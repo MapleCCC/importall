@@ -19,7 +19,7 @@ importall()
 """
 
 
-import sys
+import importlib
 from collections.abc import Iterable
 
 from stdlib_list import stdlib_list
@@ -56,14 +56,15 @@ def importall(ignore: Iterable[str] = None) -> None:
         if lib in ignore:
             continue
 
-        attr_names = getattr(lib, "__all__", None) or dir(lib)
+        module = importlib.import_module(lib)
+        attr_names = getattr(module, "__all__", None) or dir(module)
 
         for attr_name in attr_names:
 
             if attr_name.startswith("_"):
                 continue
 
-            globals()[attr_name] = getattr(lib, attr_name)
+            globals()[attr_name] = getattr(module, attr_name)
 
 
 importall()
