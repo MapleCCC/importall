@@ -58,6 +58,16 @@ def importall(
     ...
 ```
 
+Say, a user find that he want to use `Iterable` from the `collections.abc` module instead of that from the `typing` module. He could either set higher priority for the `collections.abc` module through the `prioritized` parameter, or ignore the `typing` module through the `ignore` parameter.
+
+```python
+importall(prioritized=("collections.abc"))
+
+importall(prioritized={"collections.abc": 1, "typing": -1})
+
+importall(ignore=("typing"))
+```
+
 ## Miscellaneous
 
 We use the lists maintained by the [`stdlib-list`](https://github.com/jackmaney/python-stdlib-list) library instead of that by the [`isort`](https://github.com/PyCQA/isort) library or that of [`sys.stdlib_module_names`](https://docs.python.org/3.10/library/sys.html#sys.stdlib_module_names), because the lists maintained by the `isort` library and that of `sys.stdlib_module_names` don't contain sub-packages and sub-modules, such as `concurrent.futures`.
