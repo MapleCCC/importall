@@ -84,7 +84,7 @@ def importall(
     in `globals()`.
 
     By default, built-in names are protected from overriding. The protection can be switched
-    off by setting `protect_builtins` parameter to `True`.
+    off by setting `protect_builtins` parameter to `False`.
 
     The `prioritized` parameter accepts either an iterable of strings specifying modules
     whose priorities are set to 1, or a mapping object with string keys and integer values,
