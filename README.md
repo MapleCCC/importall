@@ -2,7 +2,7 @@
 
 ## Overview
 
-`importall` is a Python equivalent to C++'s `<bits/stdc++.h>`.
+`importall` is a Python equivalent to C++'s `<bits/stdc++.h>`. Basically, it tries to import every available names from standard libraries to the current module. Useful for some niche scenarios, such as competitive programming.
 
 ## Usage
 
@@ -14,27 +14,31 @@ Two kinds of usage:
 from importall import *
 ```
 
-2. Call the `importall()` function, then all names are imported to the current module.
+2. Call the `importall()` function, and pass in `globals()` as argument, then all names are imported to the current module.
 
 ```python
 from importall import importall
 
-importall()
+importall(globals())
 ```
 
 The doc and API of the `importall()` function:
 
 ```python
-def importall(ignore: Iterable[str] = None) -> None:
+def importall(globals: MutableMapping[str, Any], ignore: Iterable[str] = None) -> None:
     """
     Python equivalent to C++'s <bits/stdc++.h>.
 
     Name collision is likely. One can prevent name collisions by specifying the `ignore`
     parameter.
 
+    The `globals` parameter accepts a symbol table to operate on. Usually the caller passes
+    in `globals()`.
+
     The `ignore` parameter accepts an iterable of strings specifying modules that should
     be skipped and not imported.
     """
+
     ...
 ```
 
@@ -48,7 +52,11 @@ One can compare the two lists:
 
 2. [List maintained by the `stdlib-list` library](https://github.com/jackmaney/python-stdlib-list/blob/master/stdlib_list/lists/3.9.txt).
 
+## Other Similar Projects
+
+- [no-one-left-behind](https://github.com/Zalastax/no-one-left-behind), [Zalastax](https://github.com/Zalastax).
+- ...
+
 ## License
 
 [MIT](./LICENSE).
-

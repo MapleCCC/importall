@@ -9,18 +9,20 @@ Two kinds of usage:
 from importall import *
 ```
 
-2. Call the `importall()` function, then all names are imported to the current module.
+2. Call the `importall()` function, and pass in `globals()` as argument, then all names are imported to the current module.
 
 ```python
 from importall import importall
 
-importall()
+importall(globals())
 ```
 """
 
 
 import importlib
+import os
 from collections.abc import Iterable
+from typing import Any, MutableMapping
 
 from stdlib_list import stdlib_list
 
@@ -30,19 +32,22 @@ from stdlib_list import stdlib_list
 #
 # One can compare the two lists:
 #
-# 1. List maintained by the `isort` library: 
+# 1. List maintained by the `isort` library:
 # https://github.com/PyCQA/isort/blob/main/isort/stdlibs/py39.py
 #
 # 2. List maintained by the `stdlib-list` library:
 # https://github.com/jackmaney/python-stdlib-list/blob/master/stdlib_list/lists/3.9.txt
 
 
-def importall(ignore: Iterable[str] = None) -> None:
+def importall(globals: MutableMapping[str, Any], ignore: Iterable[str] = None) -> None:
     """
     Python equivalent to C++'s <bits/stdc++.h>.
 
     Name collision is likely. One can prevent name collisions by specifying the `ignore`
     parameter.
+
+    The `globals` parameter accepts a symbol table to operate on. Usually the caller passes
+    in `globals()`.
 
     The `ignore` parameter accepts an iterable of strings specifying modules that should
     be skipped and not imported.
@@ -50,21 +55,42 @@ def importall(ignore: Iterable[str] = None) -> None:
 
     ignore = set(ignore) if ignore is not None else set()
 
-    libs = stdlib_list()
+    libs = set(stdlib_list())
+
+    # Ignore user-specified modules.
+    libs -= ignore
+
+    # Some standard library modules are too meta to import.
+    libs -= {"__main__", "__phello__.foo", "antigravity", "builtins", "this"}
+
+    # lib2to3 package contains Python 2 code, which is unrunnable under Python 3.
+    libs = {lib for lib in libs if not lib.startswith("lib2to3")}
+
+    if os.name == "nt":
+        # On Windows OS, UNIX-specific modules are ignored.
+        libs -= {
+            "multiprocessing.popen_fork",
+            "multiprocessing.popen_forkserver",
+            "multiprocessing.popen_spawn_posix",
+        }
 
     for lib in libs:
-        if lib in ignore:
+        try:
+            module = importlib.import_module(lib)
+        except (ImportError, ModuleNotFoundError):
             continue
 
-        module = importlib.import_module(lib)
-        attr_names = getattr(module, "__all__", None) or dir(module)
+        try:
+            attrs = getattr(module, "__all__")
+        except AttributeError:
+            # Fallback to try the best effort
+            attrs = (attr for attr in dir(module) if not attr.startswith("_"))
 
-        for attr_name in attr_names:
-
-            if attr_name.startswith("_"):
+        for attr in attrs:
+            try:
+                globals[attr] = getattr(module, attr)
+            except AttributeError:
                 continue
 
-            globals()[attr_name] = getattr(module, attr_name)
 
-
-importall()
+importall(globals())
