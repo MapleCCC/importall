@@ -29,6 +29,7 @@ The doc and API of the `importall()` function:
 ```python
 def importall(
     globals: MutableMapping[str, Any],
+    *,
     protect_builtins: bool = True,
     prioritized: Union[Iterable[str], Mapping[str, int]] = (),
     ignore: Iterable[str] = (),

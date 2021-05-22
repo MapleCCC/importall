@@ -70,6 +70,7 @@ if os.name == "nt":
 
 def importall(
     globals: MutableMapping[str, Any],
+    *,
     protect_builtins: bool = True,
     prioritized: Union[Iterable[str], Mapping[str, int]] = (),
     ignore: Iterable[str] = (),
