@@ -25,18 +25,29 @@ importall(globals())
 The doc and API of the `importall()` function:
 
 ```python
-def importall(globals: MutableMapping[str, Any], ignore: Iterable[str] = None) -> None:
+def importall(
+    globals: MutableMapping[str, Any],
+    protect_builtins: bool = True,
+    prioritized: Union[Iterable[str], Mapping[str, int]] = None,
+    ignore: Iterable[str] = None,
+) -> None:
     """
     Python equivalent to C++'s <bits/stdc++.h>.
 
-    Name collision is likely. One can prevent name collisions by specifying the `ignore`
-    parameter.
+    Name collision is likely. One can prevent name collisions by tuning the `prioritized`
+    and/or the `ignore` parameter.
 
     The `globals` parameter accepts a symbol table to operate on. Usually the caller passes
     in `globals()`.
 
     By default, built-in names are protected from overriding. The protection can be switched
     off by setting `protect_builtins` parameter to `True`.
+
+    The `prioritized` parameter accepts either an iterable of strings specifying modules
+    whose priorities are set to 1, or a mapping object with string keys and integer values,
+    specifying respective priority values for corresponding modules. Valid priority value
+    is always integer. All modules default to 0 priority values. It's possible to specify
+    negative priority value.
 
     The `ignore` parameter accepts an iterable of strings specifying modules that should
     be skipped and not imported.
