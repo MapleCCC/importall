@@ -48,6 +48,24 @@ BUILTINS_NAMES = set(dir(builtins)) - {
     "__spec__",
 }
 
+IMPORTABLE_MODULES = set(stdlib_list())
+
+# Some standard library modules are too meta to import.
+IMPORTABLE_MODULES -= {"__main__", "__phello__.foo", "antigravity", "builtins", "this"}
+
+# lib2to3 package contains Python 2 code, which is unrunnable under Python 3.
+IMPORTABLE_MODULES = {
+    mod for mod in IMPORTABLE_MODULES if not mod.startswith("lib2to3")
+}
+
+if os.name == "nt":
+    # On Windows OS, UNIX-specific modules are ignored.
+    IMPORTABLE_MODULES -= {
+        "multiprocessing.popen_fork",
+        "multiprocessing.popen_forkserver",
+        "multiprocessing.popen_spawn_posix",
+    }
+
 
 def importall(
     globals: MutableMapping[str, Any],
@@ -72,28 +90,12 @@ def importall(
 
     ignore = set(ignore) if ignore is not None else set()
 
-    libs = set(stdlib_list())
-
     # Ignore user-specified modules.
-    libs -= ignore
+    module_names = IMPORTABLE_MODULES - ignore
 
-    # Some standard library modules are too meta to import.
-    libs -= {"__main__", "__phello__.foo", "antigravity", "builtins", "this"}
-
-    # lib2to3 package contains Python 2 code, which is unrunnable under Python 3.
-    libs = {lib for lib in libs if not lib.startswith("lib2to3")}
-
-    if os.name == "nt":
-        # On Windows OS, UNIX-specific modules are ignored.
-        libs -= {
-            "multiprocessing.popen_fork",
-            "multiprocessing.popen_forkserver",
-            "multiprocessing.popen_spawn_posix",
-        }
-
-    for lib in libs:
+    for module_name in module_names:
         try:
-            module = importlib.import_module(lib)
+            module = importlib.import_module(module_name)
         except (ImportError, ModuleNotFoundError):
             continue
 
