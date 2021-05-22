@@ -19,6 +19,7 @@ importall(globals())
 """
 
 
+import builtins
 import importlib
 import os
 from collections.abc import Iterable
@@ -39,7 +40,20 @@ from stdlib_list import stdlib_list
 # https://github.com/jackmaney/python-stdlib-list/blob/master/stdlib_list/lists/3.9.txt
 
 
-def importall(globals: MutableMapping[str, Any], ignore: Iterable[str] = None) -> None:
+BUILTINS_NAMES = set(dir(builtins)) - {
+    "__doc__",
+    "__loader__",
+    "__name__",
+    "__package__",
+    "__spec__",
+}
+
+
+def importall(
+    globals: MutableMapping[str, Any],
+    protect_builtins: bool = True,
+    ignore: Iterable[str] = None,
+) -> None:
     """
     Python equivalent to C++'s <bits/stdc++.h>.
 
@@ -48,6 +62,9 @@ def importall(globals: MutableMapping[str, Any], ignore: Iterable[str] = None) -
 
     The `globals` parameter accepts a symbol table to operate on. Usually the caller passes
     in `globals()`.
+
+    By default, built-in names are protected from overriding. The protection can be switched
+    off by setting `protect_builtins` parameter to `True`.
 
     The `ignore` parameter accepts an iterable of strings specifying modules that should
     be skipped and not imported.
@@ -85,6 +102,9 @@ def importall(globals: MutableMapping[str, Any], ignore: Iterable[str] = None) -
         except AttributeError:
             # Fallback to try the best effort
             attrs = (attr for attr in dir(module) if not attr.startswith("_"))
+
+        if protect_builtins:
+            attrs = set(attrs) - BUILTINS_NAMES
 
         for attr in attrs:
             try:

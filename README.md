@@ -35,6 +35,9 @@ def importall(globals: MutableMapping[str, Any], ignore: Iterable[str] = None) -
     The `globals` parameter accepts a symbol table to operate on. Usually the caller passes
     in `globals()`.
 
+    By default, built-in names are protected from overriding. The protection can be switched
+    off by setting `protect_builtins` parameter to `True`.
+
     The `ignore` parameter accepts an iterable of strings specifying modules that should
     be skipped and not imported.
     """
