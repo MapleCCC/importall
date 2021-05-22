@@ -71,8 +71,8 @@ if os.name == "nt":
 def importall(
     globals: MutableMapping[str, Any],
     protect_builtins: bool = True,
-    prioritized: Union[Iterable[str], Mapping[str, int]] = None,
-    ignore: Iterable[str] = None,
+    prioritized: Union[Iterable[str], Mapping[str, int]] = (),
+    ignore: Iterable[str] = (),
 ) -> None:
     """
     Python equivalent to C++'s <bits/stdc++.h>.
@@ -102,12 +102,10 @@ def importall(
     else:
         priority_score.update((module, 1) for module in prioritized)
 
-    ignore = set(ignore) if ignore is not None else set()
-
     source_module_tracker: dict[str, str] = {}
 
     # Ignore user-specified modules.
-    module_names = IMPORTABLE_MODULES - ignore
+    module_names = IMPORTABLE_MODULES - set(ignore)
 
     for module_name in module_names:
         try:
@@ -125,11 +123,18 @@ def importall(
             attrs = set(attrs) - BUILTINS_NAMES
 
         for attr in attrs:
+
+            if attr in source_module_tracker:
+                old_src_mod_name = source_module_tracker[attr]
+
+                # When priority score ties, choose the one whose name has higher lexicographical order.
+                if (priority_score[old_src_mod_name], old_src_mod_name) > (
+                    priority_score[module_name],
+                    module_name,
+                ):
+                    continue
+
             try:
-                if attr in source_module_tracker:
-                    old_source_module_name = source_module_tracker[attr]
-                    if (priority_score[old_source_module_name], old_source_module_name) > (priority_score[module_name], module_name):
-                        continue
                 globals[attr] = getattr(module, attr)
                 source_module_tracker[attr] = module_name
             except AttributeError:

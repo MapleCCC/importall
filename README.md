@@ -2,13 +2,15 @@
 
 ## Overview
 
-`importall` is a Python equivalent to C++'s `<bits/stdc++.h>`. Basically, it tries to import every available names from standard libraries to the current module. Useful for some niche scenarios, such as competitive programming.
+`importall` is a Python equivalent to C++'s `<bits/stdc++.h>`. Basically, it tries to import every available names from standard libraries to the current module.
+
+It's definitely not intended for serious software engineering situations. It's useful and convenient for some niche scenarios, such as competitive programming contests, under which situation saving some typing strokes and hence precious time is highly desirable. Also convenient when just prototyping, testing back-of-envelop thoughts, or tinkering with ideas on playground. Save the time and tedious chores to type all the necessary modules, which could be annoying, boring and typo-prone.
 
 ## Usage
 
 Two kinds of usage:
 
-1. Import the `importall` module, then all names are imported to the current module.
+1. Wild-import the `importall` module, then all names are imported to the current module.
 
 ```python
 from importall import *
@@ -28,8 +30,8 @@ The doc and API of the `importall()` function:
 def importall(
     globals: MutableMapping[str, Any],
     protect_builtins: bool = True,
-    prioritized: Union[Iterable[str], Mapping[str, int]] = None,
-    ignore: Iterable[str] = None,
+    prioritized: Union[Iterable[str], Mapping[str, int]] = (),
+    ignore: Iterable[str] = (),
 ) -> None:
     """
     Python equivalent to C++'s <bits/stdc++.h>.
@@ -68,7 +70,7 @@ One can compare the two lists:
 
 ## Other Similar Projects
 
-- [no-one-left-behind](https://github.com/Zalastax/no-one-left-behind), [Zalastax](https://github.com/Zalastax).
+- [no-one-left-behind](https://github.com/Zalastax/no-one-left-behind), by [Zalastax](https://github.com/Zalastax).
 - ...
 
 ## License
