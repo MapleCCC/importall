@@ -4,7 +4,7 @@ libraries to the current module, i.e., a Python equivalent to C++'s `<bits/stdc+
 
 Two kinds of usage:
 
-1. [_Import interface_]
+1. _Import interface_
 
     Wild card import the `importall` module, then all names are imported to the current module.
 
@@ -18,9 +18,10 @@ Two kinds of usage:
     # 7
     ```
 
-2. [_Function interface_]
+2. _Function interface_
 
-    Call the `importall()` function, and pass in `globals()` as argument, then all names are imported to the current module.
+    Call the `importall()` function, and pass in `globals()` as argument, then all
+    names are imported to the current module.
 
     ```python
     from importall import importall
@@ -33,6 +34,58 @@ Two kinds of usage:
     nlargest(4, [48, 5, 21, 38, 65, 12, 27, 18])
     # [65, 48, 38, 27]
     ```
+
+Say, a user finds that he wants to use `Iterable` from the `collections.abc` module
+instead of that from the `typing` module. He could either set higher priority for the
+`collections.abc` module through the `prioritized` parameter, or ignore the `typing`
+module altogether through the `ignore` parameter.
+
+```python
+importall(globals())
+
+inspect.isabstract(Iterable)
+# False
+
+importall(globals(), prioritized=["collections.abc"])
+# Alternatives:
+# importall(globals(), prioritized={"collections.abc": 1, "typing": -1})
+# importall(globals(), ignore=["typing"])
+
+inspect.isabstract(Iterable)
+# True
+```
+
+If one prefers getting all importable names as a variable instead of importing them
+into the current module, there is also a programmatic interface for doing so:
+
+```python
+from importall import get_all_symbols
+
+symbol_table = get_all_symbols()
+
+symbol_table["python_implementation"]()
+# "CPython"
+
+symbol_table["getrecursionlimit"]()
+# 1000
+
+symbol_table["log2"](2)
+# 1.0
+```
+
+To recover the `globals()` and de-import all imported names, use the `deimportall()` function:
+
+```python
+importall(globals())
+
+log2(2)
+# 1.0
+
+deimportall(globals())
+
+log2(2)
+# NameError
+```
 """
 
 

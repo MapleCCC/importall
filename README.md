@@ -1,5 +1,9 @@
 # Importall - A Python Equivalent to C++'s <bits/stdc++.h>
 
+[![License](https://img.shields.io/github/license/MapleCCC/importall?color=00BFFF)](LICENSE)
+[![LOC](https://sloc.xyz/github/MapleCCC/importall)](https://sloc.xyz/github/MapleCCC/importall)
+[![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 ## Overview
 
 `importall` is a lightweight and robust<!--reliable--> script to import every<!--all--> available names from standard libraries to the current module, i.e., a Python equivalent to C++'s `<bits/stdc++.h>`.
@@ -10,7 +14,7 @@ It's definitely not intended for serious software engineering situations. It's u
 
 Two kinds of usage:
 
-1. [_Import interface_]
+1. _Import interface_
 
     Wild card import the `importall` module, then all names are imported to the current module.
 
@@ -24,7 +28,7 @@ Two kinds of usage:
     # 7
     ```
 
-2. [_Function interface_]
+2. _Function interface_
 
     Call the `importall()` function, and pass in `globals()` as argument, then all names are imported to the current module.
 
