@@ -22,7 +22,6 @@ importall(globals())
 import builtins
 import importlib
 import os
-from collections import defaultdict
 from collections.abc import Iterable, Mapping, MutableMapping
 from typing import Any, Union
 
@@ -68,8 +67,51 @@ if os.name == "nt":
     }
 
 
+SymbolTable = MutableMapping[str, Any]
+
+
+def wild_card_import_module(module_name: str) -> SymbolTable:
+    # Python official doc about "wild card import" mechanism:
+    #
+    # If the list of identifiers is replaced by a star ('*'), all public names
+    # defined in the module are bound in the local namespace for the scope
+    # where the import statement occurs.
+    #
+    # The public names defined by a module are determined by checking the
+    # module’s namespace for a variable named __all__; if defined, it must be a
+    # sequence of strings which are names defined or imported by that module.
+    # The names given in __all__ are all considered public and are required to
+    # exist. If __all__ is not defined, the set of public names includes all
+    # names found in the module’s namespace which do not begin with an
+    # underscore character ('_'). __all__ should contain the entire public API.
+    # It is intended to avoid accidentally exporting items that are not part of
+    # the API (such as library modules which were imported and used within the
+    # module).
+
+    try:
+        module = importlib.import_module(module_name)
+    except (ImportError, ModuleNotFoundError):
+        return {}
+
+    symtab: SymbolTable = {}
+
+    try:
+        attrs = getattr(module, "__all__")
+    except AttributeError:
+        # Fallback to try the best effort
+        attrs = (attr for attr in dir(module) if not attr.startswith("_"))
+
+    for attr in attrs:
+        try:
+            symtab[attr] = getattr(module, attr)
+        except AttributeError:
+            continue
+
+    return symtab
+
+
 def importall(
-    globals: MutableMapping[str, Any],
+    globals: SymbolTable,
     *,
     protect_builtins: bool = True,
     prioritized: Union[Iterable[str], Mapping[str, int]] = (),
@@ -97,49 +139,26 @@ def importall(
     be skipped and not imported.
     """
 
-    priority_score = defaultdict[str, int](int)
-    if isinstance(prioritized, Mapping):
-        priority_score.update(prioritized)
-    else:
-        priority_score.update((module, 1) for module in prioritized)
-
-    source_module_tracker: dict[str, str] = {}
+    if not isinstance(prioritized, Mapping):
+        prioritized = {module: 1 for module in prioritized}
 
     # Ignore user-specified modules.
     module_names = IMPORTABLE_MODULES - set(ignore)
 
+    # When priority score ties, choose the one whose name has higher lexicographical order.
+    module_names = sorted(
+        module_names, key=lambda name: (prioritized.get(name, 0), name)
+    )
+
+    symtab: SymbolTable = {}
     for module_name in module_names:
-        try:
-            module = importlib.import_module(module_name)
-        except (ImportError, ModuleNotFoundError):
-            continue
+        symtab |= wild_card_import_module(module_name)
 
-        try:
-            attrs = getattr(module, "__all__")
-        except AttributeError:
-            # Fallback to try the best effort
-            attrs = (attr for attr in dir(module) if not attr.startswith("_"))
+    if protect_builtins:
+        for name in BUILTINS_NAMES:
+            symtab.pop(name, None)
 
-        if protect_builtins:
-            attrs = set(attrs) - BUILTINS_NAMES
-
-        for attr in attrs:
-
-            if attr in source_module_tracker:
-                old_src_mod_name = source_module_tracker[attr]
-
-                # When priority score ties, choose the one whose name has higher lexicographical order.
-                if (priority_score[old_src_mod_name], old_src_mod_name) > (
-                    priority_score[module_name],
-                    module_name,
-                ):
-                    continue
-
-            try:
-                globals[attr] = getattr(module, attr)
-                source_module_tracker[attr] = module_name
-            except AttributeError:
-                continue
+    globals.update(symtab)
 
 
 importall(globals())
