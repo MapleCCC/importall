@@ -103,6 +103,20 @@ print(symbol_table["log2"](2))
 # 1.0
 ```
 
+To recover the globals() and de-import all imported names, use the `deimportall()` function:
+
+```python
+importall(globals())
+
+print(log2(2))
+# 1.0
+
+deimportall(globals())
+
+print(log2(2))
+# NameError
+```
+
 ## Miscellaneous
 
 We use the lists maintained by the [`stdlib-list`](https://github.com/jackmaney/python-stdlib-list) library instead of that by the [`isort`](https://github.com/PyCQA/isort) library or that of [`sys.stdlib_module_names`](https://docs.python.org/3.10/library/sys.html#sys.stdlib_module_names), because the lists maintained by the `isort` library and that of `sys.stdlib_module_names` don't include sub-packages and sub-modules, such as `concurrent.futures`.

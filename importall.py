@@ -165,6 +165,17 @@ def importall(
     globals.update(symtab)
 
 
+def deimportall(globals: SymbolTable) -> None:
+    stdlib_symbols = set()
+    for module_name in IMPORTABLE_MODULES:
+        symbol_table = wild_card_import_module(module_name)
+        stdlib_symbols.update(map(id, symbol_table.values()))
+
+    for name, symbol in dict(globals).items():
+        if id(symbol) in stdlib_symbols:
+            del globals[name]
+
+
 def get_all_symbols(
     *,
     prioritized: Union[Iterable[str], Mapping[str, int]] = (),
