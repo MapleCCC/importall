@@ -23,8 +23,8 @@ import builtins
 import importlib
 import os
 from collections import defaultdict
-from collections.abc import Iterable
-from typing import Any, Mapping, MutableMapping, Union
+from collections.abc import Iterable, Mapping, MutableMapping
+from typing import Any, Union
 
 from stdlib_list import stdlib_list
 
