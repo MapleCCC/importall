@@ -90,11 +90,11 @@ SymbolTable = MutableMapping[str, Any]
 def wild_card_import_module(module_name: str) -> SymbolTable:
     # Python official doc about "wild card import" mechanism:
     #
-    # If the list of identifiers is replaced by a star ('*'), all public names
+    # "If the list of identifiers is replaced by a star ('*'), all public names
     # defined in the module are bound in the local namespace for the scope
-    # where the import statement occurs.
+    # where the import statement occurs."
     #
-    # The public names defined by a module are determined by checking the
+    # "The public names defined by a module are determined by checking the
     # module’s namespace for a variable named __all__; if defined, it must be a
     # sequence of strings which are names defined or imported by that module.
     # The names given in __all__ are all considered public and are required to
@@ -103,7 +103,7 @@ def wild_card_import_module(module_name: str) -> SymbolTable:
     # underscore character ('_'). __all__ should contain the entire public API.
     # It is intended to avoid accidentally exporting items that are not part of
     # the API (such as library modules which were imported and used within the
-    # module).
+    # module)."
 
     try:
         module = importlib.import_module(module_name)
@@ -167,7 +167,9 @@ def importall(
 
 
 def deimportall(globals: SymbolTable) -> None:
-    stdlib_symbols = set()
+
+    stdlib_symbols: set[int] = set()
+
     for module_name in IMPORTABLE_MODULES:
         symbol_table = wild_card_import_module(module_name)
         stdlib_symbols.update(map(id, symbol_table.values()))

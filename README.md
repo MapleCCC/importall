@@ -44,7 +44,7 @@ The doc and API of the `importall()` function:
 
 ```python
 def importall(
-    globals: MutableMapping[str, Any],
+    globals: SymbolTable,
     *,
     protect_builtins: bool = True,
     prioritized: Union[Iterable[str], Mapping[str, int]] = (),
@@ -61,7 +61,7 @@ def importall(
     in `globals()`.
 
     By default, built-in names are protected from overriding. The protection can be switched
-    off by setting `protect_builtins` parameter to `False`.
+    off by setting the `protect_builtins` parameter to `False`.
 
     The `prioritized` parameter accepts either an iterable of strings specifying modules
     whose priorities are set to 1, or a mapping object with string keys and integer values,
@@ -79,11 +79,18 @@ def importall(
 Say, a user finds that he wants to use `Iterable` from the `collections.abc` module instead of that from the `typing` module. He could either set higher priority for the `collections.abc` module through the `prioritized` parameter, or ignore the `typing` module altogether through the `ignore` parameter.
 
 ```python
+importall(globals())
+
+inspect.isabstract(Iterable)
+# False
+
 importall(globals(), prioritized=["collections.abc"])
+# Alternatives:
+# importall(globals(), prioritized={"collections.abc": 1, "typing": -1})
+# importall(globals(), ignore=["typing"])
 
-importall(globals(), prioritized={"collections.abc": 1, "typing": -1})
-
-importall(globals(), ignore=["typing"])
+inspect.isabstract(Iterable)
+# True
 ```
 
 If one prefers getting all importable names as a variable instead of importing them into the current module, there is also a programmatic interface for doing so:
@@ -103,7 +110,7 @@ symbol_table["log2"](2)
 # 1.0
 ```
 
-To recover the globals() and de-import all imported names, use the `deimportall()` function:
+To recover the `globals()` and de-import all imported names, use the `deimportall()` function:
 
 ```python
 importall(globals())
