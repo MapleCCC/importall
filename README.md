@@ -2,7 +2,7 @@
 
 ## Overview
 
-`importall` is a Python equivalent to C++'s `<bits/stdc++.h>`. Basically, it tries to import every available names from standard libraries to the current module.
+`importall` is a lightweight and robust<!--reliable--> script to import every<!--all--> available names from standard libraries to the current module, i.e., a Python equivalent to C++'s `<bits/stdc++.h>`.
 
 It's definitely not intended for serious software engineering situations. It's useful and convenient for some niche scenarios, such as competitive programming contests, under which situation saving some typing strokes and hence precious time is highly desirable. Also convenient when just prototyping, testing back-of-envelop thoughts, or tinkering with ideas on playground. Save the time and tedious chores spent on typing all the necessary modules, which could be annoying, boring and typo-prone.
 
@@ -10,19 +10,35 @@ It's definitely not intended for serious software engineering situations. It's u
 
 Two kinds of usage:
 
-1. Wild card import the `importall` module, then all names are imported to the current module.
+1. [_Import interface_]
 
-```python
-from importall import *
-```
+    Wild card import the `importall` module, then all names are imported to the current module.
 
-2. Call the `importall()` function, and pass in `globals()` as argument, then all names are imported to the current module.
+    ```python
+    from importall import *
 
-```python
-from importall import importall
+    print(log2(2))
+    # 1.0
 
-importall(globals())
-```
+    print(bisect_right([24, 35, 38, 38, 46, 47, 52, 54, 54, 57, 87, 91], 53))
+    # 7
+    ```
+
+2. [_Function interface_]
+
+    Call the `importall()` function, and pass in `globals()` as argument, then all names are imported to the current module.
+
+    ```python
+    from importall import importall
+
+    importall(globals())
+
+    print(list(combinations("ABCD", 2)))
+    # [("A", "B"), ("A", "C"), ("A", "D"), ("B", "C"), ("B", "D"), ("C", "D")]
+
+    print(nlargest(4, [48, 5, 21, 38, 65, 12, 27, 18]))
+    # [65, 48, 38, 27]
+    ```
 
 The doc and API of the `importall()` function:
 
@@ -37,8 +53,9 @@ def importall(
     """
     Python equivalent to C++'s <bits/stdc++.h>.
 
-    Name collision is likely. One can prevent name collisions by tuning the `prioritized`
-    and/or the `ignore` parameter.
+    Name collision is likely. One can resolve name collisions by tuning the `prioritized`
+    and/or the `ignore` parameter. Names from the module with higher priority value will
+    override names from the module with lower priority value.
 
     The `globals` parameter accepts a symbol table to operate on. Usually the caller passes
     in `globals()`.
@@ -62,11 +79,11 @@ def importall(
 Say, a user finds that he wants to use `Iterable` from the `collections.abc` module instead of that from the `typing` module. He could either set higher priority for the `collections.abc` module through the `prioritized` parameter, or ignore the `typing` module altogether through the `ignore` parameter.
 
 ```python
-importall(prioritized=["collections.abc"])
+importall(globals(), prioritized=["collections.abc"])
 
-importall(prioritized={"collections.abc": 1, "typing": -1})
+importall(globals(), prioritized={"collections.abc": 1, "typing": -1})
 
-importall(ignore=["typing"])
+importall(globals(), ignore=["typing"])
 ```
 
 If one prefers getting all importable names as a variable instead of importing them into the current module, there is also a programmatic interface for doing so:
@@ -81,6 +98,9 @@ print(symbol_table["python_implementation"]())
 
 print(symbol_table["getrecursionlimit"]())
 # 1000
+
+print(symbol_table["log2"](2))
+# 1.0
 ```
 
 ## Miscellaneous

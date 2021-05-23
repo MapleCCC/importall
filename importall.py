@@ -1,21 +1,37 @@
 """
-`importall` is a Python equivalent to C++'s `<bits/stdc++.h>`.
+`importall` is a lightweight and robust script to import every available names from standard
+libraries to the current module, i.e., a Python equivalent to C++'s `<bits/stdc++.h>`.
 
 Two kinds of usage:
 
-1. Wild card import the `importall` module, then all names are imported to the current module.
+1. [_Import interface_]
 
-```python
-from importall import *
-```
+    Wild card import the `importall` module, then all names are imported to the current module.
 
-2. Call the `importall()` function, and pass in `globals()` as argument, then all names are imported to the current module.
+    ```python
+    from importall import *
 
-```python
-from importall import importall
+    print(log2(2))
+    # 1.0
 
-importall(globals())
-```
+    print(bisect_right([24, 35, 38, 38, 46, 47, 52, 54, 54, 57, 87, 91], 53))
+    # 7
+    ```
+
+2. [_Function interface_]
+
+    Call the `importall()` function, and pass in `globals()` as argument, then all names are imported to the current module.
+
+    ```python
+    from importall import importall
+
+    importall(globals())
+
+    print(list(combinations("ABCD", 2)))
+    # [("A", "B"), ("A", "C"), ("A", "D"), ("B", "C"), ("B", "D"), ("C", "D")]
+
+    assert nlargest(4, [48, 5, 21, 38, 65, 12, 27, 18]) == [65, 48, 38, 27]
+    ```
 """
 
 
@@ -120,8 +136,9 @@ def importall(
     """
     Python equivalent to C++'s <bits/stdc++.h>.
 
-    Name collision is likely. One can prevent name collisions by tuning the `prioritized`
-    and/or the `ignore` parameter.
+    Name collision is likely. One can resolve name collisions by tuning the `prioritized`
+    and/or the `ignore` parameter. Names from the module with higher priority value will
+    override names from the module with lower priority value.
 
     The `globals` parameter accepts a symbol table to operate on. Usually the caller passes
     in `globals()`.
