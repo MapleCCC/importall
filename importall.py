@@ -11,10 +11,10 @@ Two kinds of usage:
     ```python
     from importall import *
 
-    print(log2(2))
+    log2(2)
     # 1.0
 
-    print(bisect_right([24, 35, 38, 38, 46, 47, 52, 54, 54, 57, 87, 91], 53))
+    bisect_right([24, 35, 38, 38, 46, 47, 52, 54, 54, 57, 87, 91], 53)
     # 7
     ```
 
@@ -27,10 +27,11 @@ Two kinds of usage:
 
     importall(globals())
 
-    print(list(combinations("ABCD", 2)))
+    list(combinations("ABCD", 2))
     # [("A", "B"), ("A", "C"), ("A", "D"), ("B", "C"), ("B", "D"), ("C", "D")]
 
-    assert nlargest(4, [48, 5, 21, 38, 65, 12, 27, 18]) == [65, 48, 38, 27]
+    nlargest(4, [48, 5, 21, 38, 65, 12, 27, 18])
+    # [65, 48, 38, 27]
     ```
 """
 

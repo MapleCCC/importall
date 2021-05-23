@@ -17,10 +17,10 @@ Two kinds of usage:
     ```python
     from importall import *
 
-    print(log2(2))
+    log2(2)
     # 1.0
 
-    print(bisect_right([24, 35, 38, 38, 46, 47, 52, 54, 54, 57, 87, 91], 53))
+    bisect_right([24, 35, 38, 38, 46, 47, 52, 54, 54, 57, 87, 91], 53)
     # 7
     ```
 
@@ -33,10 +33,10 @@ Two kinds of usage:
 
     importall(globals())
 
-    print(list(combinations("ABCD", 2)))
+    list(combinations("ABCD", 2))
     # [("A", "B"), ("A", "C"), ("A", "D"), ("B", "C"), ("B", "D"), ("C", "D")]
 
-    print(nlargest(4, [48, 5, 21, 38, 65, 12, 27, 18]))
+    nlargest(4, [48, 5, 21, 38, 65, 12, 27, 18])
     # [65, 48, 38, 27]
     ```
 
@@ -93,13 +93,13 @@ from importall import get_all_symbols
 
 symbol_table = get_all_symbols()
 
-print(symbol_table["python_implementation"]())
+symbol_table["python_implementation"]()
 # "CPython"
 
-print(symbol_table["getrecursionlimit"]())
+symbol_table["getrecursionlimit"]()
 # 1000
 
-print(symbol_table["log2"](2))
+symbol_table["log2"](2)
 # 1.0
 ```
 
@@ -108,12 +108,12 @@ To recover the globals() and de-import all imported names, use the `deimportall(
 ```python
 importall(globals())
 
-print(log2(2))
+log2(2)
 # 1.0
 
 deimportall(globals())
 
-print(log2(2))
+log2(2)
 # NameError
 ```
 
