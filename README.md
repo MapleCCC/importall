@@ -69,6 +69,20 @@ importall(prioritized={"collections.abc": 1, "typing": -1})
 importall(ignore=["typing"])
 ```
 
+If one prefers getting all importable names as a variable instead of importing them into the current module, there is also a programmatic interface for doing so:
+
+```python
+from importall import get_all_symbols
+
+symbol_table = get_all_symbols()
+
+print(symbol_table["python_implementation"]())
+# "CPython"
+
+print(symbol_table["getrecursionlimit"]())
+# 1000
+```
+
 ## Miscellaneous
 
 We use the lists maintained by the [`stdlib-list`](https://github.com/jackmaney/python-stdlib-list) library instead of that by the [`isort`](https://github.com/PyCQA/isort) library or that of [`sys.stdlib_module_names`](https://docs.python.org/3.10/library/sys.html#sys.stdlib_module_names), because the lists maintained by the `isort` library and that of `sys.stdlib_module_names` don't include sub-packages and sub-modules, such as `concurrent.futures`.

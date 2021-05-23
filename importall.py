@@ -139,6 +139,21 @@ def importall(
     be skipped and not imported.
     """
 
+    symtab = get_all_symbols(prioritized=prioritized, ignore=ignore)
+
+    if protect_builtins:
+        for name in BUILTINS_NAMES:
+            symtab.pop(name, None)
+
+    globals.update(symtab)
+
+
+def get_all_symbols(
+    *,
+    prioritized: Union[Iterable[str], Mapping[str, int]] = (),
+    ignore: Iterable[str] = (),
+) -> SymbolTable:
+
     if not isinstance(prioritized, Mapping):
         prioritized = {module: 1 for module in prioritized}
 
@@ -154,11 +169,7 @@ def importall(
     for module_name in module_names:
         symtab |= wild_card_import_module(module_name)
 
-    if protect_builtins:
-        for name in BUILTINS_NAMES:
-            symtab.pop(name, None)
-
-    globals.update(symtab)
+    return symtab
 
 
 importall(globals())
