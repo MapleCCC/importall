@@ -62,11 +62,11 @@ def importall(
 Say, a user finds that he wants to use `Iterable` from the `collections.abc` module instead of that from the `typing` module. He could either set higher priority for the `collections.abc` module through the `prioritized` parameter, or ignore the `typing` module altogether through the `ignore` parameter.
 
 ```python
-importall(prioritized=("collections.abc"))
+importall(prioritized=["collections.abc"])
 
 importall(prioritized={"collections.abc": 1, "typing": -1})
 
-importall(ignore=("typing"))
+importall(ignore=["typing"])
 ```
 
 ## Miscellaneous
