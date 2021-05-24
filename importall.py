@@ -94,6 +94,7 @@ log2(2)
 import builtins
 import importlib
 import os
+import sys
 from collections.abc import Iterable, Mapping, MutableMapping
 from typing import Any, Union
 
@@ -110,6 +111,10 @@ from stdlib_list import stdlib_list
 #
 # 2. List maintained by the `stdlib-list` library:
 # https://github.com/jackmaney/python-stdlib-list/blob/master/stdlib_list/lists/3.9.txt
+
+
+if sys.version_info < (3, 9):
+    raise RuntimeError("importall library is intended to run with Python 3.9 or higher")
 
 
 BUILTINS_NAMES = set(dir(builtins)) - {
