@@ -194,6 +194,16 @@ def test_protect_builtins_parameter() -> None:
     deimportall(globals())
 
 
+def test_import_deprecated_parameter() -> None:
+    from importall import deimportall, importall
+
+    with pytest.raises(DeprecationWarning):
+        importall(global(), include_deprecated=True)
+
+    # Recover globals(). Polluted globals() seems to hinder pytest smooth run.
+    deimportall(globals())
+
+
 def test_prioritized_parameter_iterable_argument() -> None:
     from importall import deimportall, importall
 
