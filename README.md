@@ -4,6 +4,22 @@
 [![LOC](https://sloc.xyz/github/MapleCCC/importall)](https://sloc.xyz/github/MapleCCC/importall)
 [![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
+## Table of Content
+
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+
+- [Overview](#overview)
+- [Usage](#usage)
+- [Advanced Tricks](#advanced-tricks)
+- [Miscellaneous](#miscellaneous)
+- [Contribution](#contribution)
+- [Other Similar Projects](#other-similar-projects)
+- [License](#license)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## Overview
 
 `importall` is a lightweight and robust<!--reliable--> library to import every<!--all--> available names from standard libraries to the current module, i.e., a Python equivalent to C++'s `<bits/stdc++.h>`.
