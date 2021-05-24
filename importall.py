@@ -124,9 +124,7 @@ IMPORTABLE_MODULES = set(stdlib_list())
 IMPORTABLE_MODULES -= {"__main__", "__phello__.foo", "antigravity", "builtins", "this"}
 
 # lib2to3 package contains Python 2 code, which is unrunnable under Python 3.
-IMPORTABLE_MODULES = {
-    mod for mod in IMPORTABLE_MODULES if not mod.startswith("lib2to3")
-}
+IMPORTABLE_MODULES -= {mod for mod in IMPORTABLE_MODULES if mod.startswith("lib2to3")}
 
 if os.name == "nt":
     # On Windows OS, UNIX-specific modules are ignored.
