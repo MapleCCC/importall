@@ -1,10 +1,14 @@
 import builtins
 import inspect
+import os
 import platform
 import sys
 from typing import Any
 
 import pytest
+
+
+os.environ["IMPORTALL_NO_INIT_IMPORT"] = "1"
 
 
 # Unfortunately, for now we can't test the import inteface. Because wild card import

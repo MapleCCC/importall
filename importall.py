@@ -294,5 +294,5 @@ def get_all_symbols(
     return symtab
 
 
-if not os.environ.get("IMPORTALL_NO_INIT_IMPORT", None):
+if os.environ.get("IMPORTALL_NO_INIT_IMPORT", None) is None:
     importall(globals())
