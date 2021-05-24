@@ -1,3 +1,7 @@
+import builtins
+import inspect
+import platform
+import sys
 from typing import Any
 
 import pytest
@@ -34,9 +38,9 @@ def test_function_interface() -> None:
         ("C", "D"),
     ]
 
-    assert getrecursionlimit() == __import__("sys").getrecursionlimit()
+    assert getrecursionlimit() == sys.getrecursionlimit()
 
-    assert python_implementation() == __import__("platform").python_implementation()
+    assert python_implementation() == platform.python_implementation()
 
     assert nlargest(4, [48, 5, 21, 38, 65, 12, 27, 18]) == [65, 48, 38, 27]
 
@@ -68,29 +72,20 @@ def test_get_all_symbols() -> None:
         ("C", "D"),
     ]
 
-    assert symbol_table["getrecursionlimit"]() == __import__("sys").getrecursionlimit()
+    assert symbol_table["getrecursionlimit"]() == sys.getrecursionlimit()
 
-    assert (
-        symbol_table["python_implementation"]()
-        == __import__("platform").python_implementation()
+    assert symbol_table["python_implementation"]() == platform.python_implementation()
+
+    assert [65, 48, 38, 27] == symbol_table["nlargest"](
+        4, [48, 5, 21, 38, 65, 12, 27, 18]
     )
 
-    assert symbol_table["nlargest"](4, [48, 5, 21, 38, 65, 12, 27, 18]) == [
-        65,
-        48,
-        38,
-        27,
-    ]
-
-    assert (
-        symbol_table["bisect_right"](
-            [24, 35, 38, 38, 46, 47, 52, 54, 54, 57, 87, 91], 53
-        )
-        == 7
+    assert 7 == symbol_table["bisect_right"](
+        [24, 35, 38, 38, 46, 47, 52, 54, 54, 57, 87, 91], 53
     )
 
-    assert (
-        symbol_table["reduce"](symbol_table["xor"], [58, 37, 96, 115, 20, 15, 8]) == 31
+    assert 31 == symbol_table["reduce"](
+        symbol_table["xor"], [58, 37, 96, 115, 20, 15, 8]
     )
 
     assert symbol_table["defaultdict"](int)[""] == 0
@@ -121,9 +116,9 @@ def test_deimportall() -> None:
         ("C", "D"),
     ]
 
-    assert getrecursionlimit() == __import__("sys").getrecursionlimit()
+    assert getrecursionlimit() == sys.getrecursionlimit()
 
-    assert python_implementation() == __import__("platform").python_implementation()
+    assert python_implementation() == platform.python_implementation()
 
     assert nlargest(4, [48, 5, 21, 38, 65, 12, 27, 18]) == [65, 48, 38, 27]
 
@@ -151,10 +146,10 @@ def test_deimportall() -> None:
         ]
 
     with pytest.raises(NameError):
-        assert getrecursionlimit() == __import__("sys").getrecursionlimit()
+        assert getrecursionlimit() == sys.getrecursionlimit()
 
     with pytest.raises(NameError):
-        assert python_implementation() == __import__("platform").python_implementation()
+        assert python_implementation() == platform.python_implementation()
 
     with pytest.raises(NameError):
         assert nlargest(4, [48, 5, 21, 38, 65, 12, 27, 18]) == [65, 48, 38, 27]
@@ -180,7 +175,7 @@ def test_protect_builtins_parameter() -> None:
 
     importall(globals(), protect_builtins=True)
 
-    BUILTINS_NAMES = set(dir(__import__("builtins"))) - {
+    BUILTINS_NAMES = set(dir(builtins)) - {
         "__doc__",
         "__loader__",
         "__name__",
@@ -189,7 +184,7 @@ def test_protect_builtins_parameter() -> None:
     }
 
     for name in BUILTINS_NAMES:
-        assert eval_name(name) is getattr(__import__("builtins"), name)
+        assert eval_name(name) is getattr(builtins, name)
 
     # Recover globals(). Polluted globals() seems to hinder pytest smooth run.
     deimportall(globals())
@@ -200,11 +195,11 @@ def test_prioritized_parameter_iterable_argument() -> None:
 
     importall(globals())
 
-    assert not __import__("inspect").isabstract(Iterable)
+    assert not inspect.isabstract(Iterable)
 
     importall(globals(), prioritized=["collections.abc"])
 
-    assert __import__("inspect").isabstract(Iterable)
+    assert inspect.isabstract(Iterable)
 
     # Recover globals(). Polluted globals() seems to hinder pytest smooth run.
     deimportall(globals())
@@ -215,11 +210,11 @@ def test_prioritized_parameter_mapping_argument() -> None:
 
     importall(globals())
 
-    assert not __import__("inspect").isabstract(Iterable)
+    assert not inspect.isabstract(Iterable)
 
     importall(globals(), prioritized={"collections.abc": 1, "typing": -1})
 
-    assert __import__("inspect").isabstract(Iterable)
+    assert inspect.isabstract(Iterable)
 
     # Recover globals(). Polluted globals() seems to hinder pytest smooth run.
     deimportall(globals())
@@ -230,11 +225,11 @@ def test_ignore_parameter() -> None:
 
     importall(globals())
 
-    assert not __import__("inspect").isabstract(Iterable)
+    assert not inspect.isabstract(Iterable)
 
     importall(globals(), ignore=["typing"])
 
-    assert __import__("inspect").isabstract(Iterable)
+    assert inspect.isabstract(Iterable)
 
     # Recover globals(). Polluted globals() seems to hinder pytest smooth run.
     deimportall(globals())
