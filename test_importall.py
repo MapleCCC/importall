@@ -1,3 +1,5 @@
+from typing import Any
+
 import pytest
 
 
@@ -134,7 +136,7 @@ def test_protect_builtins_parameter() -> None:
     }
 
     for name in BUILTINS_NAMES:
-        assert eval(name) is getattr(__import__("builtins"), name)
+        assert eval_name(name) is getattr(__import__("builtins"), name)
 
     # Recover globals(). Polluted globals() seems to hinder pytest smooth run.
     deimportall(globals())
@@ -183,3 +185,16 @@ def test_ignore_parameter() -> None:
 
     # Recover globals(). Polluted globals() seems to hinder pytest smooth run.
     deimportall(globals())
+
+
+def eval_name(name: str) -> Any:
+    """
+    The use of `eval()` on arbitrary string has been considered dangerous practice.
+    `eval_name()` is a safer and specialized alternative to `eval()`.
+    It only evaluates expression consisting of a single name.
+    """
+
+    if not name.isidentifier():
+        raise ValueError(f"Invalid name: {name}")
+
+    return eval(name)
