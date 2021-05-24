@@ -4,12 +4,12 @@ import pytest
 # Unfortunately, for now we can't test the import inteface. Because wild card import
 # is not allowed within function `test_import_interface()`, we have to put the
 # `from importall import *` to top level, which causes pytest to collect strange things,
-# the nature of which awaiting further investigation.
+# the nature of which awaits further investigation.
 @pytest.mark.skip(
     reason="Unfortunately, for now we can't test the import inteface. Because wild card import"
     "is not allowed within function `test_import_interface()`, we have to put the"
     "`from importall import *` to top level, which causes pytest to collect strange things,"
-    "the nature of which awaiting further investigation."
+    "the nature of which awaits further investigation."
 )
 def test_import_interface() -> None:
     # from importall import *

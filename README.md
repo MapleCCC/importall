@@ -6,7 +6,7 @@
 
 ## Overview
 
-`importall` is a lightweight and robust<!--reliable--> script to import every<!--all--> available names from standard libraries to the current module, i.e., a Python equivalent to C++'s `<bits/stdc++.h>`.
+`importall` is a lightweight and robust<!--reliable--> library to import every<!--all--> available names from standard libraries to the current module, i.e., a Python equivalent to C++'s `<bits/stdc++.h>`.
 
 It's definitely not intended for serious software engineering situations. It's useful and convenient for some niche scenarios, such as competitive programming contests, under which situation saving some typing strokes and hence precious time is highly desirable. Also convenient when just prototyping, testing back-of-envelop thoughts, or tinkering with ideas on playground. Save the time and tedious chores spent on typing all the necessary modules, which could be annoying, boring and typo-prone.
 
@@ -55,6 +55,7 @@ def importall(
     ignore: Iterable[str] = (),
 ) -> None:
     """
+    Import every available names from standard libraries to the current module.
     Python equivalent to C++'s <bits/stdc++.h>.
 
     Name collision is likely. One can resolve name collisions by tuning the `prioritized`
@@ -117,6 +118,8 @@ symbol_table["log2"](2)
 To recover the `globals()` and de-import all imported names, use the `deimportall()` function:
 
 ```python
+from importall import deimportall, importall
+
 importall(globals())
 
 log2(2)

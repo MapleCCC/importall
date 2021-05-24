@@ -1,5 +1,5 @@
 """
-`importall` is a lightweight and robust script to import every available names from standard
+`importall` is a lightweight and robust library to import every available names from standard
 libraries to the current module, i.e., a Python equivalent to C++'s `<bits/stdc++.h>`.
 
 Two kinds of usage:
@@ -76,6 +76,8 @@ symbol_table["log2"](2)
 To recover the `globals()` and de-import all imported names, use the `deimportall()` function:
 
 ```python
+from importall import deimportall, importall
+
 importall(globals())
 
 log2(2)
@@ -118,9 +120,20 @@ BUILTINS_NAMES = set(dir(builtins)) - {
     "__spec__",
 }
 
+
 IMPORTABLE_MODULES = set(stdlib_list())
 
-# Some standard library modules are too meta to import.
+# Don't import some special standard library modules
+#
+# The `__main__` module is meta.
+# Names from the `__main__` module should not be considered standard library utilities.
+#
+# No need to import names from `builtins`, since they are always available anyway.
+#
+# Importing `__phello__.foo` module will cause "Hello world!" to be printed
+# on the console, and we don't yet know why.
+#
+# The `antigravity` and `this` modules are easter eggs.
 IMPORTABLE_MODULES -= {"__main__", "__phello__.foo", "antigravity", "builtins", "this"}
 
 # lib2to3 package contains Python 2 code, which is unrunnable under Python 3.
@@ -164,7 +177,7 @@ def wild_card_import_module(module_name: str) -> SymbolTable:
     symtab: SymbolTable = {}
 
     try:
-        attrs = getattr(module, "__all__")
+        attrs = module.__all__  # type: ignore
     except AttributeError:
         # Fallback to try the best effort
         attrs = (attr for attr in dir(module) if not attr.startswith("_"))
@@ -186,6 +199,7 @@ def importall(
     ignore: Iterable[str] = (),
 ) -> None:
     """
+    Import every available names from standard libraries to the current module.
     Python equivalent to C++'s <bits/stdc++.h>.
 
     Name collision is likely. One can resolve name collisions by tuning the `prioritized`
@@ -218,6 +232,9 @@ def importall(
 
 
 def deimportall(globals: SymbolTable) -> None:
+    """
+    De-import all imported names. Recover the globals.
+    """
 
     stdlib_symbols: set[int] = set()
 
@@ -235,6 +252,23 @@ def get_all_symbols(
     prioritized: Union[Iterable[str], Mapping[str, int]] = (),
     ignore: Iterable[str] = (),
 ) -> SymbolTable:
+    """
+    Gather all available names from standard libraries.
+    Python equivalent to C++'s <bits/stdc++.h>.
+
+    Name collision is likely. One can resolve name collisions by tuning the `prioritized`
+    and/or the `ignore` parameter. Names from the module with higher priority value will
+    override names from the module with lower priority value.
+
+    The `prioritized` parameter accepts either an iterable of strings specifying modules
+    whose priorities are set to 1, or a mapping object with string keys and integer values,
+    specifying respective priority values for corresponding modules. Valid priority value
+    is always integer. All modules default to 0 priority values. It's possible to specify
+    negative priority value.
+
+    The `ignore` parameter accepts an iterable of strings specifying modules that should
+    be skipped and not imported.
+    """
 
     if not isinstance(prioritized, Mapping):
         prioritized = {module: 1 for module in prioritized}
