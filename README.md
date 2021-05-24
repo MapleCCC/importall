@@ -68,6 +68,12 @@ def importall(
     By default, built-in names are protected from overriding. The protection can be switched
     off by setting the `protect_builtins` parameter to `False`.
 
+    By default, deprecated modules and deprecated names are not imported. It is designed
+    so because deprecated modules and names hopefully should not be used anymore,
+    their presence only for easing the steepness of API changes and providing a progressive
+    cross-version migration experience. If you know what you are doing, override the
+    default behavior by setting the `include_deprecated` parameter to `True`.
+
     The `prioritized` parameter accepts either an iterable of strings specifying modules
     whose priorities are set to 1, or a mapping object with string keys and integer values,
     specifying respective priority values for corresponding modules. Valid priority value

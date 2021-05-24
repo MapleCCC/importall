@@ -94,7 +94,9 @@ log2(2)
 import builtins
 import importlib
 import os
+import re
 import sys
+from collections import defaultdict
 from collections.abc import Iterable, Mapping, MutableMapping
 from typing import Any, Union
 
@@ -124,6 +126,136 @@ BUILTINS_NAMES = set(dir(builtins)) - {
     "__package__",
     "__spec__",
 }
+
+
+# Below is a list of deprecated modules who emit DeprecationWarning when imported:
+# binhex 3.9
+# parser 3.9
+# symbol 3.9
+# formatter 3.4
+# imp 3.4
+
+# Below is a list of deprecated modules who don't emit DeprecationWarning when imported:
+#
+# asynchat 3.6
+# asyncore 3.6
+# tkinter.tix 3.6
+# xml.etree.ElementTree 3.3
+# optparse 3.2
+# email.encoders 3.0
+
+# Below is a list of deprecated names satisfying two conditions:
+# 1. Doesn't emit DeprecationWarning when imported.
+# 2. Is one of the names inserted into the current namespace when its parent module is wild-card-imported.
+#
+# binascii.rledecode_hqx 3.9
+# binascii.rlecode_hqx 3.9
+# binascii.b2a_hqx 3.9
+# binascii.a2b_hqx 3.9
+# ast.Index 3.9
+# ast.ExtSlice 3.9
+# gettext.ldngettext 3.8
+# gettext.bind_textdomain_codeset 3.8
+# asyncio.coroutine 3.8
+# ast.Str 3.8
+# ast.Num 3.8
+# ast.NameConstant 3.8
+# ast.Ellipsis 3.8
+# ast.Bytes 3.8
+# grp.getgrgid 3.6
+# inspect.getcallargs 3.5
+# inspect.formatargspe 3.5
+# urllib.request.URLopener 3.3
+# urllib.request.FancyURLopener 3.3
+# pkgutil.ImpLoader 3.3
+# pkgutil.ImpImporter 3.3
+# abc.abstractstaticmethod 3.3
+# abc.abstractproperty 3.3
+# abc.abstractclassmethod 3.3
+# zipfile.BadZipfile 3.2
+# turtle.settiltangle 3.1
+# inspect.getargspec 3.0
+# tempfile.mktemp 2.3
+
+# The dict keys are since which versions they are deprecated.
+DEPRECATED_MODULES = {
+    (3, 9): {"binhex", "parser", "symbol"},
+    (3, 6): {"asynchat", "asyncore", "tkinter.tix"},
+    (3, 4): {"formatter", "imp"},
+    (3, 3): {"xml.etree.ElementTree"},
+    (3, 2): {"optparse"},
+    (3, 0): {"email.encoders"},
+}
+
+# Not all deprecated names are included, that would be too much and too tedious.
+# Only those deprecated names who are imported when wild-card-importing their parent
+# modules are listed here.
+# The dict keys are since which versions they are deprecated.
+DEPRECATED_NAMES = {
+    (3, 9): {
+        "ast.ExtSlice",
+        "ast.Index",
+        "binascii.a2b_hqx",
+        "binascii.b2a_hqx",
+        "binascii.rlecode_hqx",
+        "binascii.rledecode_hqx",
+    },
+    (3, 8): {
+        "ast.Bytes",
+        "ast.Ellipsis",
+        "ast.NameConstant",
+        "ast.Num",
+        "ast.Str",
+        "asyncio.coroutine",
+        "gettext.bind_textdomain_codeset",
+        "gettext.ldngettext",
+    },
+    (3, 6): {"grp.getgrgid"},
+    (3, 5): {"inspect.getcallargs", "inspect.formatargspe"},
+    (3, 3): {
+        "abc.abstractclassmethod",
+        "abc.abstractproperty",
+        "abc.abstractstaticmethod",
+        "pkgutil.ImpImporter",
+        "pkgutil.ImpLoader",
+        "urllib.request.FancyURLopener",
+        "urllib.request.URLopener",
+    },
+    (3, 2): {"zipfile.BadZipfile"},
+    (3, 1): {"turtle.settiltangle"},
+    (3, 0): {"inspect.getargspec"},
+    (2, 3): {"tempfile.mktemp"},
+}
+
+CURR_VER_DEPRECATED_MODULES: set[str] = set()
+for version, modules in DEPRECATED_MODULES.items():
+    if sys.version_info >= version:
+        CURR_VER_DEPRECATED_MODULES |= modules
+
+CURR_VER_DEPRECATED_NAMES: set[str] = set()
+for version, names in DEPRECATED_NAMES.items():
+    if sys.version_info >= version:
+        CURR_VER_DEPRECATED_NAMES |= names
+
+curr_ver_deprecated_names_index = defaultdict(set)
+for absolute_name in CURR_VER_DEPRECATED_NAMES:
+
+    # It's difficult to construct a perfect regex to match all valid Python identifiers,
+    # because Python 3 extends valid identifier to include non-ASCII characters.
+    #
+    # Reference:
+    # https://docs.python.org/3/reference/lexical_analysis.html#identifiers
+    # https://www.python.org/dev/peps/pep-3131/
+    # https://stackoverflow.com/questions/5474008/regular-expression-to-confirm-whether-a-string-is-a-valid-python-identifier
+    # https://stackoverflow.com/questions/49331782/python-3-how-to-check-if-a-string-can-be-a-valid-variable
+    #
+    # Instead of pursuing a perfect regex, we simply make reasonable assumption
+    # that names from standard libraries are ASCII-only.
+
+    pattern = r"(?P<module>.*)\.(?P<name>[_a-zA-Z][_0-9a-zA-Z]*)"
+    matchobj = re.fullmatch(pattern, absolute_name)
+    module, name = matchobj.group("module", "name")
+    curr_ver_deprecated_names_index[module].add(name)
 
 
 IMPORTABLE_MODULES = set(stdlib_list())
@@ -156,7 +288,19 @@ if os.name == "nt":
 SymbolTable = MutableMapping[str, Any]
 
 
-def wild_card_import_module(module_name: str) -> SymbolTable:
+def wild_card_import_module(
+    module_name: str, *, include_deprecated: bool = False
+) -> SymbolTable:
+    """
+    Return a symbol table containing all public names defined in the module.
+
+    By default, deprecated names are not included. It is designed so because
+    deprecated names hopefully should not be used anymore, their presence only for
+    easing the steepness of API changes and providing a progressive cross-version
+    migration experience. If you know what you are doing, override the default
+    behavior by setting the `include_deprecated` parameter to `True`.
+    """
+
     # Python official doc about "wild card import" mechanism:
     #
     # "If the list of identifiers is replaced by a star ('*'), all public names
@@ -187,6 +331,10 @@ def wild_card_import_module(module_name: str) -> SymbolTable:
         # Fallback to try the best effort
         attrs = (attr for attr in dir(module) if not attr.startswith("_"))
 
+    if not include_deprecated:
+        # Ignore deprecated names in the module
+        attrs = set(attrs) - curr_ver_deprecated_names_index[module_name]
+
     for attr in attrs:
         try:
             symtab[attr] = getattr(module, attr)
@@ -200,6 +348,7 @@ def importall(
     globals: SymbolTable,
     *,
     protect_builtins: bool = True,
+    include_deprecated: bool = False,
     prioritized: Union[Iterable[str], Mapping[str, int]] = (),
     ignore: Iterable[str] = (),
 ) -> None:
@@ -217,6 +366,12 @@ def importall(
     By default, built-in names are protected from overriding. The protection can be switched
     off by setting the `protect_builtins` parameter to `False`.
 
+    By default, deprecated modules and deprecated names are not imported. It is designed
+    so because deprecated modules and names hopefully should not be used anymore,
+    their presence only for easing the steepness of API changes and providing a progressive
+    cross-version migration experience. If you know what you are doing, override the
+    default behavior by setting the `include_deprecated` parameter to `True`.
+
     The `prioritized` parameter accepts either an iterable of strings specifying modules
     whose priorities are set to 1, or a mapping object with string keys and integer values,
     specifying respective priority values for corresponding modules. Valid priority value
@@ -227,7 +382,9 @@ def importall(
     be skipped and not imported.
     """
 
-    symtab = get_all_symbols(prioritized=prioritized, ignore=ignore)
+    symtab = get_all_symbols(
+        include_deprecated=include_deprecated, prioritized=prioritized, ignore=ignore
+    )
 
     if protect_builtins:
         for name in BUILTINS_NAMES:
@@ -254,16 +411,23 @@ def deimportall(globals: SymbolTable) -> None:
 
 def get_all_symbols(
     *,
+    include_deprecated: bool = False,
     prioritized: Union[Iterable[str], Mapping[str, int]] = (),
     ignore: Iterable[str] = (),
 ) -> SymbolTable:
     """
-    Gather all available names from standard libraries.
+    Return a symbol table that gathers all available names from standard libraries.
     Python equivalent to C++'s <bits/stdc++.h>.
 
     Name collision is likely. One can resolve name collisions by tuning the `prioritized`
     and/or the `ignore` parameter. Names from the module with higher priority value will
     override names from the module with lower priority value.
+
+    By default, deprecated modules and deprecated names are not imported. It is designed
+    so because deprecated modules and names hopefully should not be used anymore,
+    their presence only for easing the steepness of API changes and providing a progressive
+    cross-version migration experience. If you know what you are doing, override the
+    default behavior by setting the `include_deprecated` parameter to `True`.
 
     The `prioritized` parameter accepts either an iterable of strings specifying modules
     whose priorities are set to 1, or a mapping object with string keys and integer values,
@@ -281,6 +445,10 @@ def get_all_symbols(
     # Ignore user-specified modules.
     module_names = IMPORTABLE_MODULES - set(ignore)
 
+    if not include_deprecated:
+        # Ignore deprecated modules
+        module_names -= CURR_VER_DEPRECATED_MODULES
+
     # When priority score ties, choose the one whose name has higher lexicographical order.
     module_names = sorted(
         module_names, key=lambda name: (prioritized.get(name, 0), name)
@@ -289,7 +457,9 @@ def get_all_symbols(
     symtab: SymbolTable = {}
 
     for module_name in module_names:
-        symtab |= wild_card_import_module(module_name)
+        symtab |= wild_card_import_module(
+            module_name, include_deprecated=include_deprecated
+        )
 
     return symtab
 
