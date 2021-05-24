@@ -52,6 +52,59 @@ def test_function_interface() -> None:
     deimportall(globals())
 
 
+def test_get_all_symbols() -> None:
+    from importall import deimportall, get_all_symbols
+
+    symbol_table = get_all_symbols()
+
+    assert symbol_table["log2"](2) == 1
+
+    assert list(symbol_table["combinations"]("ABCD", 2)) == [
+        ("A", "B"),
+        ("A", "C"),
+        ("A", "D"),
+        ("B", "C"),
+        ("B", "D"),
+        ("C", "D"),
+    ]
+
+    assert symbol_table["getrecursionlimit"]() == __import__("sys").getrecursionlimit()
+
+    assert (
+        symbol_table["python_implementation"]()
+        == __import__("platform").python_implementation()
+    )
+
+    assert symbol_table["nlargest"](4, [48, 5, 21, 38, 65, 12, 27, 18]) == [
+        65,
+        48,
+        38,
+        27,
+    ]
+
+    assert (
+        symbol_table["bisect_right"](
+            [24, 35, 38, 38, 46, 47, 52, 54, 54, 57, 87, 91], 53
+        )
+        == 7
+    )
+
+    assert (
+        symbol_table["reduce"](symbol_table["xor"], [58, 37, 96, 115, 20, 15, 8]) == 31
+    )
+
+    assert symbol_table["defaultdict"](int)[""] == 0
+
+    assert not symbol_table["truth"](
+        symbol_table["itemgetter"](0)(
+            symbol_table["attrgetter"]("maps")(symbol_table["ChainMap"]())
+        )
+    )
+
+    # Recover globals(). Polluted globals() seems to hinder pytest smooth run.
+    deimportall(globals())
+
+
 def test_deimportall() -> None:
     from importall import deimportall, importall
 
