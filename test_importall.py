@@ -1,3 +1,5 @@
+# pyright: reportUndefinedVariable=false
+
 import builtins
 import inspect
 import os
