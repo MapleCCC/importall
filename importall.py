@@ -335,62 +335,6 @@ if os.name == "nt":
 SymbolTable = MutableMapping[str, Any]
 
 
-def wild_card_import_module(
-    module_name: str, *, include_deprecated: bool = False
-) -> SymbolTable:
-    """
-    Return a symbol table containing all public names defined in the module.
-
-    By default, deprecated names are not included. It is designed so because
-    deprecated names hopefully should not be used anymore, their presence only for
-    easing the steepness of API changes and providing a progressive cross-version
-    migration experience. If you know what you are doing, override the default
-    behavior by setting the `include_deprecated` parameter to `True`.
-    """
-
-    # Python official doc about "wild card import" mechanism:
-    #
-    # "If the list of identifiers is replaced by a star ('*'), all public names
-    # defined in the module are bound in the local namespace for the scope
-    # where the import statement occurs."
-    #
-    # "The public names defined by a module are determined by checking the
-    # module’s namespace for a variable named __all__; if defined, it must be a
-    # sequence of strings which are names defined or imported by that module.
-    # The names given in __all__ are all considered public and are required to
-    # exist. If __all__ is not defined, the set of public names includes all
-    # names found in the module’s namespace which do not begin with an
-    # underscore character ('_'). __all__ should contain the entire public API.
-    # It is intended to avoid accidentally exporting items that are not part of
-    # the API (such as library modules which were imported and used within the
-    # module)."
-
-    try:
-        module = importlib.import_module(module_name)
-    except (ImportError, ModuleNotFoundError):
-        return {}
-
-    symtab: SymbolTable = {}
-
-    try:
-        attrs = module.__all__  # type: ignore
-    except AttributeError:
-        # Fallback to try the best effort
-        attrs = (attr for attr in dir(module) if not attr.startswith("_"))
-
-    if not include_deprecated:
-        # Ignore deprecated names in the module
-        attrs = set(attrs) - curr_ver_deprecated_names_index[module_name]
-
-    for attr in attrs:
-        try:
-            symtab[attr] = getattr(module, attr)
-        except AttributeError:
-            continue
-
-    return symtab
-
-
 def importall(
     globals: SymbolTable,
     *,
@@ -507,6 +451,62 @@ def get_all_symbols(
         symtab |= wild_card_import_module(
             module_name, include_deprecated=include_deprecated
         )
+
+    return symtab
+
+
+def wild_card_import_module(
+    module_name: str, *, include_deprecated: bool = False
+) -> SymbolTable:
+    """
+    Return a symbol table containing all public names defined in the module.
+
+    By default, deprecated names are not included. It is designed so because
+    deprecated names hopefully should not be used anymore, their presence only for
+    easing the steepness of API changes and providing a progressive cross-version
+    migration experience. If you know what you are doing, override the default
+    behavior by setting the `include_deprecated` parameter to `True`.
+    """
+
+    # Python official doc about "wild card import" mechanism:
+    #
+    # "If the list of identifiers is replaced by a star ('*'), all public names
+    # defined in the module are bound in the local namespace for the scope
+    # where the import statement occurs."
+    #
+    # "The public names defined by a module are determined by checking the
+    # module’s namespace for a variable named __all__; if defined, it must be a
+    # sequence of strings which are names defined or imported by that module.
+    # The names given in __all__ are all considered public and are required to
+    # exist. If __all__ is not defined, the set of public names includes all
+    # names found in the module’s namespace which do not begin with an
+    # underscore character ('_'). __all__ should contain the entire public API.
+    # It is intended to avoid accidentally exporting items that are not part of
+    # the API (such as library modules which were imported and used within the
+    # module)."
+
+    try:
+        module = importlib.import_module(module_name)
+    except (ImportError, ModuleNotFoundError):
+        return {}
+
+    symtab: SymbolTable = {}
+
+    try:
+        attrs = module.__all__  # type: ignore
+    except AttributeError:
+        # Fallback to try the best effort
+        attrs = (attr for attr in dir(module) if not attr.startswith("_"))
+
+    if not include_deprecated:
+        # Ignore deprecated names in the module
+        attrs = set(attrs) - curr_ver_deprecated_names_index[module_name]
+
+    for attr in attrs:
+        try:
+            symtab[attr] = getattr(module, attr)
+        except AttributeError:
+            continue
 
     return symtab
 

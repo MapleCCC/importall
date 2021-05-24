@@ -3,7 +3,7 @@
 import builtins
 import inspect
 import os
-import platform
+import platform as platform_module
 import sys
 from typing import Any
 
@@ -46,7 +46,7 @@ def test_function_interface() -> None:
 
     assert getrecursionlimit() == sys.getrecursionlimit()
 
-    assert python_implementation() == platform.python_implementation()
+    assert python_implementation() == platform_module.python_implementation()
 
     assert nlargest(4, [48, 5, 21, 38, 65, 12, 27, 18]) == [65, 48, 38, 27]
 
@@ -80,7 +80,7 @@ def test_get_all_symbols() -> None:
 
     assert symtab["getrecursionlimit"]() == sys.getrecursionlimit()
 
-    assert symtab["python_implementation"]() == platform.python_implementation()
+    assert symtab["python_implementation"]() == platform_module.python_implementation()
 
     assert [65, 48, 38, 27] == symtab["nlargest"](4, [48, 5, 21, 38, 65, 12, 27, 18])
 
@@ -118,7 +118,7 @@ def test_deimportall() -> None:
 
     assert getrecursionlimit() == sys.getrecursionlimit()
 
-    assert python_implementation() == platform.python_implementation()
+    assert python_implementation() == platform_module.python_implementation()
 
     assert nlargest(4, [48, 5, 21, 38, 65, 12, 27, 18]) == [65, 48, 38, 27]
 
@@ -149,7 +149,7 @@ def test_deimportall() -> None:
         assert getrecursionlimit() == sys.getrecursionlimit()
 
     with pytest.raises(NameError):
-        assert python_implementation() == platform.python_implementation()
+        assert python_implementation() == platform_module.python_implementation()
 
     with pytest.raises(NameError):
         assert nlargest(4, [48, 5, 21, 38, 65, 12, 27, 18]) == [65, 48, 38, 27]
@@ -193,8 +193,11 @@ def test_protect_builtins_parameter() -> None:
 def test_import_deprecated_parameter() -> None:
     from importall import deimportall, importall
 
+    # This unit test makes a reasonable assumption that there are very likely always
+    # some deprecations going on in Python's codebase.
+
     with pytest.raises(DeprecationWarning):
-        importall(global(), include_deprecated=True)
+        importall(globals(), include_deprecated=True)
 
     # Recover globals(). Polluted globals() seems to hinder pytest smooth run.
     deimportall(globals())
