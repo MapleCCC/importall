@@ -12,7 +12,7 @@ type-check:
 	pyright
 
 test:
-	python -m pytest
+	python3 -m pytest
 
 loc:
 	tokei .

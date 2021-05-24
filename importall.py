@@ -287,6 +287,7 @@ def get_all_symbols(
     )
 
     symtab: SymbolTable = {}
+
     for module_name in module_names:
         symtab |= wild_card_import_module(module_name)
 
