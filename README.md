@@ -141,10 +141,6 @@ log2(2)
 
 To provide the wild card import interface, internally the `importall` module will eagerly import every names from standard libraries on module loading and initialization time, even when the user only intend to use `importall()`, `get_all_symbols()`, or `deimportall()` functions. If one is certain that he doesn't need the wild card import functionality, and would like to discard the unnecessary cost, one could preemptively set the environment variable `IMPORTALL_NO_INIT_IMPORT` (its presence suffices, its value doesn't matter), so as to disable the functionality.
 
-## Contribution
-
-Contributions are welcome. Open [pull requests](https://github.com/MapleCCC/importall/pulls) or [issues](https://github.com/MapleCCC/importall/issues).
-
 ## Miscellaneous
 
 We use the lists maintained by the [`stdlib-list`](https://github.com/jackmaney/python-stdlib-list) library instead of that by the [`isort`](https://github.com/PyCQA/isort) library or that of [`sys.stdlib_module_names`](https://docs.python.org/3.10/library/sys.html#sys.stdlib_module_names), because the lists maintained by the `isort` library and that of `sys.stdlib_module_names` don't include sub-packages and sub-modules, such as `concurrent.futures`.
@@ -154,6 +150,10 @@ One can compare the two lists:
 1. [List maintained by the `isort` library](https://github.com/PyCQA/isort/blob/main/isort/stdlibs/py39.py).
 
 2. [List maintained by the `stdlib-list` library](https://github.com/jackmaney/python-stdlib-list/blob/master/stdlib_list/lists/3.9.txt).
+
+## Contribution
+
+Contributions are welcome. Open [pull requests](https://github.com/MapleCCC/importall/pulls) or [issues](https://github.com/MapleCCC/importall/issues).
 
 ## Other Similar Projects
 

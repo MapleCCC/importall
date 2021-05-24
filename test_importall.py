@@ -65,11 +65,11 @@ def test_function_interface() -> None:
 def test_get_all_symbols() -> None:
     from importall import deimportall, get_all_symbols
 
-    symbol_table = get_all_symbols()
+    symtab = get_all_symbols()
 
-    assert symbol_table["log2"](2) == 1
+    assert symtab["log2"](2) == 1
 
-    assert list(symbol_table["combinations"]("ABCD", 2)) == [
+    assert list(symtab["combinations"]("ABCD", 2)) == [
         ("A", "B"),
         ("A", "C"),
         ("A", "D"),
@@ -78,28 +78,22 @@ def test_get_all_symbols() -> None:
         ("C", "D"),
     ]
 
-    assert symbol_table["getrecursionlimit"]() == sys.getrecursionlimit()
+    assert symtab["getrecursionlimit"]() == sys.getrecursionlimit()
 
-    assert symbol_table["python_implementation"]() == platform.python_implementation()
+    assert symtab["python_implementation"]() == platform.python_implementation()
 
-    assert [65, 48, 38, 27] == symbol_table["nlargest"](
-        4, [48, 5, 21, 38, 65, 12, 27, 18]
-    )
+    assert [65, 48, 38, 27] == symtab["nlargest"](4, [48, 5, 21, 38, 65, 12, 27, 18])
 
-    assert 7 == symbol_table["bisect_right"](
+    assert 7 == symtab["bisect_right"](
         [24, 35, 38, 38, 46, 47, 52, 54, 54, 57, 87, 91], 53
     )
 
-    assert 31 == symbol_table["reduce"](
-        symbol_table["xor"], [58, 37, 96, 115, 20, 15, 8]
-    )
+    assert 31 == symtab["reduce"](symtab["xor"], [58, 37, 96, 115, 20, 15, 8])
 
-    assert symbol_table["defaultdict"](int)[""] == 0
+    assert symtab["defaultdict"](int)[""] == 0
 
-    assert not symbol_table["truth"](
-        symbol_table["itemgetter"](0)(
-            symbol_table["attrgetter"]("maps")(symbol_table["ChainMap"]())
-        )
+    assert not symtab["truth"](
+        symtab["itemgetter"](0)(symtab["attrgetter"]("maps")(symtab["ChainMap"]()))
     )
 
     # Recover globals(). Polluted globals() seems to hinder pytest smooth run.
