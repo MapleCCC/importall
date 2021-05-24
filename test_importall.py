@@ -205,11 +205,11 @@ def test_prioritized_parameter_iterable_argument() -> None:
 
     importall(globals())
 
-    assert not inspect.isabstract(Iterable)
+    assert inspect.getmodule("compress") == "zlib"
 
-    importall(globals(), prioritized=["collections.abc"])
+    importall(globals(), prioritized=["lzma"])
 
-    assert inspect.isabstract(Iterable)
+    assert inspect.getmodule("compress") == "lzma"
 
     # Recover globals(). Polluted globals() seems to hinder pytest smooth run.
     deimportall(globals())
@@ -220,11 +220,11 @@ def test_prioritized_parameter_mapping_argument() -> None:
 
     importall(globals())
 
-    assert not inspect.isabstract(Iterable)
+    assert inspect.getmodule("compress") == "zlib"
 
-    importall(globals(), prioritized={"collections.abc": 1, "typing": -1})
+    importall(globals(), prioritized={"lzma": 1, "zlib": -1})
 
-    assert inspect.isabstract(Iterable)
+    assert inspect.getmodule("compress") == "lzma"
 
     # Recover globals(). Polluted globals() seems to hinder pytest smooth run.
     deimportall(globals())
@@ -235,11 +235,11 @@ def test_ignore_parameter() -> None:
 
     importall(globals())
 
-    assert not inspect.isabstract(Iterable)
+    assert inspect.getmodule("compress") == "zlib"
 
-    importall(globals(), ignore=["typing"])
+    importall(globals(), ignore=["zlib"])
 
-    assert inspect.isabstract(Iterable)
+    assert inspect.getmodule("compress") == "lzma"
 
     # Recover globals(). Polluted globals() seems to hinder pytest smooth run.
     deimportall(globals())

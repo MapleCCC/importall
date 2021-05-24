@@ -35,24 +35,24 @@ Two kinds of usage:
     # [65, 48, 38, 27]
     ```
 
-Say, a user finds that he wants to use `Iterable` from the `collections.abc` module
-instead of that from the `typing` module. He could either set higher priority for the
-`collections.abc` module through the `prioritized` parameter, or ignore the `typing`
-module altogether through the `ignore` parameter.
+Say, a user finds that he wants to use `compress` from the `lzma` module
+instead of that from the `zlib` module. He could either set higher priority for the
+`lzma` module through the `prioritized` parameter, or ignore the `zlib` module altogether
+ through the `ignore` parameter.
 
 ```python
 importall(globals())
 
-inspect.isabstract(Iterable)
-# False
+inspect.getmodule(compress)
+# "zlib"
 
-importall(globals(), prioritized=["collections.abc"])
+importall(globals(), prioritized=["lzma"])
 # Alternatives:
-# importall(globals(), prioritized={"collections.abc": 1, "typing": -1})
-# importall(globals(), ignore=["typing"])
+# importall(globals(), prioritized={"lzma": 1, "zlib": -1})
+# importall(globals(), ignore=["zlib"])
 
-inspect.isabstract(Iterable)
-# True
+inspect.getmodule(compress)
+# "lzma"
 ```
 
 If one prefers getting all importable names as a variable instead of importing them
@@ -129,6 +129,7 @@ BUILTINS_NAMES = set(dir(builtins)) - {
 
 
 # Below is a list of deprecated modules who emit DeprecationWarning when imported:
+#
 # binhex 3.9
 # parser 3.9
 # symbol 3.9
@@ -148,30 +149,38 @@ BUILTINS_NAMES = set(dir(builtins)) - {
 # 1. Doesn't emit DeprecationWarning when imported.
 # 2. Is one of the names inserted into the current namespace when its parent module is wild-card-imported.
 #
-# binascii.rledecode_hqx 3.9
-# binascii.rlecode_hqx 3.9
-# binascii.b2a_hqx 3.9
-# binascii.a2b_hqx 3.9
-# ast.Index 3.9
 # ast.ExtSlice 3.9
-# gettext.ldngettext 3.8
-# gettext.bind_textdomain_codeset 3.8
-# asyncio.coroutine 3.8
-# ast.Str 3.8
-# ast.Num 3.8
-# ast.NameConstant 3.8
-# ast.Ellipsis 3.8
+# ast.Index 3.9
+# binascii.a2b_hqx 3.9
+# binascii.b2a_hqx 3.9
+# binascii.rlecode_hqx 3.9
+# binascii.rledecode_hqx 3.9
+# typing.Tuple/Callable/Type 3.9
+# typing.Dict/List/Set/FrozenSet 3.9
+# typing.DefaultDict/OrderedDict/ChainMap/Counter/Deque 3.9
+# typing.Pattern/Match 3.9
+# typing.AbstractSet/ByteString/Collection/Container/ItemsView/KeysView/Mapping/MappingView/MutableMapping/MutableSequence/MutableSet/Sequence/ValuesView 3.9
+# typing.Iterable/Iterator/Generator/Reversible 3.9
+# typing.Coroutine/AsyncGenerator/AsyncIterable/AsyncIterator/Awaitable 3.9
+# typing.ContextManager/AsyncContextManager 3.9
 # ast.Bytes 3.8
+# ast.Ellipsis 3.8
+# ast.NameConstant 3.8
+# ast.Num 3.8
+# ast.Str 3.8
+# asyncio.coroutine 3.8
+# gettext.bind_textdomain_codeset 3.8
+# gettext.ldngettext 3.8
 # grp.getgrgid 3.6
-# inspect.getcallargs 3.5
 # inspect.formatargspe 3.5
-# urllib.request.URLopener 3.3
-# urllib.request.FancyURLopener 3.3
-# pkgutil.ImpLoader 3.3
-# pkgutil.ImpImporter 3.3
-# abc.abstractstaticmethod 3.3
-# abc.abstractproperty 3.3
+# inspect.getcallargs 3.5
 # abc.abstractclassmethod 3.3
+# abc.abstractproperty 3.3
+# abc.abstractstaticmethod 3.3
+# pkgutil.ImpImporter 3.3
+# pkgutil.ImpLoader 3.3
+# urllib.request.FancyURLopener 3.3
+# urllib.request.URLopener 3.3
 # zipfile.BadZipfile 3.2
 # turtle.settiltangle 3.1
 # inspect.getargspec 3.0
@@ -199,6 +208,44 @@ DEPRECATED_NAMES = {
         "binascii.b2a_hqx",
         "binascii.rlecode_hqx",
         "binascii.rledecode_hqx",
+        "typing.AbstractSet",
+        "typing.AsyncContextManager",
+        "typing.AsyncGenerator",
+        "typing.AsyncIterable",
+        "typing.AsyncIterator",
+        "typing.Awaitable",
+        "typing.ByteString",
+        "typing.Callable",
+        "typing.ChainMap",
+        "typing.Collection",
+        "typing.Container",
+        "typing.ContextManager",
+        "typing.Coroutine",
+        "typing.Counter",
+        "typing.DefaultDict",
+        "typing.Deque",
+        "typing.Dict",
+        "typing.FrozenSet",
+        "typing.Generator",
+        "typing.ItemsView",
+        "typing.Iterable",
+        "typing.Iterator",
+        "typing.KeysView",
+        "typing.List",
+        "typing.Mapping",
+        "typing.MappingView",
+        "typing.Match",
+        "typing.MutableMapping",
+        "typing.MutableSequence",
+        "typing.MutableSet",
+        "typing.OrderedDict",
+        "typing.Pattern",
+        "typing.Reversible",
+        "typing.Sequence",
+        "typing.Set",
+        "typing.Tuple",
+        "typing.Type",
+        "typing.ValuesView",
     },
     (3, 8): {
         "ast.Bytes",
@@ -211,7 +258,7 @@ DEPRECATED_NAMES = {
         "gettext.ldngettext",
     },
     (3, 6): {"grp.getgrgid"},
-    (3, 5): {"inspect.getcallargs", "inspect.formatargspe"},
+    (3, 5): {"inspect.formatargspe", "inspect.getcallargs"},
     (3, 3): {
         "abc.abstractclassmethod",
         "abc.abstractproperty",

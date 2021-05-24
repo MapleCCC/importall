@@ -103,21 +103,21 @@ def importall(
     ...
 ```
 
-Say, a user finds that he wants to use `Iterable` from the `collections.abc` module instead of that from the `typing` module. He could either set higher priority for the `collections.abc` module through the `prioritized` parameter, or ignore the `typing` module altogether through the `ignore` parameter.
+Say, a user finds that he wants to use `compress` from the `lzma` module instead of that from the `zlib` module. He could either set higher priority for the `lzma` module through the `prioritized` parameter, or ignore the `zlib` module altogether through the `ignore` parameter.
 
 ```python
 importall(globals())
 
-inspect.isabstract(Iterable)
-# False
+inspect.getmodule(compress)
+# "zlib"
 
-importall(globals(), prioritized=["collections.abc"])
+importall(globals(), prioritized=["lzma"])
 # Alternatives:
-# importall(globals(), prioritized={"collections.abc": 1, "typing": -1})
-# importall(globals(), ignore=["typing"])
+# importall(globals(), prioritized={"lzma": 1, "zlib": -1})
+# importall(globals(), ignore=["zlib"])
 
-inspect.isabstract(Iterable)
-# True
+inspect.getmodule(compress)
+# "lzma"
 ```
 
 If one prefers getting all importable names as a variable instead of importing them into the current module, there is also a programmatic interface for doing so:
