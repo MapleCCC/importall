@@ -70,7 +70,7 @@ Say, a user finds that he wants to use `compress` from the `lzma` module instead
 ```python
 importall(globals())
 
-inspect.getmodule(compress)
+compress.__module__
 # "zlib"
 
 importall(globals(), prioritized=["lzma"])
@@ -78,7 +78,7 @@ importall(globals(), prioritized=["lzma"])
 # importall(globals(), prioritized={"lzma": 1, "zlib": -1})
 # importall(globals(), ignore=["zlib"])
 
-inspect.getmodule(compress)
+compress.__module__
 # "lzma"
 ```
 

@@ -1,7 +1,6 @@
 # pyright: reportUndefinedVariable=false
 
 import builtins
-import inspect
 import os
 import platform as platform_module
 import sys
@@ -208,11 +207,11 @@ def test_prioritized_parameter_iterable_argument() -> None:
 
     importall(globals())
 
-    assert inspect.getmodule("compress") == "zlib"
+    assert compress.__module__ == "zlib"
 
     importall(globals(), prioritized=["lzma"])
 
-    assert inspect.getmodule("compress") == "lzma"
+    assert compress.__module__ == "lzma"
 
     # Recover globals(). Polluted globals() seems to hinder pytest smooth run.
     deimportall(globals())
@@ -223,11 +222,11 @@ def test_prioritized_parameter_mapping_argument() -> None:
 
     importall(globals())
 
-    assert inspect.getmodule("compress") == "zlib"
+    assert compress.__module__ == "zlib"
 
     importall(globals(), prioritized={"lzma": 1, "zlib": -1})
 
-    assert inspect.getmodule("compress") == "lzma"
+    assert compress.__module__ == "lzma"
 
     # Recover globals(). Polluted globals() seems to hinder pytest smooth run.
     deimportall(globals())
@@ -238,11 +237,11 @@ def test_ignore_parameter() -> None:
 
     importall(globals())
 
-    assert inspect.getmodule("compress") == "zlib"
+    assert compress.__module__ == "zlib"
 
     importall(globals(), ignore=["zlib"])
 
-    assert inspect.getmodule("compress") == "lzma"
+    assert compress.__module__ == "lzma"
 
     # Recover globals(). Polluted globals() seems to hinder pytest smooth run.
     deimportall(globals())

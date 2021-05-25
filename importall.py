@@ -43,7 +43,7 @@ instead of that from the `zlib` module. He could either set higher priority for 
 ```python
 importall(globals())
 
-inspect.getmodule(compress)
+compress.__module__
 # "zlib"
 
 importall(globals(), prioritized=["lzma"])
@@ -51,7 +51,7 @@ importall(globals(), prioritized=["lzma"])
 # importall(globals(), prioritized={"lzma": 1, "zlib": -1})
 # importall(globals(), ignore=["zlib"])
 
-inspect.getmodule(compress)
+compress.__module__
 # "lzma"
 ```
 
