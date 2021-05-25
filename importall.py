@@ -93,6 +93,7 @@ log2(2)
 
 import builtins
 import importlib
+import inspect
 import os
 import re
 import sys
@@ -392,7 +393,7 @@ def deimportall(globals: SymbolTable) -> None:
     stdlib_symbols: set[int] = set()
 
     for module_name in IMPORTABLE_MODULES:
-        symbol_table = wild_card_import_module(module_name, include_deprecated=True)
+        symbol_table = import_public_names(module_name, include_deprecated=True)
         stdlib_symbols.update(map(id, symbol_table.values()))
 
     for name, symbol in dict(globals).items():
@@ -448,14 +449,14 @@ def get_all_symbols(
     symtab: SymbolTable = {}
 
     for module_name in module_names:
-        symtab |= wild_card_import_module(
+        symtab |= import_public_names(
             module_name, include_deprecated=include_deprecated
         )
 
     return symtab
 
 
-def wild_card_import_module(
+def import_public_names(
     module_name: str, *, include_deprecated: bool = False
 ) -> SymbolTable:
     """
@@ -467,6 +468,35 @@ def wild_card_import_module(
     migration experience. If you know what you are doing, override the default
     behavior by setting the `include_deprecated` parameter to `True`.
     """
+
+    symtab = wild_card_import_module(module_name, include_deprecated=include_deprecated)
+
+    # Try best effort to filter out only public names
+
+    for name, symbol in dict(symtab).items():
+
+        if inspect.ismodule(symbol):
+            # Possibly another standard library module imported to this module
+            # Should not be considered part of the public names of this module
+            del symtab[name]
+            continue
+
+        parent_module_name = getattr(symbol, "__module__", None)
+        if (
+            parent_module_name != module_name
+            and parent_module_name in IMPORTABLE_MODULES
+        ):
+            # Possibly a public name from another standard library module, imported to this module
+            # Should not be considered part of the public names of this module
+            del symtab[name]
+            continue
+
+    return symtab
+
+
+def wild_card_import_module(
+    module_name: str, *, include_deprecated: bool = False
+) -> SymbolTable:
 
     # Python official doc about "wild card import" mechanism:
     #
