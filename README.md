@@ -60,48 +60,7 @@ Two kinds of usage:
     # [65, 48, 38, 27]
     ```
 
-The doc and API of the `importall()` function:
-
-```python
-def importall(
-    globals: SymbolTable,
-    *,
-    protect_builtins: bool = True,
-    prioritized: Union[Iterable[str], Mapping[str, int]] = (),
-    ignore: Iterable[str] = (),
-) -> None:
-    """
-    Import every available names from standard libraries to the current module.
-    Python equivalent to C++'s <bits/stdc++.h>.
-
-    Name collision is likely. One can resolve name collisions by tuning the `prioritized`
-    and/or the `ignore` parameter. Names from the module with higher priority value will
-    override names from the module with lower priority value.
-
-    The `globals` parameter accepts a symbol table to operate on. Usually the caller passes
-    in `globals()`.
-
-    By default, built-in names are protected from overriding. The protection can be switched
-    off by setting the `protect_builtins` parameter to `False`.
-
-    By default, deprecated modules and deprecated names are not imported. It is designed
-    so because deprecated modules and names hopefully should not be used anymore,
-    their presence only for easing the steepness of API changes and providing a progressive
-    cross-version migration experience. If you know what you are doing, override the
-    default behavior by setting the `include_deprecated` parameter to `True`.
-
-    The `prioritized` parameter accepts either an iterable of strings specifying modules
-    whose priorities are set to 1, or a mapping object with string keys and integer values,
-    specifying respective priority values for corresponding modules. Valid priority value
-    is always integer. All modules default to 0 priority values. It's possible to specify
-    negative priority value.
-
-    The `ignore` parameter accepts an iterable of strings specifying modules that should
-    be skipped and not imported.
-    """
-
-    ...
-```
+    Note that `local()` should not be passed to `importall()`, as `locals()` is intended as readonly [per doc](https://docs.python.org/3/library/functions.html#locals).
 
 Say, a user finds that he wants to use `compress` from the `lzma` module instead of that from the `zlib` module. He could either set higher priority for the `lzma` module through the `prioritized` parameter, or ignore the `zlib` module altogether through the `ignore` parameter.
 
@@ -151,6 +110,49 @@ deimportall(globals())
 
 log2(2)
 # NameError
+```
+
+The doc and API of the `importall()` function:
+
+```python
+def importall(
+    globals: SymbolTable,
+    *,
+    protect_builtins: bool = True,
+    prioritized: Union[Iterable[str], Mapping[str, int]] = (),
+    ignore: Iterable[str] = (),
+) -> None:
+    """
+    Import every available names from standard libraries to the current module.
+    Python equivalent to C++'s <bits/stdc++.h>.
+
+    Name collision is likely. One can resolve name collisions by tuning the `prioritized`
+    and/or the `ignore` parameter. Names from the module with higher priority value will
+    override names from the module with lower priority value.
+
+    The `globals` parameter accepts a symbol table to operate on. Usually the caller passes
+    in `globals()`.
+
+    By default, built-in names are protected from overriding. The protection can be switched
+    off by setting the `protect_builtins` parameter to `False`.
+
+    By default, deprecated modules and deprecated names are not imported. It is designed
+    so because deprecated modules and names hopefully should not be used anymore,
+    their presence only for easing the steepness of API changes and providing a progressive
+    cross-version migration experience. If you know what you are doing, override the
+    default behavior by setting the `include_deprecated` parameter to `True`.
+
+    The `prioritized` parameter accepts either an iterable of strings specifying modules
+    whose priorities are set to 1, or a mapping object with string keys and integer values,
+    specifying respective priority values for corresponding modules. Valid priority value
+    is always integer. All modules default to 0 priority values. It's possible to specify
+    negative priority value.
+
+    The `ignore` parameter accepts an iterable of strings specifying modules that should
+    be skipped and not imported.
+    """
+
+    ...
 ```
 
 ## Advanced Tricks
