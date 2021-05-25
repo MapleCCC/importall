@@ -13,6 +13,8 @@
 
 - [Overview](#overview)
 - [Usage](#usage)
+- [Development](#development)
+- [Testing](#testing)
 - [Advanced Tricks](#advanced-tricks)
 - [Miscellaneous](#miscellaneous)
 - [Contribution](#contribution)
@@ -154,6 +156,38 @@ def importall(
     """
 
     ...
+```
+
+## Development
+
+```bash
+$ git clone https://github.com/MapleCCC/importall.git
+
+$ cd importall
+
+# Optionally create a virtual environment for isolation purpose
+$ python3 -m virtualenv .venv
+$ source .venv/bin/activate
+
+# Install dependenies
+$ python3 -m pip install -r requirements.txt
+# Install dev dependenies
+$ python3 -m pip install -r requirements-dev.txt
+
+# Deploy pre-commit hooks
+$ pre-commit install
+
+$ python3 -m pip install -e .
+```
+
+## Testing
+
+`importall` project uses [pytest](https://pytest.org/) for unit testing.
+
+```bash
+# Install test dependenies
+$ python3 -m pip install -r requirements-test.txt
+$ python3 -m pytest
 ```
 
 ## Advanced Tricks
