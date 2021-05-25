@@ -392,7 +392,7 @@ def deimportall(globals: SymbolTable) -> None:
     stdlib_symbols: set[int] = set()
 
     for module_name in IMPORTABLE_MODULES:
-        symbol_table = wild_card_import_module(module_name)
+        symbol_table = wild_card_import_module(module_name, include_deprecated=True)
         stdlib_symbols.update(map(id, symbol_table.values()))
 
     for name, symbol in dict(globals).items():
