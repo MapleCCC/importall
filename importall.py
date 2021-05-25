@@ -292,7 +292,7 @@ for absolute_name in CURR_VER_DEPRECATED_NAMES:
     # because Python 3 extends valid identifier to include non-ASCII characters.
     #
     # Reference:
-    # https://docs.python.org/3/reference/lexical_analysis.html#identifiers
+    # https://docs.python.org/3.9/reference/lexical_analysis.html#identifiers
     # https://www.python.org/dev/peps/pep-3131/
     # https://stackoverflow.com/questions/5474008/regular-expression-to-confirm-whether-a-string-is-a-valid-python-identifier
     # https://stackoverflow.com/questions/49331782/python-3-how-to-check-if-a-string-can-be-a-valid-variable
@@ -498,6 +498,11 @@ def wild_card_import_module(
     module_name: str, *, include_deprecated: bool = False
 ) -> SymbolTable:
 
+    try:
+        module = importlib.import_module(module_name)
+    except (ImportError, ModuleNotFoundError):
+        return {}
+
     # Python official doc about "wild card import" mechanism:
     #
     # "If the list of identifiers is replaced by a star ('*'), all public names
@@ -514,13 +519,8 @@ def wild_card_import_module(
     # It is intended to avoid accidentally exporting items that are not part of
     # the API (such as library modules which were imported and used within the
     # module)."
-
-    try:
-        module = importlib.import_module(module_name)
-    except (ImportError, ModuleNotFoundError):
-        return {}
-
-    symtab: SymbolTable = {}
+    #
+    # Reference: https://docs.python.org/3.9/reference/simple_stmts.html#the-import-statement
 
     try:
         attrs = module.__all__  # type: ignore
@@ -532,6 +532,8 @@ def wild_card_import_module(
         # Ignore deprecated names in the module
         attrs = set(attrs) - curr_ver_deprecated_names_index[module_name]
 
+    symtab: SymbolTable = {}
+
     for attr in attrs:
         try:
             symtab[attr] = getattr(module, attr)
@@ -541,5 +543,5 @@ def wild_card_import_module(
     return symtab
 
 
-if os.environ.get("IMPORTALL_NO_INIT_IMPORT", None) is None:
+if "IMPORTALL_NO_INIT_IMPORT" not in os.environ:
     importall(globals())

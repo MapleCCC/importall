@@ -63,7 +63,7 @@ Two kinds of usage:
     # [65, 48, 38, 27]
     ```
 
-    Note that `local()` should not be passed to `importall()`, as `locals()` is intended as readonly [per doc](https://docs.python.org/3/library/functions.html#locals).
+    Note that `local()` should not be passed to `importall()`, as `locals()` is intended as readonly [per doc](https://docs.python.org/3.9/library/functions.html#locals).
 
 Say, a user finds that he wants to use `compress` from the `lzma` module instead of that from the `zlib` module. He could either set higher priority for the `lzma` module through the `prioritized` parameter, or ignore the `zlib` module altogether through the `ignore` parameter.
 
