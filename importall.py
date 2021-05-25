@@ -392,9 +392,14 @@ def deimportall(globals: SymbolTable) -> None:
 
     stdlib_symbols: set[int] = set()
 
-    for module_name in IMPORTABLE_MODULES:
-        symbol_table = import_public_names(module_name, include_deprecated=True)
-        stdlib_symbols.update(map(id, symbol_table.values()))
+    # Surpass DeprecationWarning, because we know for sure that we are not intended
+    # to use the deprecated names here.
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", DeprecationWarning)
+
+        for module_name in IMPORTABLE_MODULES:
+            symbol_table = import_public_names(module_name, include_deprecated=True)
+            stdlib_symbols.update(map(id, symbol_table.values()))
 
     for name, symbol in dict(globals).items():
         if id(symbol) in stdlib_symbols:
