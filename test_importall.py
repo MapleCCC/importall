@@ -195,7 +195,7 @@ def test_import_deprecated_parameter() -> None:
     # This unit test makes a reasonable assumption that there are very likely always
     # some deprecations going on in Python's codebase.
 
-    with pytest.raises(DeprecationWarning):
+    with pytest.deprecated_call():
         importall(globals(), include_deprecated=True)
 
     # Recover globals(). Polluted globals() seems to hinder pytest smooth run.
