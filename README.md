@@ -65,22 +65,26 @@ Two kinds of usage:
 
     Note that `local()` should not be passed to `importall()`, as `locals()` is intended as readonly [per doc](https://docs.python.org/3.9/library/functions.html#locals).
 
-Say, a user finds that he wants to use `compress` from the `lzma` module instead of that from the `zlib` module. He could either set higher priority for the `lzma` module through the `prioritized` parameter, or ignore the `zlib` module altogether through the `ignore` parameter.
+    The `importall()` function also provides several parameters for configuration and makes it more flexible and customizable than the wild-card-import approach.
 
-```python
-importall(globals())
+    More than likely, names imported from different standard libraries might collides. The name collision is resolved by tuning the `prioritized` and `ignore` parameters.
 
-compress.__module__
-# "zlib"
+    Say, a user finds that he wants to use `compress` from the `lzma` module instead of that from the `zlib` module. He could either set higher priority for the `lzma` module through the `prioritized` parameter, or ignore the `zlib` module altogether through the `ignore` parameter.
 
-importall(globals(), prioritized=["lzma"])
-# Alternatives:
-# importall(globals(), prioritized={"lzma": 1, "zlib": -1})
-# importall(globals(), ignore=["zlib"])
+    ```python
+    importall(globals())
 
-compress.__module__
-# "lzma"
-```
+    compress.__module__
+    # "zlib"
+
+    importall(globals(), prioritized=["lzma"])
+    # Alternatives:
+    # importall(globals(), prioritized={"lzma": 1, "zlib": -1})
+    # importall(globals(), ignore=["zlib"])
+
+    compress.__module__
+    # "lzma"
+    ```
 
 If one prefers getting all importable names as a variable instead of importing them into the current module, there is also a programmatic interface for doing so:
 
@@ -99,7 +103,7 @@ symbol_table["log2"](2)
 # 1.0
 ```
 
-To recover the `globals()` and de-import all imported names, use the `deimportall()` function:
+To recover<!--restore--> the `globals()` and de-import all imported names, use the `deimportall()` function:
 
 ```python
 from importall import deimportall, importall
@@ -122,6 +126,7 @@ def importall(
     globals: SymbolTable,
     *,
     protect_builtins: bool = True,
+    include_deprecated: bool = False,
     prioritized: Union[Iterable[str], Mapping[str, int]] = (),
     ignore: Iterable[str] = (),
 ) -> None:
@@ -142,8 +147,8 @@ def importall(
     By default, deprecated modules and deprecated names are not imported. It is designed
     so because deprecated modules and names hopefully should not be used anymore,
     their presence only for easing the steepness of API changes and providing a progressive
-    cross-version migration experience. If you know what you are doing, override the
-    default behavior by setting the `include_deprecated` parameter to `True`.
+    cross-version migration experience. If you are sure you know what you are doing, override
+    the default behavior by setting the `include_deprecated` parameter to `True` (not recommended).
 
     The `prioritized` parameter accepts either an iterable of strings specifying modules
     whose priorities are set to 1, or a mapping object with string keys and integer values,

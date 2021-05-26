@@ -35,25 +35,34 @@ Two kinds of usage:
     # [65, 48, 38, 27]
     ```
 
-Say, a user finds that he wants to use `compress` from the `lzma` module
-instead of that from the `zlib` module. He could either set higher priority for the
-`lzma` module through the `prioritized` parameter, or ignore the `zlib` module altogether
- through the `ignore` parameter.
+    Note that `local()` should not be passed to `importall()`, as `locals()` is
+    intended as readonly [per doc](https://docs.python.org/3.9/library/functions.html#locals).
 
-```python
-importall(globals())
+    The `importall()` function also provides several parameters for configuration and
+    makes it more flexible and customizable than the wild-card-import approach.
 
-compress.__module__
-# "zlib"
+    More than likely, names imported from different standard libraries might collides.
+    The name collision is resolved by tuning the `prioritized` and `ignore` parameters.
 
-importall(globals(), prioritized=["lzma"])
-# Alternatives:
-# importall(globals(), prioritized={"lzma": 1, "zlib": -1})
-# importall(globals(), ignore=["zlib"])
+    Say, a user finds that he wants to use `compress` from the `lzma` module instead of
+    that from the `zlib` module. He could either set higher priority for the `lzma`
+    module through the `prioritized` parameter, or ignore the `zlib` module altogether
+    through the `ignore` parameter.
 
-compress.__module__
-# "lzma"
-```
+    ```python
+    importall(globals())
+
+    compress.__module__
+    # "zlib"
+
+    importall(globals(), prioritized=["lzma"])
+    # Alternatives:
+    # importall(globals(), prioritized={"lzma": 1, "zlib": -1})
+    # importall(globals(), ignore=["zlib"])
+
+    compress.__module__
+    # "lzma"
+    ```
 
 If one prefers getting all importable names as a variable instead of importing them
 into the current module, there is also a programmatic interface for doing so:
@@ -97,6 +106,7 @@ import inspect
 import os
 import re
 import sys
+import warnings
 from collections import defaultdict
 from collections.abc import Iterable, Mapping, MutableMapping
 from typing import Any, Union
@@ -146,9 +156,8 @@ BUILTINS_NAMES = set(dir(builtins)) - {
 # optparse 3.2
 # email.encoders 3.0
 
-# Below is a list of deprecated names satisfying two conditions:
-# 1. Doesn't emit DeprecationWarning when imported.
-# 2. Is one of the names inserted into the current namespace when its parent module is wild-card-imported.
+# Below is a list of deprecated names each of which is one of the names inserted into
+# the current namespace when its parent module is wild-card-imported.
 #
 # ast.ExtSlice 3.9
 # ast.Index 3.9
@@ -361,8 +370,8 @@ def importall(
     By default, deprecated modules and deprecated names are not imported. It is designed
     so because deprecated modules and names hopefully should not be used anymore,
     their presence only for easing the steepness of API changes and providing a progressive
-    cross-version migration experience. If you know what you are doing, override the
-    default behavior by setting the `include_deprecated` parameter to `True`.
+    cross-version migration experience. If you are sure you know what you are doing, override
+    the default behavior by setting the `include_deprecated` parameter to `True` (not recommended).
 
     The `prioritized` parameter accepts either an iterable of strings specifying modules
     whose priorities are set to 1, or a mapping object with string keys and integer values,
@@ -387,7 +396,7 @@ def importall(
 
 def deimportall(globals: SymbolTable, purge_cache: bool = False) -> None:
     """
-    De-import all imported names. Recover the globals.
+    De-import all imported names. Recover/restore the globals.
 
     Set the `purge_cache` parameter to `True` if a cleaner and more thorough revert is preferred.
     Useful when module-level behaviors is desired to re-happen, such as the emission of
@@ -431,8 +440,8 @@ def get_all_symbols(
     By default, deprecated modules and deprecated names are not imported. It is designed
     so because deprecated modules and names hopefully should not be used anymore,
     their presence only for easing the steepness of API changes and providing a progressive
-    cross-version migration experience. If you know what you are doing, override the
-    default behavior by setting the `include_deprecated` parameter to `True`.
+    cross-version migration experience. If you are sure you know what you are doing, override
+    the default behavior by setting the `include_deprecated` parameter to `True` (not recommended).
 
     The `prioritized` parameter accepts either an iterable of strings specifying modules
     whose priorities are set to 1, or a mapping object with string keys and integer values,
@@ -478,8 +487,8 @@ def import_public_names(
     By default, deprecated names are not included. It is designed so because
     deprecated names hopefully should not be used anymore, their presence only for
     easing the steepness of API changes and providing a progressive cross-version
-    migration experience. If you know what you are doing, override the default
-    behavior by setting the `include_deprecated` parameter to `True`.
+    migration experience. If you are sure you know what you are doing, override the default
+    behavior by setting the `include_deprecated` parameter to `True` (not recommended).
     """
 
     symtab = wild_card_import_module(module_name, include_deprecated=include_deprecated)
