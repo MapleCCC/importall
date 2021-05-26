@@ -385,9 +385,13 @@ def importall(
     globals.update(symtab)
 
 
-def deimportall(globals: SymbolTable) -> None:
+def deimportall(globals: SymbolTable, purge_cache: bool = False) -> None:
     """
     De-import all imported names. Recover the globals.
+
+    Set the `purge_cache` parameter to `True` if a cleaner and more thorough revert is preferred.
+    Useful when module-level behaviors is desired to re-happen, such as the emission of
+    the DeprecationWarning on import.
     """
 
     stdlib_symbols: set[int] = set()
@@ -404,6 +408,10 @@ def deimportall(globals: SymbolTable) -> None:
     for name, symbol in dict(globals).items():
         if id(symbol) in stdlib_symbols:
             del globals[name]
+
+    if purge_cache:
+        for module_name in IMPORTABLE_MODULES:
+            sys.modules.pop(module_name, None)
 
 
 def get_all_symbols(
