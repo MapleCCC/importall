@@ -17,7 +17,7 @@ type-check:
 test:
 	python3 -m pytest test_importall.py
 
-prof:
+profile:
 	kernprof -lv profile_entry.py > profile_output.txt
 
 loc:
@@ -26,4 +26,4 @@ loc:
 clean:
 	rm -rf __pycache__/
 
-.PHONY: format lint unused-imports type-check test prof loc clean
+.PHONY: format lint unused-imports type-check test profile loc clean

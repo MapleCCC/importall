@@ -131,6 +131,10 @@ if sys.version_info < (3, 9):
     raise RuntimeError("importall library is intended to run with Python 3.9 or higher")
 
 
+# The name profile will be injected into builtins in runtime by line-profiler.
+profile = getattr(builtins, "profile", lambda x: x)
+
+
 BUILTINS_NAMES = set(dir(builtins)) - {
     "__doc__",
     "__loader__",
@@ -424,6 +428,7 @@ def deimportall(globals: SymbolTable, purge_cache: bool = False) -> None:
             sys.modules.pop(module_name, None)
 
 
+@profile
 def get_all_symbols(
     *,
     include_deprecated: bool = False,
@@ -517,6 +522,7 @@ def import_public_names(
     return symtab
 
 
+@profile
 def wild_card_import_module(
     module_name: str, *, include_deprecated: bool = False
 ) -> SymbolTable:
