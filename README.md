@@ -31,7 +31,7 @@ It's definitely not intended for serious software engineering situations. It's u
 
 ## Quick Start
 
-Two kinds of usage:
+Two major ways of usage:
 
 1. *Wild card import*.
 
