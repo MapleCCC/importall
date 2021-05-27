@@ -12,7 +12,7 @@
 
 
 - [Overview](#overview)
-- [Usage](#usage)
+- [Quick Start](#quick-start)
 - [Development](#development)
 - [Testing](#testing)
 - [Advanced Tricks](#advanced-tricks)
@@ -29,11 +29,11 @@
 
 It's definitely not intended for serious software engineering situations. It's useful and convenient for some niche scenarios, such as competitive programming contests, under which situation saving some typing strokes and hence precious time is highly desirable. Also convenient when just prototyping, testing back-of-envelop thoughts, or tinkering with ideas on playground. Save the time and tedious chores spent on typing all the necessary modules, which could be annoying, boring and typo-prone.
 
-## Usage
+## Quick Start
 
 Two kinds of usage:
 
-1. _Import interface_
+1. *Wild card import*.
 
     Wild card import the `importall` module, then all names are imported to the current module.
 
@@ -47,7 +47,7 @@ Two kinds of usage:
     # 7
     ```
 
-2. _Function interface_
+2. *Invoke function*
 
     Call the `importall()` function, and pass in `globals()` as argument, then all names are imported to the current module.
 
@@ -65,7 +65,7 @@ Two kinds of usage:
 
     Note that `local()` should not be passed to `importall()`, as `locals()` is intended as readonly [per doc](https://docs.python.org/3.9/library/functions.html#locals).
 
-    The `importall()` function also provides several parameters for configuration and makes it more flexible and customizable than the wild-card-import approach.
+    The `importall()` function also provides several parameters for finer-grained configuration, making it more flexible and customizable than the wild-card-import approach.
 
     More than likely, names imported from different standard libraries might collides. The name collision is resolved by tuning the `prioritized` and `ignore` parameters.
 
@@ -86,7 +86,7 @@ Two kinds of usage:
     # "lzma"
     ```
 
-If one prefers getting all importable names as a variable instead of importing them into the current module, there is also a programmatic interface for doing so:
+If one prefers getting all importable names stored as a variable instead of importing them into the current module to avoid cluttering<!--polluting--> `globals()`, there is also a programmatic interface for doing so:
 
 ```python
 from importall import get_all_symbols
@@ -148,7 +148,7 @@ def importall(
     so because deprecated modules and names hopefully should not be used anymore,
     their presence only for easing the steepness of API changes and providing a progressive
     cross-version migration experience. If you are sure you know what you are doing, override
-    the default behavior by setting the `include_deprecated` parameter to `True` (not recommended).
+    the default behavior by setting the `include_deprecated` parameter to `True` (**not recommended**).
 
     The `prioritized` parameter accepts either an iterable of strings specifying modules
     whose priorities are set to 1, or a mapping object with string keys and integer values,

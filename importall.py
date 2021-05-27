@@ -371,7 +371,7 @@ def importall(
     so because deprecated modules and names hopefully should not be used anymore,
     their presence only for easing the steepness of API changes and providing a progressive
     cross-version migration experience. If you are sure you know what you are doing, override
-    the default behavior by setting the `include_deprecated` parameter to `True` (not recommended).
+    the default behavior by setting the `include_deprecated` parameter to `True` (**not recommended**).
 
     The `prioritized` parameter accepts either an iterable of strings specifying modules
     whose priorities are set to 1, or a mapping object with string keys and integer values,
@@ -441,7 +441,7 @@ def get_all_symbols(
     so because deprecated modules and names hopefully should not be used anymore,
     their presence only for easing the steepness of API changes and providing a progressive
     cross-version migration experience. If you are sure you know what you are doing, override
-    the default behavior by setting the `include_deprecated` parameter to `True` (not recommended).
+    the default behavior by setting the `include_deprecated` parameter to `True` (**not recommended**).
 
     The `prioritized` parameter accepts either an iterable of strings specifying modules
     whose priorities are set to 1, or a mapping object with string keys and integer values,
@@ -488,7 +488,7 @@ def import_public_names(
     deprecated names hopefully should not be used anymore, their presence only for
     easing the steepness of API changes and providing a progressive cross-version
     migration experience. If you are sure you know what you are doing, override the default
-    behavior by setting the `include_deprecated` parameter to `True` (not recommended).
+    behavior by setting the `include_deprecated` parameter to `True` (**not recommended**).
     """
 
     symtab = wild_card_import_module(module_name, include_deprecated=include_deprecated)
