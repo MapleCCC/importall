@@ -109,7 +109,7 @@ import sys
 import warnings
 from collections import defaultdict
 from collections.abc import Iterable, Mapping, MutableMapping
-from typing import Any, Union
+from typing import Any, NoReturn, Union
 
 from stdlib_list import stdlib_list
 
@@ -565,5 +565,19 @@ def wild_card_import_module(
     return symtab
 
 
-if "IMPORTALL_NO_INIT_IMPORT" not in os.environ:
+if "IMPORTALL_DISABLE_WILD_CARD_IMPORT" in os.environ:
+
+    class NotIndexable:
+        def __init__(self, reason: str) -> None:
+            self._reason = reason
+
+        def __getitem__(self, key: Any) -> NoReturn:
+            raise RuntimeError(self._reason)
+
+    __all__ = NotIndexable(  # type: ignore
+        reason="Wild card importing the importall module is disabled, "
+        "due to the presence of the environment variable IMPORTALL_DISABLE_WILD_CARD_IMPORT"
+    )
+
+else:
     importall(globals())

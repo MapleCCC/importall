@@ -197,7 +197,7 @@ $ python3 -m pytest
 
 ## Advanced Tricks
 
-To provide the wild card import interface, internally the `importall` module will eagerly import every names from standard libraries on module loading and initialization time, even when the user only intend to use `importall()`, `get_all_symbols()`, or `deimportall()` functions. If one is certain that he doesn't need the wild card import functionality, and would like to discard the unnecessary cost, one could preemptively set the environment variable `IMPORTALL_NO_INIT_IMPORT` (its presence suffices, its value doesn't matter), so as to disable the functionality.
+To provide names thorough the wild card import, internally the `importall` module will eagerly import every names from standard libraries at the time of module loading and initialization, even when the user only intend to use `importall()`, `get_all_symbols()`, or `deimportall()` functions. However, the overhead of calling `importall()` is not cheap, rendering it undesirable for performance-sensitive applications. If one is certain that he won't use the wild card import, and would like to discard the unnecessary overhead, one could preemptively set the environment variable `IMPORTALL_DISABLE_WILD_CARD_IMPORT` (its presence suffices, its value doesn't matter), so as to disable the functionality.
 
 ## Miscellaneous
 
