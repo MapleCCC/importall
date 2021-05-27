@@ -9,7 +9,28 @@ from typing import Any
 import pytest
 
 
-os.environ["IMPORTALL_NO_INIT_IMPORT"] = "1"
+@pytest.fixture(scope="function", autouse=True)
+def isolate_environement():
+
+    # Reference: test.support.CleanImport() function implementation
+    # https://github.com/python/cpython/blob/v3.9.0/Lib/test/support/__init__.py#L1241
+
+    globals_dict = globals()
+
+    # Backup environement
+    original_globals = dict(globals_dict)
+    original_sys_modules = dict(sys.modules)
+    original_os_environ = dict(os.environ)
+
+    yield
+
+    # Restore environment
+    globals_dict.clear()
+    globals_dict |= original_globals
+    sys.modules.clear()
+    sys.modules |= original_sys_modules
+    os.environ.clear()
+    os.environ |= original_os_environ
 
 
 # Unfortunately, for now we can't test the import inteface. Because wild card import
@@ -28,7 +49,7 @@ def test_import_interface() -> None:
 
 
 def test_function_interface() -> None:
-    from importall import deimportall, importall
+    from importall import importall
 
     importall(globals())
 
@@ -57,12 +78,9 @@ def test_function_interface() -> None:
 
     assert not truth(itemgetter(0)(attrgetter("maps")(ChainMap())))
 
-    # Recover globals(). Polluted globals() seems to hinder pytest smooth run.
-    deimportall(globals())
-
 
 def test_get_all_symbols() -> None:
-    from importall import deimportall, get_all_symbols
+    from importall import get_all_symbols
 
     symtab = get_all_symbols()
 
@@ -94,9 +112,6 @@ def test_get_all_symbols() -> None:
     assert not symtab["truth"](
         symtab["itemgetter"](0)(symtab["attrgetter"]("maps")(symtab["ChainMap"]()))
     )
-
-    # Recover globals(). Polluted globals() seems to hinder pytest smooth run.
-    deimportall(globals())
 
 
 def test_deimportall() -> None:
@@ -165,12 +180,9 @@ def test_deimportall() -> None:
     with pytest.raises(NameError):
         assert not truth(itemgetter(0)(attrgetter("maps")(ChainMap())))
 
-    # Recover globals(). Polluted globals() seems to hinder pytest smooth run.
-    deimportall(globals())
-
 
 def test_protect_builtins_parameter() -> None:
-    from importall import deimportall, importall
+    from importall import importall
 
     importall(globals(), protect_builtins=True)
 
@@ -185,12 +197,17 @@ def test_protect_builtins_parameter() -> None:
     for name in BUILTINS_NAMES:
         assert eval_name(name) is getattr(builtins, name)
 
-    # Recover globals(). Polluted globals() seems to hinder pytest smooth run.
-    deimportall(globals())
-
 
 def test_import_deprecated_parameter() -> None:
-    from importall import deimportall, importall
+
+    # Disable wild card import because wild card import internally eagerly import every
+    # names from standard libraries, populating the sys.modules cache. Importing modules
+    # who is already in the sys.mdoules cache would reuse the cache entry, instead of
+    # actually executing the module file again, which maens module-level behaviors won't
+    # re-happen, such as the emission of the DeprecationWarning on import.
+    os.environ["IMPORTALL_DISABLE_WILD_CARD_IMPORT"] = "1"
+
+    from importall import importall
 
     # This unit test makes a reasonable assumption that there are very likely always
     # some deprecations going on in Python's codebase.
@@ -198,12 +215,9 @@ def test_import_deprecated_parameter() -> None:
     with pytest.deprecated_call():
         importall(globals(), include_deprecated=True)
 
-    # Recover globals(). Polluted globals() seems to hinder pytest smooth run.
-    deimportall(globals())
-
 
 def test_prioritized_parameter_iterable_argument() -> None:
-    from importall import deimportall, importall
+    from importall import importall
 
     importall(globals())
 
@@ -213,12 +227,9 @@ def test_prioritized_parameter_iterable_argument() -> None:
 
     assert compress.__module__ == "lzma"
 
-    # Recover globals(). Polluted globals() seems to hinder pytest smooth run.
-    deimportall(globals())
-
 
 def test_prioritized_parameter_mapping_argument() -> None:
-    from importall import deimportall, importall
+    from importall import importall
 
     importall(globals())
 
@@ -228,12 +239,9 @@ def test_prioritized_parameter_mapping_argument() -> None:
 
     assert compress.__module__ == "lzma"
 
-    # Recover globals(). Polluted globals() seems to hinder pytest smooth run.
-    deimportall(globals())
-
 
 def test_ignore_parameter() -> None:
-    from importall import deimportall, importall
+    from importall import importall
 
     importall(globals())
 
@@ -242,9 +250,6 @@ def test_ignore_parameter() -> None:
     importall(globals(), ignore=["zlib"])
 
     assert compress.__module__ == "lzma"
-
-    # Recover globals(). Polluted globals() seems to hinder pytest smooth run.
-    deimportall(globals())
 
 
 def eval_name(name: str) -> Any:
