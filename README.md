@@ -86,7 +86,7 @@ Two major ways of usage:
     # "lzma"
     ```
 
-If one prefers getting all importable names stored as a variable instead of importing them into the current module to avoid cluttering<!--polluting--> `globals()`, there is also a programmatic interface for doing so:
+If one prefers getting all importable names stored as a variable instead of importing them into the current module, so as to avoid cluttering<!--polluting--> the `globals()`, there is also a programmatic interface for doing so:
 
 ```python
 from importall import get_all_symbols
@@ -197,7 +197,7 @@ $ python3 -m pytest
 
 ## Advanced Tricks
 
-To provide names thorough the wild card import, internally the `importall` module will eagerly import every names from standard libraries at the time of module loading and initialization, even when the user only intend to use `importall()`, `get_all_symbols()`, or `deimportall()` functions. However, the overhead of calling `importall()` is not cheap, rendering it undesirable for performance-sensitive applications. If one is certain that he won't use the wild card import, and would like to discard the unnecessary overhead, one could preemptively set the environment variable `IMPORTALL_DISABLE_WILD_CARD_IMPORT` (its presence suffices, its value doesn't matter), so as to disable the functionality.
+To provide names thorough the wild card import, internally the `importall` module will eagerly import every names from standard libraries at the time of module loading and initialization, even if the user only intends to use `importall()`, `get_all_symbols()`, or `deimportall()` functions. However, the overhead of calling `importall()` is not cheap, rendering it undesirable for performance-sensitive applications. If one is certain that he won't use the wild card import, and would like to discard the unnecessary overhead, one could preemptively set the environment variable `IMPORTALL_DISABLE_WILD_CARD_IMPORT` (its presence suffices, its value doesn't matter), so as to disable the wild card import.
 
 ## Miscellaneous
 

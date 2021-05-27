@@ -15,7 +15,7 @@ type-check:
 	pyright
 
 test:
-	python3 -m pytest
+	python3 -m pytest test_importall.py
 
 prof:
 	kernprof -lv profile_entry.py > profile_output.txt
