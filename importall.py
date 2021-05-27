@@ -105,7 +105,6 @@ import builtins
 import importlib
 import inspect
 import os
-import re
 import sys
 import warnings
 from collections import defaultdict
@@ -113,6 +112,7 @@ from collections.abc import Iterable, Mapping, MutableMapping
 from typing import Any, NoReturn, Union
 
 from stdlib_list import stdlib_list
+import regex
 
 
 # We use the lists maintained by the `stdlib-list` library instead of that by the `isort` library or that of `sys.stdlib_module_names`,
@@ -311,7 +311,7 @@ for absolute_name in CURR_VER_DEPRECATED_NAMES:
     # that names from standard libraries are ASCII-only.
 
     pattern = r"(?P<module>.*)\.(?P<name>[_a-zA-Z][_0-9a-zA-Z]*)"
-    matchobj = re.fullmatch(pattern, absolute_name)
+    matchobj = regex.fullmatch(pattern, absolute_name)
     module, name = matchobj.group("module", "name")
     curr_ver_deprecated_names_index[module].add(name)
 

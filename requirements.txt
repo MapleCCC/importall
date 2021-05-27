@@ -1,1 +1,2 @@
 stdlib-list==0.8.0
+regex==2021.4.4
