@@ -49,7 +49,7 @@ Two major ways of usage:
 
 2. *Invoke function*
 
-    Call the `importall()` function, and pass in `globals()` as argument, then all names are imported to the current module.
+    Call the `importall()` function, with the `globals()` passed in as argument, then all names are imported to the current module.
 
     ```python
     from importall import importall
@@ -67,7 +67,7 @@ Two major ways of usage:
 
     The `importall()` function also provides several parameters for finer-grained configuration, making it more flexible and customizable than the wild-card-import approach.
 
-    More than likely, names imported from different standard libraries might collides. The name collision is resolved by tuning the `prioritized` and `ignore` parameters.
+    More than likely, names imported from different standard libraries might collides. The name collision is resolvable by tuning the `prioritized` and `ignore` parameters.
 
     Say, a user finds that he wants to use `compress` from the `lzma` module instead of that from the `zlib` module. He could either set higher priority for the `lzma` module through the `prioritized` parameter, or ignore the `zlib` module altogether through the `ignore` parameter.
 
@@ -86,7 +86,7 @@ Two major ways of usage:
     # "lzma"
     ```
 
-If one prefers getting all importable names stored as a variable instead of importing them into the current module, so as to avoid cluttering<!--polluting--> the `globals()`, there is also a programmatic interface for doing so:
+If one prefers getting all importable names stored as a variable instead of importing them into the current module, so as to avoid cluttering<!--polluting--> the `globals()` namespace, there is also a programmatic interface for doing so:
 
 ```python
 from importall import get_all_symbols
@@ -192,7 +192,8 @@ $ python3 -m pip install -e .
 ```bash
 # Install test dependenies
 $ python3 -m pip install -r requirements-test.txt
-$ python3 -m pytest
+
+$ make test
 ```
 
 ## Advanced Tricks
@@ -201,7 +202,7 @@ To provide names thorough the wild card import, internally the `importall` modul
 
 ## Miscellaneous
 
-We use the lists maintained by the [`stdlib-list`](https://github.com/jackmaney/python-stdlib-list) library instead of that by the [`isort`](https://github.com/PyCQA/isort) library or that of [`sys.stdlib_module_names`](https://docs.python.org/3.10/library/sys.html#sys.stdlib_module_names), because the lists maintained by the `isort` library and that of `sys.stdlib_module_names` don't include sub-packages and sub-modules, such as `concurrent.futures`.
+We use the lists maintained by the [`stdlib-list`](https://github.com/jackmaney/python-stdlib-list) library instead of that by the [`isort`](https://github.com/PyCQA/isort) library or that of [`sys.stdlib_module_names`](https://docs.python.org/3.10/library/sys.html#sys.stdlib_module_names), for they don't include sub-packages and sub-modules, such as `concurrent.futures`.
 
 One can compare the two lists:
 
@@ -211,7 +212,7 @@ One can compare the two lists:
 
 ## Contribution
 
-Contributions are welcome. Open [pull requests](https://github.com/MapleCCC/importall/pulls) or [issues](https://github.com/MapleCCC/importall/issues).
+Contributions are welcome. Open [issues](https://github.com/MapleCCC/importall/issues) or [pull requests](https://github.com/MapleCCC/importall/pulls).
 
 ## Other Similar Projects
 

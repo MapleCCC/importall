@@ -61,7 +61,7 @@ def eval_name(name: str) -> Any:
 @pytest.mark.skip(
     reason="Unfortunately, for now we can't test wild card importing the importall library. "
     "Because wild card import is not allowed within function, we have to put the "
-    "`from importall import *` statement at top level, which causes pytest to collect "
+    "`from importall import *` statement at the top level, which causes pytest to collect "
     "strange things, the nature of which awaits further investigation."
 )
 def test_wild_card_import() -> None:

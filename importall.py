@@ -20,8 +20,8 @@ Two major ways of usage:
 
 2. *Invoke function*
 
-    Call the `importall()` function, and pass in `globals()` as argument, then all
-    names are imported to the current module.
+    Call the `importall()` function, with the `globals()` passed in as argument, then
+    all names are imported to the current module.
 
     ```python
     from importall import importall
@@ -42,7 +42,7 @@ Two major ways of usage:
     configuration, making it more flexible and customizable than the wild-card-import approach.
 
     More than likely, names imported from different standard libraries might collides.
-    The name collision is resolved by tuning the `prioritized` and `ignore` parameters.
+    The name collision is resolvable by tuning the `prioritized` and `ignore` parameters.
 
     Say, a user finds that he wants to use `compress` from the `lzma` module instead of
     that from the `zlib` module. He could either set higher priority for the `lzma`
@@ -65,8 +65,8 @@ Two major ways of usage:
     ```
 
 If one prefers getting all importable names stored as a variable instead of importing
-them into the current module to avoid cluttering `globals()`, there is also a programmatic
-interface for doing so:
+them into the current module to avoid cluttering the `globals()` namespace, there is
+also a programmatic interface for doing so:
 
 ```python
 from importall import get_all_symbols
@@ -109,14 +109,15 @@ import sys
 import warnings
 from collections import defaultdict
 from collections.abc import Iterable, Mapping, MutableMapping
-from typing import Any, NoReturn, Union
+from typing import Any, NoReturn, TYPE_CHECKING, TypeVar, Union
 
-from stdlib_list import stdlib_list
 import regex
+from stdlib_list import stdlib_list
 
 
-# We use the lists maintained by the `stdlib-list` library instead of that by the `isort` library or that of `sys.stdlib_module_names`,
-# because the lists maintained by the `isort` library and that of `sys.stdlib_module_names` don't contain sub-packages and sub-modules, such as `concurrent.futures`.
+# We use the lists maintained by the `stdlib-list` library instead of that by the `isort`
+# library or that of `sys.stdlib_module_names`, for they don't include sub-packages and
+# sub-modules, such as `concurrent.futures`.
 #
 # One can compare the two lists:
 #
@@ -131,8 +132,17 @@ if sys.version_info < (3, 9):
     raise RuntimeError("importall library is intended to run with Python 3.9 or higher")
 
 
+T = TypeVar("T")
+
+
+def nulldecorator(fn: T) -> T:
+    """ Similar to contextlib.nullcontext, except for decorator """
+    return fn
+
+
 # The name profile will be injected into builtins in runtime by line-profiler.
-profile = getattr(builtins, "profile", lambda x: x)
+if TYPE_CHECKING:
+    profile = nulldecorator
 
 
 BUILTINS_NAMES = set(dir(builtins)) - {
@@ -212,8 +222,8 @@ DEPRECATED_MODULES = {
 }
 
 # Not all deprecated names are included, that would be too much and too tedious.
-# Only those deprecated names who are imported when wild-card-importing their parent
-# modules are listed here.
+# Only those deprecated names each of which is one of the names inserted into the
+# current namespace when its parent module is wild-card-imported.
 # The dict keys are since which versions they are deprecated.
 DEPRECATED_NAMES = {
     (3, 9): {
