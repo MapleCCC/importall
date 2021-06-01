@@ -420,24 +420,69 @@ def deimportall(globals: SymbolTable, purge_cache: bool = False) -> None:
     the DeprecationWarning on import.
     """
 
-    stdlib_symbols: set[int] = set()
+    # The id() approach could fail if importlib.reload() has been called or sys.modules
+    # has been manipulated.
+    #
+    # The hash() approach could fail if the symbol is unhashable.
+    #
+    # So it's a try-best-effort thing.
+
+    stdlib_symbols = set()
+    stdlib_symbol_ids: set[int] = set()
 
     # Surpass DeprecationWarning, because we know for sure that we are not intended
     # to use the deprecated names here.
+    #
+    # `contextlib.suppress` is not used because it won't suppress warnings.
+
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", DeprecationWarning)
 
         for module_name in IMPORTABLE_MODULES:
             symbol_table = import_public_names(module_name, include_deprecated=True)
-            stdlib_symbols.update(map(id, symbol_table.values()))
+
+            for symbol in symbol_table.values():
+                if hashable(symbol):
+                    stdlib_symbols.add(symbol)
+                else:
+                    stdlib_symbol_ids.add(id(symbol))
 
     for name, symbol in dict(globals).items():
-        if id(symbol) in stdlib_symbols:
-            del globals[name]
+        if hashable(symbol):
+            if symbol in stdlib_symbols:
+                del globals[name]
+
+        else:
+            if id(symbol) in stdlib_symbol_ids:
+                del globals[name]
 
     if purge_cache:
         for module_name in IMPORTABLE_MODULES:
-            sys.modules.pop(module_name, None)
+            clean_up_import_cache(module_name)
+
+
+def clean_up_import_cache(module_name: str) -> None:
+    if module_name not in sys.modules:
+        return
+
+    # Detect alias
+    # Reference: source of test.support.CleanImport https://github.com/python/cpython/blob/v3.9.0/Lib/test/support/__init__.py#L1241
+    module = sys.modules[module_name]
+    if module.__name__ != module_name:
+        del sys.modules[module.__name__]
+
+    del sys.modules[module_name]
+
+    # When a module is imported, its ascendant modules are also implicitly imported.
+    # We need to evict their corresponding cache entries as well.
+
+    idx = module_name.rfind(".")
+    while idx != -1:
+        module_name = module_name[:idx]
+        # Use pop() instead of del, because it's not out of possibility that
+        # sys.modules could have been modified by code out of our control.
+        sys.modules.pop(module_name, None)
+        idx = module_name.rfind(".")
 
 
 @profile
@@ -513,9 +558,21 @@ def import_public_names(
 
     # Try best effort to filter out only public names
 
+    # There is no easy way to reliably determine all public names exported by a module.
+    #
+    # Standard libraries export public symbols of various types.
+    #
+    # Unlike functions and classes, some symbols, whose types being string, integer, etc.,
+    # don't have the `__module__` attribute.
+    #
+    # There is no way we can inspect where they come from, less distinguishing them
+    # from public symbols of the module that imports them.
+    #
+    # The only thing we can do is to try best effort.
+
     for name, symbol in dict(symtab).items():
 
-        if inspect.ismodule(symbol):
+        if inspect.ismodule(symbol) and symbol.__name__ in IMPORTABLE_MODULES:
             # Possibly another standard library module imported to this module
             # Should not be considered part of the public names of this module
             del symtab[name]
@@ -582,6 +639,25 @@ def wild_card_import_module(
             continue
 
     return symtab
+
+
+def hashable(obj: Any) -> bool:
+    """
+    One of many infamous pitfalls of Python is that the naive `isinstance(obj,
+    collections.abc.Hashable)` check doesn't necessarily yield correct result.
+    For example, `isinstance(([],), collections.abc.Hashable)` returns True,
+    while `hash(([],))` raises TypeError.
+
+    In Python, the only reliable way to check if an object is hashable is to actually
+    calculate the hash value and inspect whether the calculation succeeds.
+    """
+
+    try:
+        hash(obj)
+    except TypeError:
+        return False
+    else:
+        return True
 
 
 if "IMPORTALL_DISABLE_WILD_CARD_IMPORT" in os.environ:
