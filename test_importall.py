@@ -104,7 +104,7 @@ class TestImportallFunction:
 
         assert not truth(itemgetter(0)(attrgetter("maps")(ChainMap())))
 
-    def test_protect_builtins_parameter(self) -> None:
+    def test_protect_builtins_parameter_is_true(self) -> None:
         from importall import importall
 
         importall(globals(), protect_builtins=True)
@@ -119,6 +119,15 @@ class TestImportallFunction:
 
         for name in BUILTINS_NAMES:
             assert eval_name(name) is getattr(builtins, name)
+
+    def test_protect_builtins_parameter_is_false(self) -> None:
+        from importall import importall
+
+        assert open.__module__ == "io"
+
+        importall(globals(), protect_builtins=False)
+
+        assert open.__module__ == "webbrowser"
 
     def test_import_deprecated_parameter(self) -> None:
 
