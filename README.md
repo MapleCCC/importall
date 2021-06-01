@@ -25,7 +25,7 @@
 
 ## Overview
 
-`importall` is a lightweight and robust<!--reliable--> library to import every<!--all--> available names from standard libraries to the current module, i.e., a Python equivalent to C++'s `<bits/stdc++.h>`.
+`importall` is a lightweight and robust<!--reliable--> library to import every<!--all--> available names from standard libraries to the current namespace, i.e., a Python equivalent to C++'s `<bits/stdc++.h>`.
 
 It's definitely not intended for serious software engineering situations. It's useful and convenient for some niche scenarios, such as competitive programming contests, under which situation saving some typing strokes and hence precious time is highly desirable. Also convenient when just prototyping, testing back-of-envelop thoughts, or tinkering with ideas on playground. Save the time and tedious chores spent on typing all the necessary modules, which could be annoying, boring and typo-prone.
 
@@ -35,7 +35,7 @@ Two major ways of usage:
 
 1. *Wild card import*.
 
-    Wild card import the `importall` module, then all names are imported to the current module.
+    Wild card import the `importall` module, then all names are imported to the current namespace.
 
     ```python
     from importall import *
@@ -49,7 +49,7 @@ Two major ways of usage:
 
 2. *Invoke function*
 
-    Call the `importall()` function, with the `globals()` passed in as argument, then all names are imported to the current module.
+    Call the `importall()` function, with the `globals()` passed in as argument, then all names are imported to the current namespace.
 
     ```python
     from importall import importall
@@ -86,7 +86,7 @@ Two major ways of usage:
     # "lzma"
     ```
 
-If one prefers getting all importable names stored as a variable instead of importing them into the current module, so as to avoid cluttering<!--polluting--> the `globals()` namespace, there is also a programmatic interface for doing so:
+If one prefers getting all importable names stored as a variable instead of importing them into the current namespace, so as to avoid cluttering<!--polluting--> the `globals()` namespace, there is also a programmatic interface for doing so:
 
 ```python
 from importall import get_all_symbols
@@ -131,7 +131,7 @@ def importall(
     ignore: Iterable[str] = (),
 ) -> None:
     """
-    Import every available names from standard libraries to the current module.
+    Import every available names from standard libraries to the current namespace.
     Python equivalent to C++'s <bits/stdc++.h>.
 
     Name collision is likely. One can resolve name collisions by tuning the `prioritized`

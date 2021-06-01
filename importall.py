@@ -1,12 +1,12 @@
 """
 `importall` is a lightweight and robust library to import every available names from standard
-libraries to the current module, i.e., a Python equivalent to C++'s `<bits/stdc++.h>`.
+libraries to the current namespace, i.e., a Python equivalent to C++'s `<bits/stdc++.h>`.
 
 Two major ways of usage:
 
 1. *Wild card import*.
 
-    Wild card import the `importall` module, then all names are imported to the current module.
+    Wild card import the `importall` module, then all names are imported to the current namespace.
 
     ```python
     from importall import *
@@ -21,7 +21,7 @@ Two major ways of usage:
 2. *Invoke function*
 
     Call the `importall()` function, with the `globals()` passed in as argument, then
-    all names are imported to the current module.
+    all names are imported to the current namespace.
 
     ```python
     from importall import importall
@@ -65,8 +65,8 @@ Two major ways of usage:
     ```
 
 If one prefers getting all importable names stored as a variable instead of importing
-them into the current module to avoid cluttering the `globals()` namespace, there is
-also a programmatic interface for doing so:
+them into the current namespace, so as to avoid cluttering the `globals()` namespace,
+there is also a programmatic interface for doing so:
 
 ```python
 from importall import get_all_symbols
@@ -136,11 +136,13 @@ T = TypeVar("T")
 
 
 def nulldecorator(fn: T) -> T:
-    """ Similar to contextlib.nullcontext, except for decorator """
+    """Similar to contextlib.nullcontext, except for decorator"""
     return fn
 
 
-# The name profile will be injected into builtins in runtime by line-profiler.
+# The name `profile` will be injected into builtins in runtime by line-profiler.
+profile = getattr(builtins, "profile", None) or nulldecorator
+
 if TYPE_CHECKING:
     profile = nulldecorator
 
@@ -369,7 +371,7 @@ def importall(
     ignore: Iterable[str] = (),
 ) -> None:
     """
-    Import every available names from standard libraries to the current module.
+    Import every available names from standard libraries to the current namespace.
     Python equivalent to C++'s <bits/stdc++.h>.
 
     Name collision is likely. One can resolve name collisions by tuning the `prioritized`
