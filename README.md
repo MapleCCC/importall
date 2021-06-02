@@ -27,7 +27,7 @@
 
 `importall` is a lightweight and robust<!--reliable--> library to import every<!--all--> available names from standard libraries to the current namespace, i.e., a Python equivalent to C++'s `<bits/stdc++.h>`.
 
-It's definitely not intended for serious software engineering situations. It's useful and convenient for some niche scenarios, such as competitive programming contests, under which situation saving some typing strokes and hence precious time is highly desirable. Also convenient when just prototyping, testing back-of-envelop thoughts, or tinkering with ideas on playground. Save the time and tedious chores spent on typing all the necessary modules, which could be annoying, boring and typo-prone.
+It's definitely [not](https://stackoverflow.com/questions/2386714/why-is-import-bad) [intended](https://stackoverflow.com/questions/3615125/should-wildcard-import-be-avoided) [for](https://stackoverflow.com/questions/14626674/in-python-is-it-a-good-practice-to-import-all-attributes-with-a-wildcard) [serious](https://stackoverflow.com/questions/55722260/what-is-the-reason-for-using-a-wildcard-import) [software](https://stackoverflow.com/questions/2360724/what-exactly-does-import-import) [engineering](https://stackoverflow.com/questions/7249488/tool-to-help-eliminate-wildcard-imports) [si](https://stackoverflow.com/questions/896112/properly-importing-modules-in-python)[tu](https://stevepython.wordpress.com/2019/01/12/how-to-avoid-wildcard-imports/)[a](https://github.com/quentinsf/dewildcard)[ti](https://github.com/fake-name/autoflake/blob/master/autostar.py)[on](https://rules.sonarsource.com/python/RSPEC-2208)[s](https://stevepython.wordpress.com/2019/01/12/how-to-avoid-wildcard-imports/). It's useful and convenient for interactive consoles, and some niche scenarios, such as competitive programming contests, under which situation saving some typing strokes and hence precious time is highly desirable. Also convenient when just prototyping, testing back-of-envelop thoughts, or tinkering with ideas on playground. Save the time and tedious chores spent on typing all the necessary modules, which could be annoying, boring and typo-prone.
 
 ## Quick Start
 
@@ -187,7 +187,7 @@ $ python3 -m pip install -e .
 
 ## Testing
 
-`importall` project uses [pytest](https://pytest.org/) for unit testing.
+The `importall` project uses [pytest](https://pytest.org/) for unit testing.
 
 ```bash
 # Install test dependenies
@@ -221,4 +221,4 @@ Contributions are welcome. Open [issues](https://github.com/MapleCCC/importall/i
 
 ## License
 
-[MIT](LICENSE).
+The source code of the `importall` library is currently licensed under the terms of the [MIT](LICENSE). Feel free to contribute, fork, modify, or redistribute.
