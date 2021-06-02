@@ -8,7 +8,7 @@ Two major ways of usage:
 
     Wild card import the `importall` module, then all names are imported to the current namespace.
 
-    ```python
+    ```python3
     from importall import *
 
     log2(2)
@@ -23,7 +23,7 @@ Two major ways of usage:
     Call the `importall()` function, with the `globals()` passed in as argument, then
     all names are imported to the current namespace.
 
-    ```python
+    ```python3
     from importall import importall
 
     importall(globals())
@@ -49,7 +49,7 @@ Two major ways of usage:
     module through the `prioritized` parameter, or ignore the `zlib` module altogether
     through the `ignore` parameter.
 
-    ```python
+    ```python3
     importall(globals())
 
     compress.__module__
@@ -68,7 +68,7 @@ If one prefers getting all importable names stored as a variable instead of impo
 them into the current namespace, so as to avoid cluttering the `globals()` namespace,
 there is also a programmatic interface for doing so:
 
-```python
+```python3
 from importall import get_all_symbols
 
 symbol_table = get_all_symbols()
@@ -85,7 +85,7 @@ symbol_table["log2"](2)
 
 To recover the `globals()` and de-import all imported names, use the `deimportall()` function:
 
-```python
+```python3
 from importall import deimportall, importall
 
 importall(globals())
