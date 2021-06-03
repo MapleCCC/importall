@@ -59,12 +59,12 @@ def eval_name(name: str) -> Any:
 
 
 @pytest.mark.skip(
-    reason="Unfortunately, for now we can't test wild card importing the importall library. "
-    "Because wild card import is not allowed within function, we have to put the "
+    reason="Unfortunately, for now we can't test wildcard importing the importall library. "
+    "Because wildcard import is not allowed within function, we have to put the "
     "`from importall import *` statement at the top level, which causes pytest to collect "
     "strange things, the nature of which awaits further investigation."
 )
-def test_wild_card_import() -> None:
+def test_wildcard_import() -> None:
     # from importall import *
     pass
 
@@ -131,12 +131,12 @@ class TestImportallFunction:
 
     def test_import_deprecated_parameter(self) -> None:
 
-        # Disable wild card import because wild card import internally eagerly import every
+        # Disable wildcard import because wildcard import internally eagerly import every
         # names from standard libraries, populating the sys.modules cache. Importing modules
         # who is already in the sys.mdoules cache would reuse the cache entry, instead of
         # actually executing the module file again, which maens module-level behaviors won't
         # re-happen, such as the emission of the DeprecationWarning on import.
-        os.environ["IMPORTALL_DISABLE_WILD_CARD_IMPORT"] = "1"
+        os.environ["IMPORTALL_DISABLE_WILDCARD_IMPORT"] = "1"
 
         from importall import importall
 

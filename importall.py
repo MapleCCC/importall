@@ -4,9 +4,9 @@ libraries to the current namespace, i.e., a Python equivalent to C++'s `<bits/st
 
 Two major ways of usage:
 
-1. *Wild card import*.
+1. *Wildcard import*.
 
-    Wild card import the `importall` module, then all names are imported to the current namespace.
+    Wildcard import the `importall` module, then all names are imported to the current namespace.
 
     ```python3
     from importall import *
@@ -39,7 +39,7 @@ Two major ways of usage:
     intended as readonly [per doc](https://docs.python.org/3.9/library/functions.html#locals).
 
     The `importall()` function also provides several parameters for finer-grained
-    configuration, making it more flexible and customizable than the wild-card-import approach.
+    configuration, making it more flexible and customizable than the wildcard import approach.
 
     More than likely, names imported from different standard libraries might collides.
     The name collision is resolvable by tuning the `prioritized` and `ignore` parameters.
@@ -102,14 +102,13 @@ log2(2)
 
 
 import builtins
-import importlib
 import inspect
 import os
 import sys
 import warnings
 from collections import defaultdict
 from collections.abc import Iterable, Mapping, MutableMapping
-from typing import Any, NoReturn, TYPE_CHECKING, TypeVar, Union
+from typing import TYPE_CHECKING, Any, NoReturn, TypeVar, Union
 
 import regex
 from stdlib_list import stdlib_list
@@ -174,7 +173,7 @@ BUILTINS_NAMES = set(dir(builtins)) - {
 # email.encoders 3.0
 
 # Below is a list of deprecated names each of which is one of the names inserted into
-# the current namespace when its parent module is wild-card-imported.
+# the current namespace when its parent module is wildcard-imported.
 #
 # ast.ExtSlice 3.9
 # ast.Index 3.9
@@ -225,7 +224,7 @@ DEPRECATED_MODULES = {
 
 # Not all deprecated names are included, that would be too much and too tedious.
 # Only those deprecated names each of which is one of the names inserted into the
-# current namespace when its parent module is wild-card-imported.
+# current namespace when its parent module is wildcard-imported.
 # The dict keys are since which versions they are deprecated.
 DEPRECATED_NAMES = {
     (3, 9): {
@@ -400,7 +399,8 @@ def importall(
     be skipped and not imported.
 
     Despite imported, features in the `__future__` module are not enabled, as they are
-    not imported in the form of [future statements](https://docs.python.org/3/reference/simple_stmts.html#future-statements).
+    not imported in the form of future statements (See the production rule for the
+    nonterminal `future_stmt` in https://docs.python.org/3/reference/simple_stmts.html#future-statements).
     """
 
     symtab = get_all_symbols(
@@ -534,11 +534,14 @@ def get_all_symbols(
     be skipped and not imported.
 
     Despite imported, features in the `__future__` module are not enabled, as they are
-    not imported in the form of [future statements](https://docs.python.org/3/reference/simple_stmts.html#future-statements).
+    not imported in the form of future statements (See the production rule for the
+    nonterminal `future_stmt` in https://docs.python.org/3/reference/simple_stmts.html#future-statements).
     """
 
-    if not isinstance(prioritized, Mapping):
-        prioritized = {module: 1 for module in prioritized}
+    if isinstance(prioritized, Mapping):
+        priorities = prioritized
+    else:
+        priorities = {module: 1 for module in prioritized}
 
     # Ignore user-specified modules.
     module_names = IMPORTABLE_MODULES - set(ignore)
@@ -549,7 +552,7 @@ def get_all_symbols(
 
     # When priority score ties, choose the one whose name has higher lexicographical order.
     module_names = sorted(
-        module_names, key=lambda name: (prioritized.get(name, 0), name)
+        module_names, key=lambda name: (priorities.get(name, 0), name)
     )
 
     symtab: SymbolTable = {}
@@ -575,7 +578,7 @@ def import_public_names(
     behavior by setting the `include_deprecated` parameter to `True` (**not recommended**).
     """
 
-    symtab = wild_card_import_module(module_name)
+    symtab = wildcard_import_module(module_name)
 
     if not include_deprecated:
         for name in curr_ver_deprecated_names_index[module_name]:
@@ -623,10 +626,10 @@ def import_public_names(
 
 
 @profile
-def wild_card_import_module(module_name: str) -> SymbolTable:
+def wildcard_import_module(module_name: str) -> SymbolTable:
 
     # The __future__ module is a special case.
-    # Wild-card-importing the __future__ library yields SyntaxError.
+    # Wildcard-importing the __future__ library yields SyntaxError.
     if module_name == "__future__":
         import __future__
 
@@ -642,18 +645,18 @@ def wild_card_import_module(module_name: str) -> SymbolTable:
     return symtab
 
 
-if "IMPORTALL_DISABLE_WILD_CARD_IMPORT" in os.environ:
+if "IMPORTALL_DISABLE_WILDCARD_IMPORT" in os.environ:
 
     class NotIndexable:
         def __init__(self, reason: str) -> None:
             self._reason = reason
 
-        def __getitem__(self, key: Any) -> NoReturn:
+        def __getitem__(self, _: Any) -> NoReturn:
             raise RuntimeError(self._reason)
 
     __all__ = NotIndexable(  # type: ignore
-        reason="Wild card importing the importall module is disabled, "
-        "due to the presence of the environment variable IMPORTALL_DISABLE_WILD_CARD_IMPORT"
+        reason="Wildcard importing the importall module is disabled, "
+        "due to the presence of the environment variable IMPORTALL_DISABLE_WILDCARD_IMPORT"
     )
 
 else:

@@ -33,9 +33,9 @@ It's definitely [not](https://stackoverflow.com/questions/2386714/why-is-import-
 
 Two major ways of usage:
 
-1. *Wild card import*.
+1. *Wildcard import*.
 
-    Wild card import the `importall` module, then all names are imported to the current namespace.
+    Wildcard import the `importall` module, then all names are imported to the current namespace.
 
     ```python3
     from importall import *
@@ -65,7 +65,7 @@ Two major ways of usage:
 
     Note that `local()` should not be passed to `importall()`, as `locals()` is intended as readonly [per doc](https://docs.python.org/3.9/library/functions.html#locals).
 
-    The `importall()` function also provides several parameters for finer-grained configuration, making it more flexible and customizable than the wild-card-import approach.
+    The `importall()` function also provides several parameters for finer-grained configuration, making it more flexible and customizable than the wildcard import approach.
 
     More than likely, names imported from different standard libraries might collides. The name collision is resolvable by tuning the `prioritized` and `ignore` parameters.
 
@@ -160,7 +160,8 @@ def importall(
     be skipped and not imported.
 
     Despite imported, features in the `__future__` module are not enabled, as they are
-    not imported in the form of [future statements](https://docs.python.org/3/reference/simple_stmts.html#future-statements).
+    not imported in the form of future statements (See the production rule for the
+    nonterminal `future_stmt` in https://docs.python.org/3/reference/simple_stmts.html#future-statements).
     """
 
     ...
@@ -201,7 +202,7 @@ $ make test
 
 ## Advanced Tricks
 
-To provide names thorough the wild card import, internally the `importall` module will eagerly import every names from standard libraries at the time of module loading and initialization, even if the user only intends to use `importall()`, `get_all_symbols()`, or `deimportall()` functions. However, the overhead of calling `importall()` is not cheap, rendering it undesirable for performance-sensitive applications. If one is certain that he won't use the wild card import, and would like to discard the unnecessary overhead, one could preemptively set the environment variable `IMPORTALL_DISABLE_WILD_CARD_IMPORT` (its presence suffices, its value doesn't matter), so as to disable the wild card import.
+To provide names thorough the wildcard import, internally the `importall` module will eagerly import every names from standard libraries at the time of module loading and initialization, even if the user only intends to use `importall()`, `get_all_symbols()`, or `deimportall()` functions. However, the overhead of calling `importall()` is not cheap, rendering it undesirable for performance-sensitive applications. If one is certain that he won't use the wildcard import, and would like to discard the unnecessary overhead, one could preemptively set the environment variable `IMPORTALL_DISABLE_WILDCARD_IMPORT` (its presence suffices, its value doesn't matter), so as to disable the wildcard import.
 
 ## Miscellaneous
 
@@ -224,4 +225,4 @@ Contributions are welcome. Open [issues](https://github.com/MapleCCC/importall/i
 
 ## License
 
-The source code of the `importall` library is currently licensed under the terms of the [MIT](LICENSE). Feel free to contribute, fork, modify, or redistribute.
+The source code of the `importall` library is currently licensed under the terms of the [MIT](LICENSE) license. Feel free to contribute, fork, modify, or redistribute.
