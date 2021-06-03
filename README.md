@@ -158,6 +158,9 @@ def importall(
 
     The `ignore` parameter accepts an iterable of strings specifying modules that should
     be skipped and not imported.
+
+    Despite imported, features in the `__future__` module are not enabled, as they are
+    not imported in the form of [future statements](https://docs.python.org/3/reference/simple_stmts.html#future-statements).
     """
 
     ...
