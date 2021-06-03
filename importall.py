@@ -442,17 +442,18 @@ def deimportall(globals: SymbolTable, purge_cache: bool = False) -> None:
             symbol_table = import_public_names(module_name, include_deprecated=True)
 
             for symbol in symbol_table.values():
-                if hashable(symbol):
+                try:
                     stdlib_symbols.add(symbol)
-                else:
+
+                except TypeError:
                     stdlib_symbol_ids.add(id(symbol))
 
     for name, symbol in dict(globals).items():
-        if hashable(symbol):
+        try:
             if symbol in stdlib_symbols:
                 del globals[name]
 
-        else:
+        except TypeError:
             if id(symbol) in stdlib_symbol_ids:
                 del globals[name]
 
@@ -639,25 +640,6 @@ def wild_card_import_module(
             continue
 
     return symtab
-
-
-def hashable(obj: Any) -> bool:
-    """
-    One of many infamous pitfalls of Python is that the naive `isinstance(obj,
-    collections.abc.Hashable)` check doesn't necessarily yield correct result.
-    For example, `isinstance(([],), collections.abc.Hashable)` returns True,
-    while `hash(([],))` raises TypeError.
-
-    In Python, the only reliable way to check if an object is hashable is to actually
-    calculate the hash value and inspect whether the calculation succeeds.
-    """
-
-    try:
-        hash(obj)
-    except TypeError:
-        return False
-    else:
-        return True
 
 
 if "IMPORTALL_DISABLE_WILD_CARD_IMPORT" in os.environ:
