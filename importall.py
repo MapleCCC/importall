@@ -420,6 +420,22 @@ def deimportall(globals: SymbolTable, purge_cache: bool = False) -> None:
     the DeprecationWarning on import.
     """
 
+    checker = StdlibChecker()
+
+    for name, symbol in dict(globals).items():
+        if checker.check(symbol):
+            del globals[name]
+
+    if purge_cache:
+        for module_name in IMPORTABLE_MODULES:
+            clean_up_import_cache(module_name)
+
+
+class StdlibChecker:
+    """
+    Check if a symbol comes from standard libraries. Try best effort.
+    """
+
     # The id() approach could fail if importlib.reload() has been called or sys.modules
     # has been manipulated.
     #
@@ -427,39 +443,37 @@ def deimportall(globals: SymbolTable, purge_cache: bool = False) -> None:
     #
     # So it's a try-best-effort thing.
 
-    stdlib_symbols = set()
-    stdlib_symbol_ids: set[int] = set()
-
-    # Surpass DeprecationWarning, because we know for sure that we are not intended
-    # to use the deprecated names here.
-    #
-    # `contextlib.suppress` is not used because it won't suppress warnings.
-
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", DeprecationWarning)
+    def __init__(self) -> None:
+        self._stdlib_symbols = set()
+        self._stdlib_symbol_ids: set[int] = set()
 
         for module_name in IMPORTABLE_MODULES:
+            self._gather_info(module_name)
+
+    def _gather_info(self, module_name: str) -> None:
+
+        # Surpass DeprecationWarning, because we know for sure that we are not intended
+        # to use the deprecated names here.
+        #
+        # `contextlib.suppress` is not used because it won't suppress warnings.
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+
             symbol_table = import_public_names(module_name, include_deprecated=True)
 
             for symbol in symbol_table.values():
                 try:
-                    stdlib_symbols.add(symbol)
+                    self._stdlib_symbols.add(symbol)
 
                 except TypeError:
-                    stdlib_symbol_ids.add(id(symbol))
+                    self._stdlib_symbol_ids.add(id(symbol))
 
-    for name, symbol in dict(globals).items():
+    def check(self, obj: Any) -> bool:
         try:
-            if symbol in stdlib_symbols:
-                del globals[name]
-
+            return obj in self._stdlib_symbols
         except TypeError:
-            if id(symbol) in stdlib_symbol_ids:
-                del globals[name]
-
-    if purge_cache:
-        for module_name in IMPORTABLE_MODULES:
-            clean_up_import_cache(module_name)
+            return id(obj) in self._stdlib_symbol_ids
 
 
 def clean_up_import_cache(module_name: str) -> None:
