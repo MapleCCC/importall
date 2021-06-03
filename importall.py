@@ -569,7 +569,11 @@ def import_public_names(
     behavior by setting the `include_deprecated` parameter to `True` (**not recommended**).
     """
 
-    symtab = wild_card_import_module(module_name, include_deprecated=include_deprecated)
+    symtab = wild_card_import_module(module_name)
+
+    if not include_deprecated:
+        for name in curr_ver_deprecated_names_index[module_name]:
+            symtab.pop(name, None)
 
     # Try best effort to filter out only public names
 
@@ -613,51 +617,21 @@ def import_public_names(
 
 
 @profile
-def wild_card_import_module(
-    module_name: str, *, include_deprecated: bool = False
-) -> SymbolTable:
+def wild_card_import_module(module_name: str) -> SymbolTable:
 
-    try:
-        module = importlib.import_module(module_name)
-    except (ImportError, ModuleNotFoundError):
-        return {}
+    # The __future__ module is a special case.
+    # Wild-card-importing the __future__ library yields SyntaxError.
+    if module_name == "__future__":
+        import __future__
 
-    # Python official doc about "wild card import" mechanism:
-    #
-    # "If the list of identifiers is replaced by a star ('*'), all public names
-    # defined in the module are bound in the local namespace for the scope
-    # where the import statement occurs."
-    #
-    # "The public names defined by a module are determined by checking the
-    # module’s namespace for a variable named __all__; if defined, it must be a
-    # sequence of strings which are names defined or imported by that module.
-    # The names given in __all__ are all considered public and are required to
-    # exist. If __all__ is not defined, the set of public names includes all
-    # names found in the module’s namespace which do not begin with an
-    # underscore character ('_'). __all__ should contain the entire public API.
-    # It is intended to avoid accidentally exporting items that are not part of
-    # the API (such as library modules which were imported and used within the
-    # module)."
-    #
-    # Reference: https://docs.python.org/3.9/reference/simple_stmts.html#the-import-statement
-
-    try:
-        attrs = module.__all__  # type: ignore
-    except AttributeError:
-        # Fallback to try the best effort
-        attrs = (attr for attr in dir(module) if not attr.startswith("_"))
-
-    if not include_deprecated:
-        # Ignore deprecated names in the module
-        attrs = set(attrs) - curr_ver_deprecated_names_index[module_name]
+        return {name: getattr(__future__, name) for name in __future__.__all__}
 
     symtab: SymbolTable = {}
 
-    for attr in attrs:
-        try:
-            symtab[attr] = getattr(module, attr)
-        except AttributeError:
-            continue
+    try:
+        exec(f"from {module_name} import *", {}, symtab)
+    except (ImportError, ModuleNotFoundError):
+        return {}
 
     return symtab
 
