@@ -585,23 +585,29 @@ def import_public_names(
     #
     # The only thing we can do is to try best effort.
 
-    for name, symbol in dict(symtab).items():
+    def is_another_stdlib(symbol: Any) -> bool:
+        """
+        Detect if symbol is possibly another standard library module imported to this
+        module, hence should not be considered part of the public names of this module.
+        """
 
-        if inspect.ismodule(symbol) and symbol.__name__ in IMPORTABLE_MODULES:
-            # Possibly another standard library module imported to this module
-            # Should not be considered part of the public names of this module
-            del symtab[name]
-            continue
+        return inspect.ismodule(symbol) and symbol.__name__ in IMPORTABLE_MODULES
+
+    def from_another_stdlib(symbol: Any) -> bool:
+        """
+        Detect if symbol is possibly a public name from another standard library module,
+        imported to this module, hence should not be considered part of the public names
+        of this module
+        """
 
         parent_module_name = getattr(symbol, "__module__", None)
-        if (
-            parent_module_name != module_name
-            and parent_module_name in IMPORTABLE_MODULES
-        ):
-            # Possibly a public name from another standard library module, imported to this module
-            # Should not be considered part of the public names of this module
+        if parent_module_name not in IMPORTABLE_MODULES:
+            return False
+        return parent_module_name == module_name
+
+    for name, symbol in dict(symtab).items():
+        if is_another_stdlib(symbol) or from_another_stdlib(symbol):
             del symtab[name]
-            continue
 
     return symtab
 
