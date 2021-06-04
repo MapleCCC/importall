@@ -475,7 +475,7 @@ def import_public_names(
         parent_module_name = getattr(symbol, "__module__", None)
         if parent_module_name not in IMPORTABLE_MODULES:
             return False
-        return parent_module_name == module_name
+        return parent_module_name != module_name
 
     for name, symbol in dict(symtab).items():
         if is_another_stdlib(symbol) or from_another_stdlib(symbol):
