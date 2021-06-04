@@ -102,6 +102,7 @@ log2(2)
 
 
 import builtins
+import functools
 import inspect
 import os
 import sys
@@ -132,6 +133,9 @@ if sys.version_info < (3, 9):
 
 
 T = TypeVar("T")
+
+
+singleton_class = functools.cache
 
 
 def nulldecorator(fn: T) -> T:
@@ -302,54 +306,6 @@ if os.name == "nt":
     }
 
 
-class StdlibChecker:
-    """
-    Check if a symbol comes from standard libraries. Try best effort.
-    """
-
-    # The id() approach could fail if importlib.reload() has been called or sys.modules
-    # has been manipulated.
-    #
-    # The hash() approach could fail if the symbol is unhashable.
-    #
-    # So it's a try-best-effort thing.
-
-    def __init__(self) -> None:
-        self._stdlib_symbols = set()
-        self._stdlib_symbol_ids: set[int] = set()
-
-        for module_name in IMPORTABLE_MODULES:
-            self._gather_info(module_name)
-
-    def _gather_info(self, module_name: str) -> None:
-
-        # Surpass DeprecationWarning, because we know for sure that we are not intended
-        # to use the deprecated names here.
-        #
-        # `contextlib.suppress` is not used because it won't suppress warnings.
-
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", DeprecationWarning)
-
-            symbol_table = import_public_names(module_name, include_deprecated=True)
-
-            for symbol in symbol_table.values():
-                try:
-                    self._stdlib_symbols.add(symbol)
-
-                except TypeError:
-                    self._stdlib_symbol_ids.add(id(symbol))
-
-    def check(self, obj: Any) -> bool:
-        try:
-            return obj in self._stdlib_symbols
-        except TypeError:
-            return id(obj) in self._stdlib_symbol_ids
-
-
-from_stdlib = StdlibChecker().check
-
-
 SymbolTable = MutableMapping[str, Any]
 
 
@@ -404,48 +360,6 @@ def importall(
             symtab.pop(name, None)
 
     globals.update(symtab)
-
-
-def deimportall(globals: SymbolTable, purge_cache: bool = False) -> None:
-    """
-    De-import all imported names. Recover/restore the globals.
-
-    Set the `purge_cache` parameter to `True` if a cleaner and more thorough revert is preferred.
-    Useful when module-level behaviors is desired to re-happen, such as the emission of
-    the DeprecationWarning on import.
-    """
-
-    for name, symbol in dict(globals).items():
-        if from_stdlib(symbol):
-            del globals[name]
-
-    if purge_cache:
-        for module_name in IMPORTABLE_MODULES:
-            clean_up_import_cache(module_name)
-
-
-def clean_up_import_cache(module_name: str) -> None:
-    if module_name not in sys.modules:
-        return
-
-    # Detect alias
-    # Reference: source of test.support.CleanImport https://github.com/python/cpython/blob/v3.9.0/Lib/test/support/__init__.py#L1241
-    module = sys.modules[module_name]
-    if module.__name__ != module_name:
-        del sys.modules[module.__name__]
-
-    del sys.modules[module_name]
-
-    # When a module is imported, its ascendant modules are also implicitly imported.
-    # We need to evict their corresponding cache entries as well.
-
-    idx = module_name.rfind(".")
-    while idx != -1:
-        module_name = module_name[:idx]
-        # Use pop() instead of del, because it's not out of possibility that
-        # sys.modules could have been modified by code out of our control.
-        sys.modules.pop(module_name, None)
-        idx = module_name.rfind(".")
 
 
 @profile
@@ -588,6 +502,99 @@ def wildcard_import_module(module_name: str) -> SymbolTable:
         return {}
 
     return symtab
+
+
+def deimportall(globals: SymbolTable, purge_cache: bool = False) -> None:
+    """
+    De-import all imported names. Recover/restore the globals.
+
+    Set the `purge_cache` parameter to `True` if a cleaner and more thorough revert is preferred.
+    Useful when module-level behaviors is desired to re-happen, such as the emission of
+    the DeprecationWarning on import.
+    """
+
+    for name, symbol in dict(globals).items():
+        if from_stdlib(symbol):
+            del globals[name]
+
+    if purge_cache:
+        for module_name in IMPORTABLE_MODULES:
+            clean_up_import_cache(module_name)
+
+
+@singleton_class
+class StdlibChecker:
+    """
+    Check if a symbol comes from standard libraries. Try best effort.
+    """
+
+    # The id() approach could fail if importlib.reload() has been called or sys.modules
+    # has been manipulated.
+    #
+    # The hash() approach could fail if the symbol is unhashable.
+    #
+    # So it's a try-best-effort thing.
+
+    def __init__(self) -> None:
+        self._stdlib_symbols = set()
+        self._stdlib_symbol_ids: set[int] = set()
+
+        for module_name in IMPORTABLE_MODULES:
+            self._gather_info(module_name)
+
+    def _gather_info(self, module_name: str) -> None:
+
+        # Surpass DeprecationWarning, because we know for sure that we are not intended
+        # to use the deprecated names here.
+        #
+        # `contextlib.suppress` is not used because it won't suppress warnings.
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+
+            symbol_table = import_public_names(module_name, include_deprecated=True)
+
+            for symbol in symbol_table.values():
+                try:
+                    self._stdlib_symbols.add(symbol)
+
+                except TypeError:
+                    self._stdlib_symbol_ids.add(id(symbol))
+
+    def check(self, obj: Any) -> bool:
+        try:
+            return obj in self._stdlib_symbols
+        except TypeError:
+            return id(obj) in self._stdlib_symbol_ids
+
+
+# Convenient function for handy invocation of `StdlibChecker().check()`
+def from_stdlib(symbol: Any) -> bool:
+    return StdlibChecker().check(symbol)
+
+
+def clean_up_import_cache(module_name: str) -> None:
+    if module_name not in sys.modules:
+        return
+
+    # Detect alias
+    # Reference: source of test.support.CleanImport https://github.com/python/cpython/blob/v3.9.0/Lib/test/support/__init__.py#L1241
+    module = sys.modules[module_name]
+    if module.__name__ != module_name:
+        del sys.modules[module.__name__]
+
+    del sys.modules[module_name]
+
+    # When a module is imported, its ascendant modules are also implicitly imported.
+    # We need to evict their corresponding cache entries as well.
+
+    idx = module_name.rfind(".")
+    while idx != -1:
+        module_name = module_name[:idx]
+        # Use pop() instead of del, because it's not out of possibility that
+        # sys.modules could have been modified by code out of our control.
+        sys.modules.pop(module_name, None)
+        idx = module_name.rfind(".")
 
 
 if "IMPORTALL_DISABLE_WILDCARD_IMPORT" in os.environ:
