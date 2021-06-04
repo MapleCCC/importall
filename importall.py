@@ -107,12 +107,12 @@ import inspect
 import os
 import sys
 import warnings
-from collections import defaultdict
 from collections.abc import Iterable, Mapping, MutableMapping
 from typing import TYPE_CHECKING, Any, NoReturn, TypeVar, Union
 
-import regex
 from stdlib_list import stdlib_list
+
+from deprecated import deprecated_modules, deprecated_names
 
 
 # We use the lists maintained by the `stdlib-list` library instead of that by the `isort`
@@ -157,126 +157,6 @@ BUILTINS_NAMES = set(dir(builtins)) - {
     "__package__",
     "__spec__",
 }
-
-
-# The dict keys are since which versions they are deprecated.
-# Among these modules, binhex, parser, symbol, formatter, and imp emit DeprecationWarning's when imported.
-DEPRECATED_MODULES = {
-    (3, 9): {"binhex", "parser", "symbol"},
-    (3, 6): {"asynchat", "asyncore", "tkinter.tix"},
-    (3, 4): {"formatter", "imp"},
-    (3, 3): {"xml.etree.ElementTree"},
-    (3, 2): {"optparse"},
-    (3, 0): {"email.encoders"},
-}
-
-# Not all deprecated names are included, that would be too much and too tedious.
-# Only those deprecated names each of which is one of the names inserted into the
-# current namespace when its parent module is wildcard-imported.
-# The dict keys are since which versions they are deprecated.
-DEPRECATED_NAMES = {
-    (3, 9): {
-        "ast.ExtSlice",
-        "ast.Index",
-        "binascii.a2b_hqx",
-        "binascii.b2a_hqx",
-        "binascii.rlecode_hqx",
-        "binascii.rledecode_hqx",
-        "typing.AbstractSet",
-        "typing.AsyncContextManager",
-        "typing.AsyncGenerator",
-        "typing.AsyncIterable",
-        "typing.AsyncIterator",
-        "typing.Awaitable",
-        "typing.ByteString",
-        "typing.Callable",
-        "typing.ChainMap",
-        "typing.Collection",
-        "typing.Container",
-        "typing.ContextManager",
-        "typing.Coroutine",
-        "typing.Counter",
-        "typing.DefaultDict",
-        "typing.Deque",
-        "typing.Dict",
-        "typing.FrozenSet",
-        "typing.Generator",
-        "typing.ItemsView",
-        "typing.Iterable",
-        "typing.Iterator",
-        "typing.KeysView",
-        "typing.List",
-        "typing.Mapping",
-        "typing.MappingView",
-        "typing.Match",
-        "typing.MutableMapping",
-        "typing.MutableSequence",
-        "typing.MutableSet",
-        "typing.OrderedDict",
-        "typing.Pattern",
-        "typing.Reversible",
-        "typing.Sequence",
-        "typing.Set",
-        "typing.Tuple",
-        "typing.Type",
-        "typing.ValuesView",
-    },
-    (3, 8): {
-        "ast.Bytes",
-        "ast.Ellipsis",
-        "ast.NameConstant",
-        "ast.Num",
-        "ast.Str",
-        "asyncio.coroutine",
-        "gettext.bind_textdomain_codeset",
-        "gettext.ldngettext",
-    },
-    (3, 6): {"grp.getgrgid"},
-    (3, 5): {"inspect.formatargspe", "inspect.getcallargs"},
-    (3, 3): {
-        "abc.abstractclassmethod",
-        "abc.abstractproperty",
-        "abc.abstractstaticmethod",
-        "pkgutil.ImpImporter",
-        "pkgutil.ImpLoader",
-        "urllib.request.FancyURLopener",
-        "urllib.request.URLopener",
-    },
-    (3, 2): {"zipfile.BadZipfile"},
-    (3, 1): {"turtle.settiltangle"},
-    (3, 0): {"inspect.getargspec"},
-    (2, 3): {"tempfile.mktemp"},
-}
-
-CURR_VER_DEPRECATED_MODULES: set[str] = set()
-for version, modules in DEPRECATED_MODULES.items():
-    if sys.version_info >= version:
-        CURR_VER_DEPRECATED_MODULES |= modules
-
-CURR_VER_DEPRECATED_NAMES: set[str] = set()
-for version, names in DEPRECATED_NAMES.items():
-    if sys.version_info >= version:
-        CURR_VER_DEPRECATED_NAMES |= names
-
-curr_ver_deprecated_names_index = defaultdict(set)
-for absolute_name in CURR_VER_DEPRECATED_NAMES:
-
-    # It's difficult to construct a perfect regex to match all valid Python identifiers,
-    # because Python 3 extends valid identifier to include non-ASCII characters.
-    #
-    # Reference:
-    # https://docs.python.org/3.9/reference/lexical_analysis.html#identifiers
-    # https://www.python.org/dev/peps/pep-3131/
-    # https://stackoverflow.com/questions/5474008/regular-expression-to-confirm-whether-a-string-is-a-valid-python-identifier
-    # https://stackoverflow.com/questions/49331782/python-3-how-to-check-if-a-string-can-be-a-valid-variable
-    #
-    # Instead of pursuing a perfect regex, we simply make reasonable assumption
-    # that names from standard libraries are ASCII-only.
-
-    pattern = r"(?P<module>.*)\.(?P<name>[_a-zA-Z][_0-9a-zA-Z]*)"
-    matchobj = regex.fullmatch(pattern, absolute_name)
-    module, name = matchobj.group("module", "name")
-    curr_ver_deprecated_names_index[module].add(name)
 
 
 IMPORTABLE_MODULES = set(stdlib_list())
@@ -407,7 +287,7 @@ def get_all_symbols(
 
     if not include_deprecated:
         # Ignore deprecated modules
-        module_names -= CURR_VER_DEPRECATED_MODULES
+        module_names -= deprecated_modules()
 
     # When priority score ties, choose the one whose name has higher lexicographical order.
     module_names = sorted(
@@ -440,7 +320,7 @@ def import_public_names(
     symtab = wildcard_import_module(module_name)
 
     if not include_deprecated:
-        for name in curr_ver_deprecated_names_index[module_name]:
+        for name in deprecated_names(module=module_name):
             symtab.pop(name, None)
 
     # Try best effort to filter out only public names
