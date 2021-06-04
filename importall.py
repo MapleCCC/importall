@@ -454,27 +454,46 @@ def from_stdlib(symbol: Any) -> bool:
 
 
 def clean_up_import_cache(module_name: str) -> None:
+    """
+    Clean up the cache entries related to the given module, in caches populated by the
+    import mechanism.
+
+    Useful when module-level behaviors is desired to re-happen, such as the emission of
+    the DeprecationWarning on import.
+    """
+
+    def clean_cache_of_alias(module_name: str) -> None:
+
+        # Detect alias
+        # Reference: source of test.support.CleanImport https://github.com/python/cpython/blob/v3.9.0/Lib/test/support/__init__.py#L1241
+
+        module = sys.modules[module_name]
+        if module.__name__ != module_name:
+            del sys.modules[module.__name__]
+
+    def clean_cache_of_ascendants(module_name: str) -> None:
+
+        # When a module is imported, its ascendant modules are also implicitly imported.
+        # We need to evict their corresponding cache entries as well.
+
+        idx = module_name.rfind(".")
+        while idx != -1:
+            module_name = module_name[:idx]
+
+            # Use pop() instead of del, because it's not out of possibility that
+            # sys.modules could have been modified by code out of our control.
+
+            sys.modules.pop(module_name, None)
+            idx = module_name.rfind(".")
+
     if module_name not in sys.modules:
         return
 
-    # Detect alias
-    # Reference: source of test.support.CleanImport https://github.com/python/cpython/blob/v3.9.0/Lib/test/support/__init__.py#L1241
-    module = sys.modules[module_name]
-    if module.__name__ != module_name:
-        del sys.modules[module.__name__]
+    clean_cache_of_alias(module_name)
+
+    clean_cache_of_ascendants(module_name)
 
     del sys.modules[module_name]
-
-    # When a module is imported, its ascendant modules are also implicitly imported.
-    # We need to evict their corresponding cache entries as well.
-
-    idx = module_name.rfind(".")
-    while idx != -1:
-        module_name = module_name[:idx]
-        # Use pop() instead of del, because it's not out of possibility that
-        # sys.modules could have been modified by code out of our control.
-        sys.modules.pop(module_name, None)
-        idx = module_name.rfind(".")
 
 
 if "IMPORTALL_DISABLE_WILDCARD_IMPORT" in os.environ:
