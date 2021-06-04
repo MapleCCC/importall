@@ -155,64 +155,8 @@ BUILTINS_NAMES = set(dir(builtins)) - {
 }
 
 
-# Below is a list of deprecated modules who emit DeprecationWarning when imported:
-#
-# binhex 3.9
-# parser 3.9
-# symbol 3.9
-# formatter 3.4
-# imp 3.4
-
-# Below is a list of deprecated modules who don't emit DeprecationWarning when imported:
-#
-# asynchat 3.6
-# asyncore 3.6
-# tkinter.tix 3.6
-# xml.etree.ElementTree 3.3
-# optparse 3.2
-# email.encoders 3.0
-
-# Below is a list of deprecated names each of which is one of the names inserted into
-# the current namespace when its parent module is wildcard-imported.
-#
-# ast.ExtSlice 3.9
-# ast.Index 3.9
-# binascii.a2b_hqx 3.9
-# binascii.b2a_hqx 3.9
-# binascii.rlecode_hqx 3.9
-# binascii.rledecode_hqx 3.9
-# typing.Tuple/Callable/Type 3.9
-# typing.Dict/List/Set/FrozenSet 3.9
-# typing.DefaultDict/OrderedDict/ChainMap/Counter/Deque 3.9
-# typing.Pattern/Match 3.9
-# typing.AbstractSet/ByteString/Collection/Container/ItemsView/KeysView/Mapping/MappingView/MutableMapping/MutableSequence/MutableSet/Sequence/ValuesView 3.9
-# typing.Iterable/Iterator/Generator/Reversible 3.9
-# typing.Coroutine/AsyncGenerator/AsyncIterable/AsyncIterator/Awaitable 3.9
-# typing.ContextManager/AsyncContextManager 3.9
-# ast.Bytes 3.8
-# ast.Ellipsis 3.8
-# ast.NameConstant 3.8
-# ast.Num 3.8
-# ast.Str 3.8
-# asyncio.coroutine 3.8
-# gettext.bind_textdomain_codeset 3.8
-# gettext.ldngettext 3.8
-# grp.getgrgid 3.6
-# inspect.formatargspe 3.5
-# inspect.getcallargs 3.5
-# abc.abstractclassmethod 3.3
-# abc.abstractproperty 3.3
-# abc.abstractstaticmethod 3.3
-# pkgutil.ImpImporter 3.3
-# pkgutil.ImpLoader 3.3
-# urllib.request.FancyURLopener 3.3
-# urllib.request.URLopener 3.3
-# zipfile.BadZipfile 3.2
-# turtle.settiltangle 3.1
-# inspect.getargspec 3.0
-# tempfile.mktemp 2.3
-
 # The dict keys are since which versions they are deprecated.
+# Among these modules, binhex, parser, symbol, formatter, and imp emit DeprecationWarning's when imported.
 DEPRECATED_MODULES = {
     (3, 9): {"binhex", "parser", "symbol"},
     (3, 6): {"asynchat", "asyncore", "tkinter.tix"},
