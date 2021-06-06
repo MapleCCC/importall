@@ -115,19 +115,6 @@ from stdlib_list import stdlib_list
 from deprecated import deprecated_modules, deprecated_names
 
 
-# We use the lists maintained by the `stdlib-list` library instead of that by the `isort`
-# library or that of `sys.stdlib_module_names`, for they don't include sub-packages and
-# sub-modules, such as `concurrent.futures`.
-#
-# One can compare the two lists:
-#
-# 1. List maintained by the `isort` library:
-# https://github.com/PyCQA/isort/blob/main/isort/stdlibs/py39.py
-#
-# 2. List maintained by the `stdlib-list` library:
-# https://github.com/jackmaney/python-stdlib-list/blob/master/stdlib_list/lists/3.9.txt
-
-
 if sys.version_info < (3, 9):
     raise RuntimeError("importall library is intended to run with Python 3.9 or higher")
 
@@ -135,6 +122,7 @@ if sys.version_info < (3, 9):
 T = TypeVar("T")
 
 
+# A decorator to transform a class into a singleton
 singleton_class = functools.cache
 
 
@@ -158,6 +146,18 @@ BUILTINS_NAMES = set(dir(builtins)) - {
     "__spec__",
 }
 
+
+# We use the lists maintained by the `stdlib-list` library instead of that by the `isort`
+# library or that of `sys.stdlib_module_names`, for they don't include sub-packages and
+# sub-modules, such as `concurrent.futures`.
+#
+# One can compare the two lists:
+#
+# 1. List maintained by the `isort` library:
+# https://github.com/PyCQA/isort/blob/main/isort/stdlibs/py39.py
+#
+# 2. List maintained by the `stdlib-list` library:
+# https://github.com/jackmaney/python-stdlib-list/blob/master/stdlib_list/lists/3.9.txt
 
 IMPORTABLE_MODULES = set(stdlib_list())
 
@@ -352,10 +352,8 @@ def import_public_names(
         of this module
         """
 
-        parent_module_name = getattr(symbol, "__module__", None)
-        if parent_module_name not in IMPORTABLE_MODULES:
-            return False
-        return parent_module_name != module_name
+        origin = getattr(symbol, "__module__", None)
+        return origin in IMPORTABLE_MODULES and origin != module_name
 
     for name, symbol in dict(symtab).items():
         if is_another_stdlib(symbol) or from_another_stdlib(symbol):
@@ -369,6 +367,7 @@ def wildcard_import_module(module_name: str) -> SymbolTable:
 
     # The __future__ module is a special case.
     # Wildcard-importing the __future__ library yields SyntaxError.
+
     if module_name == "__future__":
         import __future__
 
@@ -462,6 +461,8 @@ def clean_up_import_cache(module_name: str) -> None:
     the DeprecationWarning on import.
     """
 
+    # Reference: Import cache mechanism https://docs.python.org/3.9/reference/import.html#the-module-cache
+
     def clean_cache_of_alias(module_name: str) -> None:
 
         # Detect alias
@@ -475,6 +476,8 @@ def clean_up_import_cache(module_name: str) -> None:
 
         # When a module is imported, its ascendant modules are also implicitly imported.
         # We need to evict their corresponding cache entries as well.
+        #
+        # Reference: https://docs.python.org/3.9/reference/import.html#searching
 
         idx = module_name.rfind(".")
         while idx != -1:

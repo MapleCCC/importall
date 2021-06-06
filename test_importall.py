@@ -104,6 +104,8 @@ class TestImportallFunction:
 
         assert not truth(itemgetter(0)(attrgetter("maps")(ChainMap())))
 
+        assert barry_as_FLUFL.optional[:2] == (3, 1)
+
     def test_protect_builtins_parameter_is_true(self) -> None:
         from importall import importall
 
@@ -214,6 +216,8 @@ def test_get_all_symbols() -> None:
         symtab["itemgetter"](0)(symtab["attrgetter"]("maps")(symtab["ChainMap"]()))
     )
 
+    assert symtab["barry_as_FLUFL"].optional[:2] == (3, 1)
+
 
 def test_deimportall() -> None:
     from importall import deimportall, importall
@@ -244,6 +248,8 @@ def test_deimportall() -> None:
     assert defaultdict(int)[""] == 0
 
     assert not truth(itemgetter(0)(attrgetter("maps")(ChainMap())))
+
+    assert barry_as_FLUFL.optional[:2] == (3, 1)
 
     deimportall(globals())
 
@@ -280,3 +286,6 @@ def test_deimportall() -> None:
 
     with pytest.raises(NameError):
         assert not truth(itemgetter(0)(attrgetter("maps")(ChainMap())))
+
+    with pytest.raises(NameError):
+        assert barry_as_FLUFL.optional[:2] == (3, 1)
