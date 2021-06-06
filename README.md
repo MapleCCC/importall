@@ -15,7 +15,6 @@
 - [Quick Start](#quick-start)
 - [Development](#development)
 - [Testing](#testing)
-- [Advanced Tricks](#advanced-tricks)
 - [Miscellaneous](#miscellaneous)
 - [Contribution](#contribution)
 - [Other Similar Projects](#other-similar-projects)
@@ -31,60 +30,42 @@ It's definitely [not](https://stackoverflow.com/questions/2386714/why-is-import-
 
 ## Quick Start
 
-Two major ways of usage:
+Call the `importall()` function, with the `globals()` passed in as argument, then all names are imported to the current namespace.
 
-1. *Wildcard import*.
+```python3
+from importall import importall
 
-    Wildcard import the `importall` module, then all names are imported to the current namespace.
+importall(globals())
 
-    ```python3
-    from importall import *
+list(combinations("ABCD", 2))
+# [("A", "B"), ("A", "C"), ("A", "D"), ("B", "C"), ("B", "D"), ("C", "D")]
 
-    log2(2)
-    # 1.0
+nlargest(4, [48, 5, 21, 38, 65, 12, 27, 18])
+# [65, 48, 38, 27]
+```
 
-    bisect_right([24, 35, 38, 38, 46, 47, 52, 54, 54, 57, 87, 91], 53)
-    # 7
-    ```
+Note that `local()` should not be passed to `importall()`, as `locals()` is intended as readonly [per doc](https://docs.python.org/3.9/library/functions.html#locals).
 
-2. *Invoke function*
+The `importall()` function also provides several parameters for finer-grained configuration, enabling more flexible and customizable options.
 
-    Call the `importall()` function, with the `globals()` passed in as argument, then all names are imported to the current namespace.
+More than likely, names imported from different standard libraries might collides. The name collision is resolvable by tuning the `prioritized` and `ignore` parameters.
 
-    ```python3
-    from importall import importall
+Say, a user finds that he wants to use `compress` from the `lzma` module instead of that from the `zlib` module. He could either set higher priority for the `lzma` module through the `prioritized` parameter, or ignore the `zlib` module altogether through the `ignore` parameter.
 
-    importall(globals())
+```python3
+importall(globals())
 
-    list(combinations("ABCD", 2))
-    # [("A", "B"), ("A", "C"), ("A", "D"), ("B", "C"), ("B", "D"), ("C", "D")]
+compress.__module__
+# "zlib"
 
-    nlargest(4, [48, 5, 21, 38, 65, 12, 27, 18])
-    # [65, 48, 38, 27]
-    ```
+importall(globals(), prioritized=["lzma"])
+# Alternatives:
+# importall(globals(), prioritized={"lzma": 1, "zlib": -1})
+# importall(globals(), ignore=["zlib"])
 
-    Note that `local()` should not be passed to `importall()`, as `locals()` is intended as readonly [per doc](https://docs.python.org/3.9/library/functions.html#locals).
-
-    The `importall()` function also provides several parameters for finer-grained configuration, making it more flexible and customizable than the wildcard import approach.
-
-    More than likely, names imported from different standard libraries might collides. The name collision is resolvable by tuning the `prioritized` and `ignore` parameters.
-
-    Say, a user finds that he wants to use `compress` from the `lzma` module instead of that from the `zlib` module. He could either set higher priority for the `lzma` module through the `prioritized` parameter, or ignore the `zlib` module altogether through the `ignore` parameter.
-
-    ```python3
-    importall(globals())
-
-    compress.__module__
-    # "zlib"
-
-    importall(globals(), prioritized=["lzma"])
-    # Alternatives:
-    # importall(globals(), prioritized={"lzma": 1, "zlib": -1})
-    # importall(globals(), ignore=["zlib"])
-
-    compress.__module__
-    # "lzma"
-    ```
+compress.__module__
+# "lzma"
+```
 
 If one prefers getting all importable names stored as a variable instead of importing them into the current namespace, so as to avoid cluttering<!--polluting--> the `globals()` namespace, there is also a programmatic interface for doing so:
 
@@ -199,10 +180,6 @@ $ python3 -m pip install -r requirements-test.txt
 
 $ make test
 ```
-
-## Advanced Tricks
-
-To provide names thorough the wildcard import, internally the `importall` module will eagerly import every names from standard libraries at the time of module loading and initialization, even if the user only intends to use `importall()`, `get_all_symbols()`, or `deimportall()` functions. However, the overhead of calling `importall()` is not cheap, rendering it undesirable for performance-sensitive applications. If one is certain that he won't use the wildcard import, and would like to discard the unnecessary overhead, one could preemptively set the environment variable `IMPORTALL_DISABLE_WILDCARD_IMPORT` (its presence suffices, its value doesn't matter), so as to disable the wildcard import.
 
 ## Miscellaneous
 

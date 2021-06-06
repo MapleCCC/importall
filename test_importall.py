@@ -58,17 +58,6 @@ def eval_name(name: str) -> Any:
     return eval(name)
 
 
-@pytest.mark.skip(
-    reason="Unfortunately, for now we can't test wildcard importing the importall library. "
-    "Because wildcard import is not allowed within function, we have to put the "
-    "`from importall import *` statement at the top level, which causes pytest to collect "
-    "strange things, the nature of which awaits further investigation."
-)
-def test_wildcard_import() -> None:
-    # from importall import *
-    pass
-
-
 class TestImportallFunction:
     """
     Unit tests for testing the `importall()` function

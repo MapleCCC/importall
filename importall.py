@@ -1,68 +1,51 @@
 """
-`importall` is a lightweight and robust library to import every available names from standard
-libraries to the current namespace, i.e., a Python equivalent to C++'s `<bits/stdc++.h>`.
+`importall` is a lightweight and robust library to import every available names from
+standard libraries to the current namespace, i.e., a Python equivalent to C++'s
+`<bits/stdc++.h>`.
 
-Two major ways of usage:
+Call the `importall()` function, with the `globals()` passed in as argument, then all
+names are imported to the current namespace.
 
-1. *Wildcard import*.
+```python3
+from importall import importall
 
-    Wildcard import the `importall` module, then all names are imported to the current namespace.
+importall(globals())
 
-    ```python3
-    from importall import *
+list(combinations("ABCD", 2))
+# [("A", "B"), ("A", "C"), ("A", "D"), ("B", "C"), ("B", "D"), ("C", "D")]
 
-    log2(2)
-    # 1.0
+nlargest(4, [48, 5, 21, 38, 65, 12, 27, 18])
+# [65, 48, 38, 27]
+```
 
-    bisect_right([24, 35, 38, 38, 46, 47, 52, 54, 54, 57, 87, 91], 53)
-    # 7
-    ```
+Note that `local()` should not be passed to `importall()`, as `locals()` is intended as
+readonly [per doc](https://docs.python.org/3.9/library/functions.html#locals).
 
-2. *Invoke function*
+The `importall()` function also provides several parameters for finer-grained
+configuration, enabling more flexible and customizable options.
 
-    Call the `importall()` function, with the `globals()` passed in as argument, then
-    all names are imported to the current namespace.
+More than likely, names imported from different standard libraries might collides.
+The name collision is resolvable by tuning the `prioritized` and `ignore` parameters.
 
-    ```python3
-    from importall import importall
+Say, a user finds that he wants to use `compress` from the `lzma` module instead of that
+from the `zlib` module. He could either set higher priority for the `lzma` module
+through the `prioritized` parameter, or ignore the `zlib` module altogether through the
+`ignore` parameter.
 
-    importall(globals())
+```python3
+importall(globals())
 
-    list(combinations("ABCD", 2))
-    # [("A", "B"), ("A", "C"), ("A", "D"), ("B", "C"), ("B", "D"), ("C", "D")]
+compress.__module__
+# "zlib"
 
-    nlargest(4, [48, 5, 21, 38, 65, 12, 27, 18])
-    # [65, 48, 38, 27]
-    ```
+importall(globals(), prioritized=["lzma"])
+# Alternatives:
+# importall(globals(), prioritized={"lzma": 1, "zlib": -1})
+# importall(globals(), ignore=["zlib"])
 
-    Note that `local()` should not be passed to `importall()`, as `locals()` is
-    intended as readonly [per doc](https://docs.python.org/3.9/library/functions.html#locals).
-
-    The `importall()` function also provides several parameters for finer-grained
-    configuration, making it more flexible and customizable than the wildcard import approach.
-
-    More than likely, names imported from different standard libraries might collides.
-    The name collision is resolvable by tuning the `prioritized` and `ignore` parameters.
-
-    Say, a user finds that he wants to use `compress` from the `lzma` module instead of
-    that from the `zlib` module. He could either set higher priority for the `lzma`
-    module through the `prioritized` parameter, or ignore the `zlib` module altogether
-    through the `ignore` parameter.
-
-    ```python3
-    importall(globals())
-
-    compress.__module__
-    # "zlib"
-
-    importall(globals(), prioritized=["lzma"])
-    # Alternatives:
-    # importall(globals(), prioritized={"lzma": 1, "zlib": -1})
-    # importall(globals(), ignore=["zlib"])
-
-    compress.__module__
-    # "lzma"
-    ```
+compress.__module__
+# "lzma"
+```
 
 If one prefers getting all importable names stored as a variable instead of importing
 them into the current namespace, so as to avoid cluttering the `globals()` namespace,
@@ -83,7 +66,8 @@ symbol_table["log2"](2)
 # 1.0
 ```
 
-To recover the `globals()` and de-import all imported names, use the `deimportall()` function:
+To recover the `globals()` and de-import all imported names, use the `deimportall()`
+function:
 
 ```python3
 from importall import deimportall, importall
@@ -108,7 +92,7 @@ import os
 import sys
 import warnings
 from collections.abc import Iterable, Mapping, MutableMapping
-from typing import TYPE_CHECKING, Any, NoReturn, TypeVar, Union
+from typing import TYPE_CHECKING, Any, TypeVar, Union
 
 from stdlib_list import stdlib_list
 
@@ -497,21 +481,3 @@ def clean_up_import_cache(module_name: str) -> None:
     clean_cache_of_ascendants(module_name)
 
     del sys.modules[module_name]
-
-
-if "IMPORTALL_DISABLE_WILDCARD_IMPORT" in os.environ:
-
-    class NotIndexable:
-        def __init__(self, reason: str) -> None:
-            self._reason = reason
-
-        def __getitem__(self, _: Any) -> NoReturn:
-            raise RuntimeError(self._reason)
-
-    __all__ = NotIndexable(  # type: ignore
-        reason="Wildcard importing the importall module is disabled, "
-        "due to the presence of the environment variable IMPORTALL_DISABLE_WILDCARD_IMPORT"
-    )
-
-else:
-    importall(globals())
