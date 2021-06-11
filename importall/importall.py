@@ -85,88 +85,17 @@ log2(2)
 """
 
 
-import builtins
-import functools
 import inspect
-import os
 import sys
 import warnings
 from collections.abc import Iterable, Mapping, MutableMapping
-from typing import TYPE_CHECKING, Any, TypeVar, Union
+from typing import Any, Union
 
-from stdlib_list import stdlib_list
-
-from .deprecated import deprecated_modules, deprecated_names
+from .utils import deprecated_modules, deprecated_names, profile, singleton_class
+from .config import  BUILTINS_NAMES, IMPORTABLE_MODULES
 
 
 __all__ = ["importall", "deimportall", "get_all_symbols"]
-
-
-T = TypeVar("T")
-
-
-# A decorator to transform a class into a singleton
-singleton_class = functools.cache
-
-
-def nulldecorator(fn: T) -> T:
-    """Similar to contextlib.nullcontext, except for decorator"""
-    return fn
-
-
-# The name `profile` will be injected into builtins in runtime by line-profiler.
-profile = getattr(builtins, "profile", None) or nulldecorator
-
-if TYPE_CHECKING:
-    profile = nulldecorator
-
-
-BUILTINS_NAMES = set(dir(builtins)) - {
-    "__doc__",
-    "__loader__",
-    "__name__",
-    "__package__",
-    "__spec__",
-}
-
-
-# We use the lists maintained by the `stdlib-list` library instead of that by the `isort`
-# library or that of `sys.stdlib_module_names`, for they don't include sub-packages and
-# sub-modules, such as `concurrent.futures`.
-#
-# One can compare the two lists:
-#
-# 1. List maintained by the `isort` library:
-# https://github.com/PyCQA/isort/blob/main/isort/stdlibs/py39.py
-#
-# 2. List maintained by the `stdlib-list` library:
-# https://github.com/jackmaney/python-stdlib-list/blob/master/stdlib_list/lists/3.9.txt
-
-IMPORTABLE_MODULES = set(stdlib_list())
-
-# Don't import some special standard library modules
-#
-# The `__main__` module is meta.
-# Names from the `__main__` module should not be considered standard library utilities.
-#
-# No need to import names from `builtins`, since they are always available anyway.
-#
-# Importing `__phello__.foo` module will cause "Hello world!" to be printed
-# on the console, and we don't yet know why.
-#
-# The `antigravity` and `this` modules are easter eggs.
-IMPORTABLE_MODULES -= {"__main__", "__phello__.foo", "antigravity", "builtins", "this"}
-
-# lib2to3 package contains Python 2 code, which is unrunnable under Python 3.
-IMPORTABLE_MODULES -= {mod for mod in IMPORTABLE_MODULES if mod.startswith("lib2to3")}
-
-if os.name == "nt":
-    # On Windows OS, UNIX-specific modules are ignored.
-    IMPORTABLE_MODULES -= {
-        "multiprocessing.popen_fork",
-        "multiprocessing.popen_forkserver",
-        "multiprocessing.popen_spawn_posix",
-    }
 
 
 SymbolTable = MutableMapping[str, Any]

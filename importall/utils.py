@@ -1,16 +1,56 @@
+import builtins
+import functools
 import json
 import sys
 from collections import defaultdict
 from functools import cache
 from pathlib import Path
+from typing import TYPE_CHECKING, Any, TypeVar
 
 import regex
 
 
-__all__ = ["deprecated_modules", "deprecated_names"]
+__all__ = [
+    "singleton_class",
+    "nulldecorator",
+    "profile",
+    "deprecated_modules",
+    "deprecated_names",
+]
+
+
+T = TypeVar("T")
 
 
 VersionTuple = tuple[int, int]
+
+
+# A decorator to transform a class into a singleton
+singleton_class = functools.cache
+
+
+def nulldecorator(fn: T) -> T:
+    """Similar to contextlib.nullcontext, except for decorator"""
+    return fn
+
+
+# The name `profile` will be injected into builtins in runtime by line-profiler.
+profile = getattr(builtins, "profile", None) or nulldecorator
+
+if TYPE_CHECKING:
+    profile = nulldecorator
+
+
+def jsonc_loads(text: str) -> Any:
+    """Similar to json.loads(), except also accept JSON with comments"""
+
+    # TODO use more robust way to clean comments, use syntax parsing
+    # TODO recognize more comment formats, Python-style comment, C-style comment, ...
+    # TODO recognize multi-line comment
+
+    lines = text.splitlines(keepends=True)
+    cleaned = "".join(line for line in lines if not line.lstrip().startswith("//"))
+    return json.loads(cleaned)
 
 
 def convert_version_to_tuple(version: str) -> VersionTuple:
@@ -20,35 +60,35 @@ def convert_version_to_tuple(version: str) -> VersionTuple:
     """
 
     m = regex.fullmatch(r"(?P<major>\d+)\.(?P<minor>\d+)", version)
-    version_tuple = (int(m.major), int(m.minor))
+    version_tuple = (int(m.group("major")), int(m.group("minor")))
     return version_tuple
 
 
 def load_deprecated_modules() -> dict[VersionTuple, frozenset[str]]:
     """Load DEPRECATED_MODULES from JSON file"""
 
-    json_file = Path(__file__) / "deprecated_modules.json"
+    json_file = Path(__file__).parent / "deprecated_modules.json"
     json_text = json_file.read_text(encoding="utf-8")
-    json_obj = json.loads(json_text)
+    json_obj = jsonc_loads(json_text)
 
     return {
         convert_version_to_tuple(version): frozenset(modules)
-        for version, modules in json_obj
+        for version, modules in json_obj.items()
     }
 
 
 def load_deprecated_names() -> dict[VersionTuple, dict[str, frozenset[str]]]:
     """Load DEPRECATED_NAMES from JSON file"""
 
-    json_file = Path(__file__) / "deprecated_names.json"
+    json_file = Path(__file__).parent / "deprecated_names.json"
     json_text = json_file.read_text(encoding="utf-8")
-    json_obj = json.loads(json_text)
+    json_obj = jsonc_loads(json_text)
 
     res = defaultdict(dict)
 
-    for version, modules in json_obj:
-        for module, names in modules:
-            res[version][module] = frozenset(names)
+    for version, modules in json_obj.items():
+        for module, names in modules.items():
+            res[convert_version_to_tuple(version)][module] = frozenset(names)
 
     return res
 
