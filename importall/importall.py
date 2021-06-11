@@ -96,11 +96,10 @@ from typing import TYPE_CHECKING, Any, TypeVar, Union
 
 from stdlib_list import stdlib_list
 
-from deprecated import deprecated_modules, deprecated_names
+from .deprecated import deprecated_modules, deprecated_names
 
 
-if sys.version_info < (3, 9):
-    raise RuntimeError("importall library is intended to run with Python 3.9 or higher")
+__all__ = ["importall", "deimportall", "get_all_symbols"]
 
 
 T = TypeVar("T")
