@@ -91,8 +91,8 @@ import warnings
 from collections.abc import Iterable, Mapping, MutableMapping
 from typing import Any, Union
 
+from .constants import  BUILTINS_NAMES, IMPORTABLE_MODULES
 from .utils import deprecated_modules, deprecated_names, profile, singleton_class
-from .config import  BUILTINS_NAMES, IMPORTABLE_MODULES
 
 
 __all__ = ["importall", "deimportall", "get_all_symbols"]

@@ -7,7 +7,7 @@ from stdlib_list import stdlib_list
 __all__ = ["BUILTINS_NAMES", "IMPORTABLE_MODULES"]
 
 
-BUILTINS_NAMES = set(dir(builtins)) - {
+BUILTINS_NAMES = frozenset(dir(builtins)) - {
     "__doc__",
     "__loader__",
     "__name__",
@@ -28,7 +28,7 @@ BUILTINS_NAMES = set(dir(builtins)) - {
 # 2. List maintained by the `stdlib-list` library:
 # https://github.com/jackmaney/python-stdlib-list/blob/master/stdlib_list/lists/3.9.txt
 
-IMPORTABLE_MODULES = set(stdlib_list())
+IMPORTABLE_MODULES = frozenset(stdlib_list())
 
 # Don't import some special standard library modules
 #
