@@ -1,0 +1,81 @@
+// Not all deprecated names are included, that would be too much and too tedious.
+//
+// Included are only those deprecated names each of which is one of the names inserted into the
+// current namespace when its parent module is wildcard-imported.
+//
+// The dict keys are since which versions they are deprecated.
+
+{
+  "3.9": {
+    "ast": ["ExtSlice", "Index"],
+    "binascii": ["a2b_hqx", "b2a_hqx", "rlecode_hqx", "rledecode_hqx"],
+    "typing": [
+      "AbstractSet",
+      "AsyncContextManager",
+      "AsyncGenerator",
+      "AsyncIterable",
+      "AsyncIterator",
+      "Awaitable",
+      "ByteString",
+      "Callable",
+      "ChainMap",
+      "Collection",
+      "Container",
+      "ContextManager",
+      "Coroutine",
+      "Counter",
+      "DefaultDict",
+      "Deque",
+      "Dict",
+      "FrozenSet",
+      "Generator",
+      "ItemsView",
+      "Iterable",
+      "Iterator",
+      "KeysView",
+      "List",
+      "Mapping",
+      "MappingView",
+      "Match",
+      "MutableMapping",
+      "MutableSequence",
+      "MutableSet",
+      "OrderedDict",
+      "Pattern",
+      "Reversible",
+      "Sequence",
+      "Set",
+      "Tuple",
+      "Type",
+      "ValuesView"
+    ]
+  },
+  "3.8": {
+    "ast": ["Bytes", "Ellipsis", "NameConstant", "Num", "Str"],
+    "asyncio": ["coroutine"],
+    "gettext": ["bind_textdomain_codeset", "ldngettext"]
+  },
+  "3.6": {
+    "grp": ["getgrgid"]
+  },
+  "3.5": {
+    "inspect": ["formatargspe", "getcallargs"]
+  },
+  "3.3": {
+    "abc": ["abstractclassmethod", "abstractproperty", "abstractstaticmethod"],
+    "pkgutil": ["ImpImporter", "ImpLoader"],
+    "urllib.request": ["FancyURLopener", "URLopener"]
+  },
+  "3.2": {
+    "zipfile": ["BadZipfile"]
+  },
+  "3.1": {
+    "turtle": ["settiltangle"]
+  },
+  "3.0": {
+    "inspect": ["getargspec"]
+  },
+  "2.3": {
+    "tempfile": ["mktemp"]
+  }
+}

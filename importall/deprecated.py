@@ -1,5 +1,8 @@
+import json
 import sys
+from collections import defaultdict
 from functools import cache
+from pathlib import Path
 
 import regex
 
@@ -7,7 +10,52 @@ import regex
 __all__ = ["deprecated_modules", "deprecated_names"]
 
 
-Version = tuple[int, int]
+VersionTuple = tuple[int, int]
+
+
+def convert_version_to_tuple(version: str) -> VersionTuple:
+    """
+    Convert version info from string representation to tuple representation.
+    The tuple representation is convenient for direct comparison.
+    """
+
+    m = regex.fullmatch(r"(?P<major>\d+)\.(?P<minor>\d+)", version)
+    version_tuple = (int(m.major), int(m.minor))
+    return version_tuple
+
+
+def load_deprecated_modules() -> dict[VersionTuple, frozenset[str]]:
+    """Load DEPRECATED_MODULES from JSON file"""
+
+    json_file = Path(__file__) / "deprecated_modules.json"
+    json_text = json_file.read_text(encoding="utf-8")
+    json_obj = json.loads(json_text)
+
+    return {
+        convert_version_to_tuple(version): frozenset(modules)
+        for version, modules in json_obj
+    }
+
+
+def load_deprecated_names() -> dict[VersionTuple, dict[str, frozenset[str]]]:
+    """Load DEPRECATED_NAMES from JSON file"""
+
+    json_file = Path(__file__) / "deprecated_names.json"
+    json_text = json_file.read_text(encoding="utf-8")
+    json_obj = json.loads(json_text)
+
+    res = defaultdict(dict)
+
+    for version, modules in json_obj:
+        for module, names in modules:
+            res[version][module] = frozenset(names)
+
+    return res
+
+
+DEPRECATED_MODULES = load_deprecated_modules()
+
+DEPRECATED_NAMES = load_deprecated_names()
 
 
 @cache
@@ -23,8 +71,7 @@ def deprecated_modules(*, version: str = None) -> set[str]:
     if version is None:
         version_tuple = sys.version_info[:2]
     else:
-        m = regex.fullmatch(r"(?P<major>\d+)\.(?P<minor>\d+)", version)
-        version_tuple = (int(m.major), int(m.minor))
+        version_tuple = convert_version_to_tuple(version)
 
     modules: set[str] = set()
 
@@ -48,8 +95,7 @@ def deprecated_names(*, version: str = None, module: str = None) -> set[str]:
     if version is None:
         version_tuple = sys.version_info[:2]
     else:
-        m = regex.fullmatch(r"(?P<major>\d+)\.(?P<minor>\d+)", version)
-        version_tuple = (int(m.major), int(m.minor))
+        version_tuple = convert_version_to_tuple(version)
 
     names: set[str] = set()
 
@@ -62,87 +108,3 @@ def deprecated_names(*, version: str = None, module: str = None) -> set[str]:
                 names |= _names
 
     return names
-
-
-# The dict keys are since which versions they are deprecated.
-#
-# Among these modules, binhex, parser, symbol, formatter, and imp emit DeprecationWarning's when imported.
-DEPRECATED_MODULES: dict[Version, set[str]] = {
-    (3, 9): {"binhex", "parser", "symbol"},
-    (3, 6): {"asynchat", "asyncore", "tkinter.tix"},
-    (3, 4): {"formatter", "imp"},
-    (3, 3): {"xml.etree.ElementTree"},
-    (3, 2): {"optparse"},
-    (3, 0): {"email.encoders"},
-}
-
-
-# Not all deprecated names are included, that would be too much and too tedious.
-#
-# Included are only those deprecated names each of which is one of the names inserted into the
-# current namespace when its parent module is wildcard-imported.
-#
-# The dict keys are since which versions they are deprecated.
-DEPRECATED_NAMES: dict[Version, dict[str, set[str]]] = {
-    (3, 9): {
-        "ast": {"ExtSlice", "Index"},
-        "binascii": {"a2b_hqx", "b2a_hqx", "rlecode_hqx", "rledecode_hqx"},
-        "typing": {
-            "AbstractSet",
-            "AsyncContextManager",
-            "AsyncGenerator",
-            "AsyncIterable",
-            "AsyncIterator",
-            "Awaitable",
-            "ByteString",
-            "Callable",
-            "ChainMap",
-            "Collection",
-            "Container",
-            "ContextManager",
-            "Coroutine",
-            "Counter",
-            "DefaultDict",
-            "Deque",
-            "Dict",
-            "FrozenSet",
-            "Generator",
-            "ItemsView",
-            "Iterable",
-            "Iterator",
-            "KeysView",
-            "List",
-            "Mapping",
-            "MappingView",
-            "Match",
-            "MutableMapping",
-            "MutableSequence",
-            "MutableSet",
-            "OrderedDict",
-            "Pattern",
-            "Reversible",
-            "Sequence",
-            "Set",
-            "Tuple",
-            "Type",
-            "ValuesView",
-        },
-    },
-    (3, 8): {
-        "ast": {"Bytes", "Ellipsis", "NameConstant", "Num", "Str"},
-        "asyncio": {"coroutine"},
-        "gettext": {"bind_textdomain_codeset"},
-        "gettext": {"ldngettext"},
-    },
-    (3, 6): {"grp": {"getgrgid"}},
-    (3, 5): {"inspect": {"formatargspe", "getcallargs"}},
-    (3, 3): {
-        "abc": {"abstractclassmethod", "abstractproperty", "abstractstaticmethod"},
-        "pkgutil": {"ImpImporter", "ImpLoader"},
-        "urllib.request": {"FancyURLopener", "URLopener"},
-    },
-    (3, 2): {"zipfile": {"BadZipfile"}},
-    (3, 1): {"turtle": {"settiltangle"}},
-    (3, 0): {"inspect": {"getargspec"}},
-    (2, 3): {"tempfile": {"mktemp"}},
-}
