@@ -84,11 +84,11 @@ def load_deprecated_names() -> dict[VersionTuple, dict[str, frozenset[str]]]:
     json_text = json_file.read_text(encoding="utf-8")
     json_obj = jsonc_loads(json_text)
 
-    res = defaultdict(dict)
+    res = {}
 
     for version, modules in json_obj.items():
-        for module, names in modules.items():
-            res[convert_version_to_tuple(version)][module] = frozenset(names)
+        version_tuple = convert_version_to_tuple(version)
+        res[version_tuple] = {module: frozenset(names) for module, names in modules.items()}
 
     return res
 

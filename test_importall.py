@@ -121,14 +121,6 @@ class TestImportallFunction:
         assert open.__module__ == "webbrowser"
 
     def test_import_deprecated_parameter(self) -> None:
-
-        # Disable wildcard import because wildcard import internally eagerly import every
-        # names from standard libraries, populating the sys.modules cache. Importing modules
-        # who is already in the sys.mdoules cache would reuse the cache entry, instead of
-        # actually executing the module file again, which maens module-level behaviors won't
-        # re-happen, such as the emission of the DeprecationWarning on import.
-        os.environ["IMPORTALL_DISABLE_WILDCARD_IMPORT"] = "1"
-
         from importall import importall
 
         # This unit test makes a reasonable assumption that there are very likely always

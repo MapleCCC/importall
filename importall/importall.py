@@ -91,7 +91,7 @@ import warnings
 from collections.abc import Iterable, Mapping, MutableMapping
 from typing import Any, Union
 
-from .constants import  BUILTINS_NAMES, IMPORTABLE_MODULES
+from .constants import BUILTINS_NAMES, IMPORTABLE_MODULES
 from .utils import deprecated_modules, deprecated_names, profile, singleton_class
 
 
@@ -277,22 +277,21 @@ def import_public_names(
 @profile
 def wildcard_import_module(module_name: str) -> SymbolTable:
 
-    # The __future__ module is a special case.
-    # Wildcard-importing the __future__ library yields SyntaxError.
-
     if module_name == "__future__":
-        import __future__
 
+        # The __future__ module is a special case.
+        # Wildcard-importing the __future__ library yields SyntaxError.
+
+        import __future__
         return {name: getattr(__future__, name) for name in __future__.__all__}
 
-    symtab: SymbolTable = {}
-
     try:
+        symtab: SymbolTable = {}
         exec(f"from {module_name} import *", {}, symtab)
+        return symtab
+
     except (ImportError, ModuleNotFoundError):
         return {}
-
-    return symtab
 
 
 def deimportall(globals: SymbolTable, purge_cache: bool = False) -> None:
