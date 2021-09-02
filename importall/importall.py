@@ -251,17 +251,18 @@ def import_public_names(
 
     def is_another_stdlib(symbol: Any) -> bool:
         """
-        Detect if symbol is possibly another standard library module imported to this
-        module, hence should not be considered part of the public names of this module.
+        Detect if the symbol is possibly another standard library module imported to
+        this module, hence should not be considered part of the public names of this
+        module.
         """
 
         return inspect.ismodule(symbol) and symbol.__name__ in IMPORTABLE_MODULES
 
     def from_another_stdlib(symbol: Any) -> bool:
         """
-        Detect if symbol is possibly a public name from another standard library module,
-        imported to this module, hence should not be considered part of the public names
-        of this module
+        Detect if the symbol is possibly a public name from another standard library
+        module, imported to this module, hence should not be considered part of the
+        public names of this module.
         """
 
         origin = getattr(symbol, "__module__", None)
@@ -334,7 +335,7 @@ class StdlibChecker:
 
     def _gather_info(self, module_name: str) -> None:
 
-        # Surpass DeprecationWarning, because we know for sure that we are not intended
+        # Suppress DeprecationWarning, because we know for sure that we are not intended
         # to use the deprecated names here.
         #
         # `contextlib.suppress` is not used because it won't suppress warnings.
@@ -395,7 +396,7 @@ def clean_up_import_cache(module_name: str) -> None:
             module_name = module_name[:idx]
 
             # Use pop() instead of del, because it's not out of possibility that
-            # sys.modules could have been modified by code out of our control.
+            # sys.modules could have been tampered with by other code.
 
             sys.modules.pop(module_name, None)
             idx = module_name.rfind(".")

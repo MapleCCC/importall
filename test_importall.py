@@ -11,6 +11,7 @@ import pytest
 
 @pytest.fixture()
 def isolate_globals():
+    # Copy a reference, because the name `globals` can't be accessed after the `.clear()` call.
     globals_dict = globals()
     original_globals = dict(globals_dict)
     yield

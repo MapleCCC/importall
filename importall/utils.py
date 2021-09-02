@@ -2,7 +2,6 @@ import builtins
 import functools
 import json
 import sys
-from collections import defaultdict
 from functools import cache
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, TypeVar
@@ -60,14 +59,17 @@ def convert_version_to_tuple(version: str) -> VersionTuple:
     """
 
     m = regex.fullmatch(r"(?P<major>\d+)\.(?P<minor>\d+)", version)
-    version_tuple = (int(m.group("major")), int(m.group("minor")))
+
+    major, minor = m.group("major", "minor")
+    version_tuple = (int(major), int(minor))
+
     return version_tuple
 
 
 def load_deprecated_modules() -> dict[VersionTuple, frozenset[str]]:
     """Load DEPRECATED_MODULES from JSON file"""
 
-    json_file = Path(__file__).parent / "deprecated_modules.json"
+    json_file = Path(__file__).with_name("deprecated_modules.json")
     json_text = json_file.read_text(encoding="utf-8")
     json_obj = jsonc_loads(json_text)
 
@@ -80,7 +82,7 @@ def load_deprecated_modules() -> dict[VersionTuple, frozenset[str]]:
 def load_deprecated_names() -> dict[VersionTuple, dict[str, frozenset[str]]]:
     """Load DEPRECATED_NAMES from JSON file"""
 
-    json_file = Path(__file__).parent / "deprecated_names.json"
+    json_file = Path(__file__).with_name("deprecated_names.json")
     json_text = json_file.read_text(encoding="utf-8")
     json_obj = jsonc_loads(json_text)
 
