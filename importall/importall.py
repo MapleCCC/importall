@@ -384,6 +384,20 @@ def clean_up_import_cache(module_name: str) -> None:
         if module.__name__ != module_name:
             del sys.modules[module.__name__]
 
+    def clean_cache_of_submodules(module_name: str) -> None:
+
+        # When a module is imported, its submodules are possibly also implicitly
+        # imported.
+
+        submodules = []
+
+        for mod in sys.modules:
+            if mod.startswith(module_name + "."):
+                submodules.append(mod)
+
+        for mod in submodules:
+            del sys.modules[mod]
+
     def clean_cache_of_ascendants(module_name: str) -> None:
 
         # When a module is imported, its ascendant modules are also implicitly imported.
@@ -405,6 +419,8 @@ def clean_up_import_cache(module_name: str) -> None:
         return
 
     clean_cache_of_alias(module_name)
+
+    clean_cache_of_submodules(module_name)
 
     clean_cache_of_ascendants(module_name)
 
