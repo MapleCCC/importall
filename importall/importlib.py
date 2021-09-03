@@ -10,6 +10,7 @@ from .utils import deprecated_names, profile, singleton_class
 
 __all__ = [
     "import_public_names",
+    "deduce_public_interface",
     "wildcard_import_module",
     "from_stdlib",
     "clean_up_import_cache",
@@ -29,11 +30,20 @@ def import_public_names(
     behavior by setting the `include_deprecated` parameter to `True` (**not recommended**).
     """
 
-    symtab = wildcard_import_module(module_name)
+    public_names = deduce_public_interface(module_name)
 
     if not include_deprecated:
-        for name in deprecated_names(module=module_name):
-            symtab.pop(name, None)
+        public_names -= deprecated_names(module=module_name)
+
+    symtab = wildcard_import_module(module_name)
+
+    return {name: symtab[name] for name in public_names}
+
+
+def deduce_public_interface(module_name: str) -> set[str]:
+    """Try best effort to heuristically determine public names exported by a module"""
+
+    symtab = wildcard_import_module(module_name)
 
     # Try best effort to filter out only public names
 
@@ -68,11 +78,14 @@ def import_public_names(
         origin = getattr(symbol, "__module__", None)
         return origin in IMPORTABLE_MODULES and origin != module_name
 
+    public_names = set()
+
     for name, symbol in dict(symtab).items():
         if is_another_stdlib(symbol) or from_another_stdlib(symbol):
-            del symtab[name]
+            continue
+        public_names.add(name)
 
-    return symtab
+    return public_names
 
 
 @profile
