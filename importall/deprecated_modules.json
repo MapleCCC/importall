@@ -3,7 +3,7 @@
 // Among these modules, binhex, parser, symbol, formatter, and imp emit DeprecationWarning's when imported.
 
 {
-  "3.9": ["binhex", "parser", "symbol"],
+  "3.9": ["binhex", "distutils.command.bdist_msi", "parser", "symbol"],
   "3.6": ["asynchat", "asyncore", "tkinter.tix"],
   "3.4": ["formatter", "imp"],
   "3.3": ["xml.etree.ElementTree"],
