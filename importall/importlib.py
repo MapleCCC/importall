@@ -5,7 +5,7 @@ from typing import Any
 
 from .constants import IMPORTABLE_MODULES
 from .typing import SymbolTable
-from .utils import deprecated_names, profile, singleton_class
+from .utils import deprecated_names, profile, singleton_class, stdlib_public_names
 
 
 __all__ = [
@@ -30,7 +30,7 @@ def import_public_names(
     behavior by setting the `include_deprecated` parameter to `True` (**not recommended**).
     """
 
-    public_names = deduce_public_interface(module_name)
+    public_names = stdlib_public_names(module_name)
 
     if not include_deprecated:
         public_names -= deprecated_names(module=module_name)

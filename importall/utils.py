@@ -15,6 +15,7 @@ __all__ = [
     "profile",
     "deprecated_modules",
     "deprecated_names",
+    "stdlib_public_names",
 ]
 
 
@@ -150,3 +151,28 @@ def deprecated_names(*, version: str = None, module: str = None) -> set[str]:
                 names |= _names
 
     return names
+
+
+@cache
+def load_stdlib_public_names(version: str) -> dict[str, frozenset[str]]:
+    """Load stdlib public names data from JSON file"""
+
+    json_file = Path(__file__).with_name("stdlib_public_names") / (version + ".json")
+    json_text = json_file.read_text(encoding="utf-8")
+    json_obj = json.loads(json_text)
+
+    return {module: frozenset(names) for module, names in json_obj.items()}
+
+
+def stdlib_public_names(module: str, *, version: str = None) -> set[str]:
+    """
+    Return a set of public names of a stdlib module, in specific Python version.
+
+    If no version is given, default to the current version.
+
+    The `version` parameter takes argument of the form `3.6`, `2.7`, etc.
+    """
+
+    version = version or ".".join(str(c) for c in sys.version_info[:2])
+
+    return set(load_stdlib_public_names(version)[module])
