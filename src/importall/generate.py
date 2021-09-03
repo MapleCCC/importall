@@ -20,8 +20,7 @@ def main() -> None:
     data = {}
     for module_name in IMPORTABLE_MODULES:
         public_names = deduce_public_interface(module_name)
-        if public_names:
-            data[module_name] = sorted(public_names)
+        data[module_name] = sorted(public_names)
 
     file.write_text(json.dumps(data, indent=2, sort_keys=True), encoding="utf-8")
 
