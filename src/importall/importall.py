@@ -217,9 +217,12 @@ def get_all_symbols(
     symtab: SymbolTable = {}
 
     for module_name in module_names:
-        symtab |= import_public_names(
-            module_name, lazy=lazy, include_deprecated=include_deprecated
-        )
+        try:
+            symtab |= import_public_names(
+                module_name, lazy=lazy, include_deprecated=include_deprecated
+            )
+        except (ImportError, ModuleNotFoundError):
+            continue
 
     return symtab
 

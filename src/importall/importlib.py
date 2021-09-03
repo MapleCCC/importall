@@ -105,7 +105,11 @@ def deduce_public_interface(module_name: str) -> set[str]:
 
 @profile
 def wildcard_import_module(module_name: str) -> SymbolTable:
-    """Programmatic wildcard import"""
+    """
+    Programmatically wildcard import a module.
+
+    Could raise `ModuleNotFoundError` or `ImportError`.
+    """
 
     if module_name == "__future__":
 
@@ -115,13 +119,9 @@ def wildcard_import_module(module_name: str) -> SymbolTable:
         import __future__
         return {name: getattr(__future__, name) for name in __future__.__all__}
 
-    try:
-        symtab: SymbolTable = {}
-        exec(f"from {module_name} import *", {}, symtab)
-        return symtab
-
-    except (ImportError, ModuleNotFoundError):
-        return {}
+    symtab: SymbolTable = {}
+    exec(f"from {module_name} import *", {}, symtab)
+    return symtab
 
 
 @singleton_class
@@ -154,7 +154,10 @@ class StdlibChecker:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
 
-            symbol_table = import_public_names(module_name, include_deprecated=True)
+            try:
+                symbol_table = import_public_names(module_name, include_deprecated=True)
+            except (ImportError, ModuleNotFoundError):
+                return
 
             for symbol in symbol_table.values():
                 try:

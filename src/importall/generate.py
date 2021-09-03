@@ -19,7 +19,13 @@ def main() -> None:
     # FIXME we should not only use IMPORTABLE_MODULES, because the list should be much more general
     data = {}
     for module_name in IMPORTABLE_MODULES:
-        public_names = deduce_public_interface(module_name)
+
+        try:
+            public_names = deduce_public_interface(module_name)
+        except (ImportError, ModuleNotFoundError):
+            print(f"Failed to generate public interface of library {module_name}")
+            continue
+
         data[module_name] = sorted(public_names)
 
     file.write_text(json.dumps(data, indent=2, sort_keys=True), encoding="utf-8")
