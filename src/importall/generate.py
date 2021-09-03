@@ -7,8 +7,8 @@ import subprocess
 import sys
 from pathlib import Path
 
-from .constants import IMPORTABLE_MODULES
 from .importlib import deduce_public_interface
+from .stdlib_list import IMPORTABLE_STDLIB_MODULES
 
 
 def main() -> None:
@@ -16,9 +16,9 @@ def main() -> None:
     ver = ".".join(str(c) for c in sys.version_info[:2])
     file = Path(__file__).with_name("stdlib_public_names") / (ver + ".json")
 
-    # FIXME we should not only use IMPORTABLE_MODULES, because the list should be much more general
+    # FIXME we should not only use IMPORTABLE_STDLIB_MODULES, because the list should be much more general
     data = {}
-    for module_name in IMPORTABLE_MODULES:
+    for module_name in IMPORTABLE_STDLIB_MODULES:
 
         try:
             public_names = deduce_public_interface(module_name)

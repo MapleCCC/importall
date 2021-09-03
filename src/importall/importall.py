@@ -89,8 +89,8 @@ import inspect
 from collections.abc import Iterable, Mapping
 from typing import Union
 
-from .constants import BUILTINS_NAMES, IMPORTABLE_MODULES
 from .importlib import clean_up_import_cache, from_stdlib, import_public_names
+from .stdlib_list import BUILTINS_NAMES, IMPORTABLE_STDLIB_MODULES
 from .typing import SymbolTable
 from .utils import deprecated_modules, profile
 
@@ -203,7 +203,7 @@ def get_all_symbols(
         priorities = {module: 1 for module in prioritized}
 
     # Ignore user-specified modules.
-    module_names = IMPORTABLE_MODULES - set(ignore)
+    module_names = IMPORTABLE_STDLIB_MODULES - set(ignore)
 
     if not include_deprecated:
         # Ignore deprecated modules
@@ -241,5 +241,5 @@ def deimportall(globals: SymbolTable, purge_cache: bool = False) -> None:
             del globals[name]
 
     if purge_cache:
-        for module_name in IMPORTABLE_MODULES:
+        for module_name in IMPORTABLE_STDLIB_MODULES:
             clean_up_import_cache(module_name)

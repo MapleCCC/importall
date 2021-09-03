@@ -6,7 +6,7 @@ from typing import Any
 
 from lazy_object_proxy import Proxy
 
-from .constants import IMPORTABLE_MODULES
+from .stdlib_list import IMPORTABLE_STDLIB_MODULES, STDLIB_MODULES
 from .typing import SymbolTable
 from .utils import deprecated_names, profile, singleton_class, stdlib_public_names
 
@@ -81,7 +81,7 @@ def deduce_public_interface(module_name: str) -> set[str]:
         module.
         """
 
-        return inspect.ismodule(symbol) and symbol.__name__ in IMPORTABLE_MODULES
+        return inspect.ismodule(symbol) and symbol.__name__ in STDLIB_MODULES
 
     def from_another_stdlib(symbol: Any) -> bool:
         """
@@ -91,7 +91,7 @@ def deduce_public_interface(module_name: str) -> set[str]:
         """
 
         origin = getattr(symbol, "__module__", None)
-        return origin in IMPORTABLE_MODULES and origin != module_name
+        return origin in STDLIB_MODULES and origin != module_name
 
     public_names = set()
 
@@ -141,7 +141,7 @@ class StdlibChecker:
         self._stdlib_symbols = set()
         self._stdlib_symbol_ids: set[int] = set()
 
-        for module_name in IMPORTABLE_MODULES:
+        for module_name in IMPORTABLE_STDLIB_MODULES:
             self._gather_info(module_name)
 
     def _gather_info(self, module_name: str) -> None:
