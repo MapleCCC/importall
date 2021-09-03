@@ -101,7 +101,6 @@ DEPRECATED_MODULES = load_deprecated_modules()
 DEPRECATED_NAMES = load_deprecated_names()
 
 
-@cache
 def deprecated_modules(*, version: str = None) -> set[str]:
     """
     Return a set of modules who are deprecated after the given version.
@@ -125,7 +124,6 @@ def deprecated_modules(*, version: str = None) -> set[str]:
     return modules
 
 
-@cache
 def deprecated_names(*, version: str = None, module: str = None) -> set[str]:
     """
     Return a set of names who are deprecated after the given version.
