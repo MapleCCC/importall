@@ -114,7 +114,7 @@ def importall(
     and/or the `ignore` parameter. Names from the module with higher priority value will
     override names from the module with lower priority value.
 
-    The `globals` parameter accepts a symbol table to operate on. Usually the caller passes
+    The `globals` parameter accepts a symbol table to populate. Usually the caller passes
     in `globals()`.
 
     By default, built-in names are protected from overriding. The protection can be switched
@@ -124,12 +124,12 @@ def importall(
     so because deprecated modules and names hopefully should not be used anymore,
     their presence only for easing the steepness of API changes and providing a progressive
     cross-version migration experience. If you are sure you know what you are doing, override
-    the default behavior by setting the `include_deprecated` parameter to `True` (**not recommended**).
+    the default behavior by setting the `include_deprecated` parameter to `True` (**NOT RECOMMENDED!**).
 
     The `prioritized` parameter accepts either an iterable of strings specifying modules
     whose priorities are set to 1, or a mapping object with string keys and integer values,
     specifying respective priority values for corresponding modules. Valid priority value
-    is always integer. All modules default to 0 priority values. It's possible to specify
+    is always integer. All modules default to priority values of 0. It's possible to specify
     negative priority value.
 
     The `ignore` parameter accepts an iterable of strings specifying modules that should
@@ -170,12 +170,12 @@ def get_all_symbols(
     so because deprecated modules and names hopefully should not be used anymore,
     their presence only for easing the steepness of API changes and providing a progressive
     cross-version migration experience. If you are sure you know what you are doing, override
-    the default behavior by setting the `include_deprecated` parameter to `True` (**not recommended**).
+    the default behavior by setting the `include_deprecated` parameter to `True` (**NOT RECOMMENDED!**).
 
     The `prioritized` parameter accepts either an iterable of strings specifying modules
     whose priorities are set to 1, or a mapping object with string keys and integer values,
     specifying respective priority values for corresponding modules. Valid priority value
-    is always integer. All modules default to 0 priority values. It's possible to specify
+    is always integer. All modules default to priority values of 0. It's possible to specify
     negative priority value.
 
     The `ignore` parameter accepts an iterable of strings specifying modules that should
@@ -219,7 +219,7 @@ def deimportall(globals: SymbolTable, purge_cache: bool = False) -> None:
 
     Set the `purge_cache` parameter to `True` if a cleaner and more thorough revert is preferred.
     Useful when module-level behaviors is desired to re-happen, such as the emission of
-    the DeprecationWarning on import.
+    the `DeprecationWarning` on import.
     """
 
     for name, symbol in dict(globals).items():

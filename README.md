@@ -119,7 +119,7 @@ def importall(
     and/or the `ignore` parameter. Names from the module with higher priority value will
     override names from the module with lower priority value.
 
-    The `globals` parameter accepts a symbol table to operate on. Usually the caller passes
+    The `globals` parameter accepts a symbol table to populate. Usually the caller passes
     in `globals()`.
 
     By default, built-in names are protected from overriding. The protection can be switched

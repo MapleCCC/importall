@@ -27,7 +27,7 @@ def import_public_names(
     deprecated names hopefully should not be used anymore, their presence only for
     easing the steepness of API changes and providing a progressive cross-version
     migration experience. If you are sure you know what you are doing, override the default
-    behavior by setting the `include_deprecated` parameter to `True` (**not recommended**).
+    behavior by setting the `include_deprecated` parameter to `True` (**NOT RECOMMENDED!**).
     """
 
     public_names = stdlib_public_names(module_name)
@@ -90,6 +90,7 @@ def deduce_public_interface(module_name: str) -> set[str]:
 
 @profile
 def wildcard_import_module(module_name: str) -> SymbolTable:
+    """Programmatic wildcard import"""
 
     if module_name == "__future__":
 
@@ -156,6 +157,7 @@ class StdlibChecker:
 
 # Convenient function for handy invocation of `StdlibChecker().check()`
 def from_stdlib(symbol: Any) -> bool:
+    """Check if a symbol comes from standard libraries. Try best effort."""
     return StdlibChecker().check(symbol)
 
 
@@ -165,7 +167,7 @@ def clean_up_import_cache(module_name: str) -> None:
     import mechanism.
 
     Useful when module-level behaviors is desired to re-happen, such as the emission of
-    the DeprecationWarning on import.
+    the `DeprecationWarning` on import.
     """
 
     # Reference: Import cache mechanism https://docs.python.org/3.9/reference/import.html#the-module-cache
