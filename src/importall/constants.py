@@ -28,12 +28,16 @@ BUILTINS_NAMES = frozenset(dir(builtins)) - {
 # 2. List maintained by the `stdlib-list` library:
 # https://github.com/jackmaney/python-stdlib-list/blob/master/stdlib_list/lists/3.9.txt
 
-curr_ver_stdlib_list = stdlib_list()
+curr_ver_stdlib_list = set(stdlib_list())
 
-# Patch missing standard libraries in stdlib-list
+# Patch stdlib-list: add missing standard libraries
 # TODO open an issue in https://github.com/jackmaney/python-stdlib-list/
 # FIXME should we consider these standard libraries ? What's the authority definition of "standard libraries" in Python?
-curr_ver_stdlib_list += {"msilib.schema", "msilib.sequence", "msilib.text"}
+curr_ver_stdlib_list |= {"msilib.schema", "msilib.sequence", "msilib.text"}
+
+# Patch stdlib-list: some modules should not be considered public standard libraries
+# TODO open an issue in https://github.com/jackmaney/python-stdlib-list/
+curr_ver_stdlib_list -= {"multiprocessing.context", "_collections_abc", "unittest.loader"}
 
 IMPORTABLE_MODULES = frozenset(curr_ver_stdlib_list)
 

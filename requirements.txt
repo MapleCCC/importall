@@ -1,2 +1,2 @@
-stdlib-list==0.8.0
+stdlib-list==0.7.0  # TODO wait for upstream fix. stdlib-list==0.8.0 is poisoned by several commits from CJ-Wright that add non-public folders which should not be considered public standard libraries.
 regex==2021.4.4
