@@ -1,7 +1,10 @@
 import inspect
 import sys
 import warnings
+from functools import partial
 from typing import Any
+
+from lazy_object_proxy import Proxy
 
 from .constants import IMPORTABLE_MODULES
 from .typing import SymbolTable
@@ -18,10 +21,13 @@ __all__ = [
 
 
 def import_public_names(
-    module_name: str, *, include_deprecated: bool = False
+    module_name: str, *, lazy: bool = False, include_deprecated: bool = False
 ) -> SymbolTable:
     """
     Return a symbol table containing all public names defined in the module.
+
+    By default, names are eagerly imported. One can reduce the overhead by setting the
+    `lazy` parameter to `True` to enable lazy import mode.
 
     By default, deprecated names are not included. It is designed so because
     deprecated names hopefully should not be used anymore, their presence only for
@@ -35,9 +41,18 @@ def import_public_names(
     if not include_deprecated:
         public_names -= deprecated_names(module=module_name)
 
-    symtab = wildcard_import_module(module_name)
+    eager = not lazy
 
-    return {name: symtab[name] for name in public_names}
+    if eager:
+        symtab = wildcard_import_module(module_name)
+        return {name: symtab[name] for name in public_names}
+
+    else:
+
+        def eager_import(name: str) -> Any:
+            return wildcard_import_module(module_name)[name]
+
+        return {name: Proxy(partial(eager_import, name)) for name in public_names}
 
 
 def deduce_public_interface(module_name: str) -> set[str]:

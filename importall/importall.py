@@ -101,6 +101,7 @@ __all__ = ["importall", "deimportall", "get_all_symbols"]
 def importall(
     globals: SymbolTable,
     *,
+    lazy: bool = True,
     protect_builtins: bool = True,
     include_deprecated: bool = False,
     prioritized: Union[Iterable[str], Mapping[str, int]] = (),
@@ -116,6 +117,9 @@ def importall(
 
     The `globals` parameter accepts a symbol table to populate. Usually the caller passes
     in `globals()`.
+
+    By default, names are lazily imported, to avoid the overhead of eager import.
+    Set the `lazy` parameter to `False` to switch to eager import mode.
 
     By default, built-in names are protected from overriding. The protection can be switched
     off by setting the `protect_builtins` parameter to `False`.
@@ -141,7 +145,10 @@ def importall(
     """
 
     symtab = get_all_symbols(
-        include_deprecated=include_deprecated, prioritized=prioritized, ignore=ignore
+        lazy=lazy,
+        include_deprecated=include_deprecated,
+        prioritized=prioritized,
+        ignore=ignore,
     )
 
     if protect_builtins:
@@ -154,6 +161,7 @@ def importall(
 @profile
 def get_all_symbols(
     *,
+    lazy: bool = True,
     include_deprecated: bool = False,
     prioritized: Union[Iterable[str], Mapping[str, int]] = (),
     ignore: Iterable[str] = (),
@@ -165,6 +173,9 @@ def get_all_symbols(
     Name collision is likely. One can resolve name collisions by tuning the `prioritized`
     and/or the `ignore` parameter. Names from the module with higher priority value will
     override names from the module with lower priority value.
+
+    By default, names are lazily imported, to avoid the overhead of eager import.
+    Set the `lazy` parameter to `False` to switch to eager import mode.
 
     By default, deprecated modules and deprecated names are not imported. It is designed
     so because deprecated modules and names hopefully should not be used anymore,
@@ -207,7 +218,7 @@ def get_all_symbols(
 
     for module_name in module_names:
         symtab |= import_public_names(
-            module_name, include_deprecated=include_deprecated
+            module_name, lazy=lazy, include_deprecated=include_deprecated
         )
 
     return symtab
