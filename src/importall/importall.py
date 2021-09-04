@@ -85,14 +85,18 @@ log2(2)
 """
 
 
-import inspect
 from collections.abc import Iterable, Mapping
 from typing import Union
 
 from .importlib import clean_up_import_cache, from_stdlib, import_public_names
 from .stdlib_list import BUILTINS_NAMES, IMPORTABLE_STDLIB_MODULES
 from .typing import SymbolTable
-from .utils import deprecated_modules, profile
+from .utils import (
+    deprecated_modules,
+    getcallerframe,
+    is_called_at_module_level,
+    profile,
+)
 
 
 __all__ = ["importall", "deimportall", "get_all_symbols"]
@@ -148,18 +152,11 @@ def importall(
     nonterminal `future_stmt` in https://docs.python.org/3/reference/simple_stmts.html#future-statements).
     """
 
-    caller_frame = inspect.stack()[1].frame
-
     # Check against invocation at non-module level
-    #
-    # This check could emit false positive in the case of some advanced dynamic-reflection
-    # inspection tricks, like `func.__code__ = func.__code__.replace(co_name="<module>")`.
-    # However such case is so unlikely and rare that we should not be concerned.
-    # We are good with the current approach as it works for most cases.
-    if caller_frame.f_code.co_name != "<module>":
+    if not is_called_at_module_level():
         raise RuntimeError("importall() function is only allowed to be invoked at the module level")
 
-    globals = globals or caller_frame.f_globals
+    globals = globals or getcallerframe().f_globals
 
     symtab = get_all_symbols(
         lazy=lazy,
@@ -257,18 +254,11 @@ def deimportall(globals: SymbolTable = None, *, purge_cache: bool = False) -> No
     RuntimeError.
     """
 
-    caller_frame = inspect.stack()[1].frame
-
     # Check against invocation at non-module level
-    #
-    # This check could emit false positive in the case of some advanced dynamic-reflection
-    # inspection tricks, like `func.__code__ = func.__code__.replace(co_name="<module>")`.
-    # However such case is so unlikely and rare that we should not be concerned.
-    # We are good with the current approach as it works for most cases.
-    if caller_frame.f_code.co_name != "<module>":
+    if not is_called_at_module_level():
         raise RuntimeError("deimportall() function is only allowed to be invoked at the module level")
 
-    globals = globals or caller_frame.f_globals
+    globals = globals or getcallerframe().f_globals
 
     for name, symbol in dict(globals).items():
         if from_stdlib(symbol):
