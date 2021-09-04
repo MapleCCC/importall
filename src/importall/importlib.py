@@ -67,10 +67,12 @@ def deduce_public_interface(module_name: str) -> set[str]:
 
     # Use a separate clean interpreter to retrieve public names.
     #
-    # This is to workaround the problem that a proceding importing of submodules could
-    # lead to surprising and undesirable injection of such submodules into the namespace
-    # of the parent module. Such problem would have lead to nondeterministic result from
-    # the `deduce_public_interface()` function.
+    # This is to workaround the problem that a preceding importing of submodules could
+    # lead to inadvertent and surprising injection of such submodules into the namespace
+    # of the parent module. Such problem would have led to nondeterministic result from
+    # the `deduce_public_interface()` function if not taken good care of.
+
+    # TODO create a subinterpreter within the same process to reduce performance overhead
 
     executable = sys.executable or "python"
     source = (
@@ -81,8 +83,6 @@ def deduce_public_interface(module_name: str) -> set[str]:
     public_names = set(
         subprocess.check_output([executable, "-c", source], text=True).splitlines()
     )
-
-    symtab = wildcard_import_module(module_name)
 
     # Try best effort to filter out only public names
 
@@ -125,6 +125,8 @@ def deduce_public_interface(module_name: str) -> set[str]:
             and not origin.startswith(module_name + ".")
         )
 
+    symtab = wildcard_import_module(module_name)
+
     for name, symbol in dict(symtab).items():
         if is_another_stdlib(symbol) or from_another_stdlib(symbol):
             public_names.remove(name)
@@ -140,12 +142,9 @@ def wildcard_import_module(module_name: str) -> SymbolTable:
     Could raise `ModuleNotFoundError` or `ImportError`.
     """
 
+    # The __future__ module is a special case.
+    # Wildcard-importing the __future__ library yields SyntaxError.
     if module_name == "__future__":
-
-        # The __future__ module is a special case.
-        # Wildcard-importing the __future__ library yields SyntaxError.
-
-        import __future__
         return {name: getattr(__future__, name) for name in __future__.__all__}
 
     symtab: SymbolTable = {}

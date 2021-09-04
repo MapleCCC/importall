@@ -29,6 +29,7 @@ def main() -> None:
     for module_name in tqdm(
         IMPORTABLE_STDLIB_MODULES,
         desc="Generating static list of stdlib public names",
+        # TODO which style is better: "5.42module/s" or "5.42modules/s" ?
         unit="module",
     ):
 
