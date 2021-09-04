@@ -1,4 +1,6 @@
+import __future__
 import inspect
+import subprocess
 import sys
 import warnings
 from functools import partial
@@ -58,6 +60,28 @@ def import_public_names(
 def deduce_public_interface(module_name: str) -> set[str]:
     """Try best effort to heuristically determine public names exported by a module"""
 
+    # The __future__ module is a special case
+    # Wildcard importing the __future__ module yields SyntaxError
+    if module_name == "__future__":
+        return set(__future__.__all__)
+
+    # Use a separate clean interpreter to retrieve public names.
+    #
+    # This is to workaround the problem that a proceding importing of submodules could
+    # lead to surprising and undesirable injection of such submodules into the namespace
+    # of the parent module. Such problem would have lead to nondeterministic result from
+    # the `deduce_public_interface()` function.
+
+    executable = sys.executable or "python"
+    source = (
+        "symtab = {}\n"
+        f"exec('from {module_name} import *', dict(), symtab)\n"
+        "for symbol in symtab: print(symbol)\n"
+    )
+    public_names = set(
+        subprocess.check_output([executable, "-c", source], text=True).splitlines()
+    )
+
     symtab = wildcard_import_module(module_name)
 
     # Try best effort to filter out only public names
@@ -101,12 +125,9 @@ def deduce_public_interface(module_name: str) -> set[str]:
             and not origin.startswith(module_name + ".")
         )
 
-    public_names = set()
-
     for name, symbol in dict(symtab).items():
         if is_another_stdlib(symbol) or from_another_stdlib(symbol):
-            continue
-        public_names.add(name)
+            public_names.remove(name)
 
     return public_names
 
