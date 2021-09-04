@@ -115,6 +115,10 @@ def importall(
     and/or the `ignore` parameter. Names from the module with higher priority value will
     override names from the module with lower priority value.
 
+    The `importall()` function is only allowed to be called at the module level.
+    Attempting to invoke `importall()` in class or function definitions will raise a
+    RuntimeError.
+
     The `globals` parameter accepts a symbol table to populate. Usually the caller passes
     in `globals()`.
 
@@ -144,7 +148,18 @@ def importall(
     nonterminal `future_stmt` in https://docs.python.org/3/reference/simple_stmts.html#future-statements).
     """
 
-    globals = globals or inspect.stack()[1].frame.f_globals
+    caller_frame = inspect.stack()[1].frame
+
+    # Check against invocation at non-module level
+    #
+    # This check could emit false positive in the case of some advanced dynamic-reflection
+    # inspection tricks, like `func.__code__ = func.__code__.replace(co_name="<module>")`.
+    # However such case is so unlikely and rare that we should not be concerned.
+    # We are good with the current approach as it works for most cases.
+    if caller_frame.f_code.co_name != "<module>":
+        raise RuntimeError("importall() function is only allowed to be invoked at the module level")
+
+    globals = globals or caller_frame.f_globals
 
     symtab = get_all_symbols(
         lazy=lazy,
@@ -236,9 +251,24 @@ def deimportall(globals: SymbolTable = None, *, purge_cache: bool = False) -> No
     Set the `purge_cache` parameter to `True` if a cleaner and more thorough revert is preferred.
     Useful when module-level behaviors is desired to re-happen, such as the emission of
     the `DeprecationWarning` on import.
+
+    The `deimportall()` function is only allowed to be called at the module level.
+    Attempting to invoke `deimportall()` in class or function definitions will raise a
+    RuntimeError.
     """
 
-    globals = globals or inspect.stack()[1].frame.f_globals
+    caller_frame = inspect.stack()[1].frame
+
+    # Check against invocation at non-module level
+    #
+    # This check could emit false positive in the case of some advanced dynamic-reflection
+    # inspection tricks, like `func.__code__ = func.__code__.replace(co_name="<module>")`.
+    # However such case is so unlikely and rare that we should not be concerned.
+    # We are good with the current approach as it works for most cases.
+    if caller_frame.f_code.co_name != "<module>":
+        raise RuntimeError("deimportall() function is only allowed to be invoked at the module level")
+
+    globals = globals or caller_frame.f_globals
 
     for name, symbol in dict(globals).items():
         if from_stdlib(symbol):
