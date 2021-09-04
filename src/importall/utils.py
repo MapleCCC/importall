@@ -6,9 +6,11 @@ import sys
 from functools import cache
 from pathlib import Path
 from types import FrameType
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, TypeVar, cast
 
 import regex
+
+from .typing import JSONLoadsReturnType
 
 
 __all__ = [
@@ -45,7 +47,7 @@ if TYPE_CHECKING:
     profile = nulldecorator
 
 
-def jsonc_loads(text: str) -> Any:
+def jsonc_loads(text: str) -> JSONLoadsReturnType:
     """Similar to json.loads(), except also accepts JSON with comments"""
 
     # TODO use more robust way to clean comments, use syntax parsing
@@ -76,7 +78,7 @@ def load_deprecated_modules() -> dict[VersionTuple, frozenset[str]]:
 
     json_file = Path(__file__).with_name("deprecated_modules.json")
     json_text = json_file.read_text(encoding="utf-8")
-    json_obj = jsonc_loads(json_text)
+    json_obj = cast(dict[str, list[str]], jsonc_loads(json_text))
 
     return {
         convert_version_to_tuple(version): frozenset(modules)
@@ -89,9 +91,9 @@ def load_deprecated_names() -> dict[VersionTuple, dict[str, frozenset[str]]]:
 
     json_file = Path(__file__).with_name("deprecated_names.json")
     json_text = json_file.read_text(encoding="utf-8")
-    json_obj = jsonc_loads(json_text)
+    json_obj = cast(dict[str, dict[str, list[str]]], jsonc_loads(json_text))
 
-    res = {}
+    res: dict[VersionTuple, dict[str, frozenset[str]]] = {}
 
     for version, modules in json_obj.items():
         version_tuple = convert_version_to_tuple(version)
