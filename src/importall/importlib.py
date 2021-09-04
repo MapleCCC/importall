@@ -2,7 +2,7 @@ import inspect
 import sys
 import warnings
 from functools import partial
-from typing import Any
+from typing import Any, Optional
 
 from lazy_object_proxy import Proxy
 
@@ -81,7 +81,11 @@ def deduce_public_interface(module_name: str) -> set[str]:
         module.
         """
 
-        return inspect.ismodule(symbol) and symbol.__name__ in STDLIB_MODULES
+        return (
+            inspect.ismodule(symbol)
+            and symbol.__name__ in STDLIB_MODULES
+            and not symbol.__name__.startswith(module_name + ".")
+        )
 
     def from_another_stdlib(symbol: Any) -> bool:
         """
@@ -90,8 +94,12 @@ def deduce_public_interface(module_name: str) -> set[str]:
         public names of this module.
         """
 
-        origin = getattr(symbol, "__module__", None)
-        return origin in STDLIB_MODULES and origin != module_name
+        origin: Optional[str] = getattr(symbol, "__module__", None)
+        return (
+            origin in STDLIB_MODULES
+            and origin != module_name
+            and not origin.startswith(module_name + ".")
+        )
 
     public_names = set()
 
