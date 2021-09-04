@@ -229,7 +229,7 @@ def get_all_symbols(
     return symtab
 
 
-def deimportall(globals: SymbolTable = None, purge_cache: bool = False) -> None:
+def deimportall(globals: SymbolTable = None, *, purge_cache: bool = False) -> None:
     """
     De-import all imported names. Recover/restore the globals.
 
