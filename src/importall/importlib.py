@@ -1,4 +1,5 @@
 import __future__
+import importlib
 import inspect
 import subprocess
 import sys
@@ -16,6 +17,7 @@ from .utils import deprecated_names, profile, singleton_class, stdlib_public_nam
 __all__ = [
     "import_public_names",
     "deduce_public_interface",
+    "import_name_from_module",
     "wildcard_import_module",
     "from_stdlib",
     "clean_up_import_cache",
@@ -46,13 +48,13 @@ def import_public_names(
     eager = not lazy
 
     if eager:
-        symtab = wildcard_import_module(module_name)
-        return {name: symtab[name] for name in public_names}
+        module = importlib.import_module(module_name)
+        return {name: getattr(module, name) for name in public_names}
 
     else:
 
         def eager_import(name: str) -> Any:
-            return wildcard_import_module(module_name)[name]
+            return import_name_from_module(name, module_name)
 
         return {name: Proxy(partial(eager_import, name)) for name in public_names}
 
@@ -132,6 +134,15 @@ def deduce_public_interface(module_name: str) -> set[str]:
             public_names.remove(name)
 
     return public_names
+
+
+def import_name_from_module(name: str, module: str) -> object:
+    """Programmatically import a name from a module"""
+
+    try:
+        return getattr(importlib.import_module(module), name)
+    except AttributeError:
+        raise ImportError(f"cannot import name '{name}' from '{module}'") from None
 
 
 @profile
