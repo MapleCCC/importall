@@ -99,7 +99,7 @@ __all__ = ["importall", "deimportall", "get_all_symbols"]
 
 
 def importall(
-    globals: SymbolTable,
+    globals: SymbolTable = None,
     *,
     lazy: bool = True,
     protect_builtins: bool = True,
@@ -143,6 +143,8 @@ def importall(
     not imported in the form of future statements (See the production rule for the
     nonterminal `future_stmt` in https://docs.python.org/3/reference/simple_stmts.html#future-statements).
     """
+
+    globals = globals or inspect.stack()[1].frame.f_globals
 
     symtab = get_all_symbols(
         lazy=lazy,
@@ -227,7 +229,7 @@ def get_all_symbols(
     return symtab
 
 
-def deimportall(globals: SymbolTable, purge_cache: bool = False) -> None:
+def deimportall(globals: SymbolTable = None, purge_cache: bool = False) -> None:
     """
     De-import all imported names. Recover/restore the globals.
 
@@ -235,6 +237,8 @@ def deimportall(globals: SymbolTable, purge_cache: bool = False) -> None:
     Useful when module-level behaviors is desired to re-happen, such as the emission of
     the `DeprecationWarning` on import.
     """
+
+    globals = globals or inspect.stack()[1].frame.f_globals
 
     for name, symbol in dict(globals).items():
         if from_stdlib(symbol):
