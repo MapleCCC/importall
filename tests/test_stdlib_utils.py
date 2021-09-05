@@ -5,11 +5,11 @@ from typing import Any
 import pytest
 
 from importall.stdlib_utils import (
-    from_stdlib,
     deduce_stdlib_public_interface,
-    import_stdlib_public_names,
-    deprecated_names,
     deprecated_modules,
+    deprecated_names,
+    from_stdlib,
+    import_stdlib_public_names,
     stdlib_public_names,
 )
 

@@ -3,7 +3,7 @@ from typing import cast
 from hypothesis import given
 from hypothesis.strategies import integers
 
-from importall.utils import jsonc_loads, profile, singleton_class, hashable, Proxy
+from importall.utils import Proxy, hashable, jsonc_loads, profile, singleton_class
 
 
 def test_singleton_class() -> None:

@@ -3,9 +3,9 @@ import functools
 import pytest
 
 from importall.importlib import (
+    clean_up_import_cache,
     import_name_from_module,
     wildcard_import_module,
-    clean_up_import_cache,
 )
 
 
