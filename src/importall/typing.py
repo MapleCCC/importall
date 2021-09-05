@@ -1,11 +1,11 @@
 from collections.abc import MutableMapping
-from typing import Any, Union
+from typing import Union
 
 
 __all__ = ["SymbolTable", "JSONLoadsReturnType"]
 
 
-SymbolTable = MutableMapping[str, Any]
+SymbolTable = MutableMapping[str, object]
 
 
 JSONLoadsReturnType = Union[None, bool, float, str, list, dict]

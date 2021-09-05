@@ -5,7 +5,7 @@ import subprocess
 import sys
 import warnings
 from functools import partial
-from typing import Any, Optional
+from typing import Optional
 
 from lazy_object_proxy import Proxy
 
@@ -53,7 +53,7 @@ def import_public_names(
 
     else:
 
-        def eager_import(name: str) -> Any:
+        def eager_import(name: str) -> object:
             return import_name_from_module(name, module_name)
 
         return {name: Proxy(partial(eager_import, name)) for name in public_names}
@@ -100,7 +100,7 @@ def deduce_public_interface(module_name: str) -> set[str]:
     #
     # The only thing we can do is to try best effort.
 
-    def is_another_stdlib(symbol: Any) -> bool:
+    def is_another_stdlib(symbol: object) -> bool:
         """
         Detect if the symbol is possibly another standard library module imported to
         this module, hence should not be considered part of the public names of this
@@ -113,7 +113,7 @@ def deduce_public_interface(module_name: str) -> set[str]:
             and not symbol.__name__.startswith(module_name + ".")
         )
 
-    def from_another_stdlib(symbol: Any) -> bool:
+    def from_another_stdlib(symbol: object) -> bool:
         """
         Detect if the symbol is possibly a public name from another standard library
         module, imported to this module, hence should not be considered part of the
@@ -206,7 +206,7 @@ class StdlibChecker:
                 except TypeError:
                     self._stdlib_symbol_ids.add(id(symbol))
 
-    def check(self, obj: Any) -> bool:
+    def check(self, obj: object) -> bool:
         try:
             return obj in self._stdlib_symbols
         except TypeError:
@@ -214,7 +214,7 @@ class StdlibChecker:
 
 
 # Convenient function for handy invocation of `StdlibChecker().check()`
-def from_stdlib(symbol: Any) -> bool:
+def from_stdlib(symbol: object) -> bool:
     """Check if a symbol comes from standard libraries. Try best effort."""
     return StdlibChecker().check(symbol)
 

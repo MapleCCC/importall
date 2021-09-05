@@ -4,7 +4,6 @@ import builtins
 import os
 import platform as platform_module
 import sys
-from typing import Any
 
 import pytest
 
@@ -46,7 +45,7 @@ def isolate_environement(isolate_globals, isolate_sys_modules, isolate_os_enviro
     # https://github.com/python/cpython/blob/v3.9.0/Lib/test/support/__init__.py#L1241
 
 
-def eval_name(name: str) -> Any:
+def eval_name(name: str) -> object:
     """
     The use of `eval()` on arbitrary string has been considered dangerous practice.
     `eval_name()` is a safer and specialized alternative to `eval()`.
