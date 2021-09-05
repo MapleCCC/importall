@@ -14,7 +14,7 @@ from .stdlib_utils import deduce_public_interface
 
 
 MODULES_WITH_ZERO_TOP_LEVEL_PUBLIC_NAMES = frozenset(
-    {'distutils', 'email.mime', 'test', 'urllib', 'wsgiref'}
+    {"distutils", "email.mime", "test", "urllib", "wsgiref"}
 )
 
 

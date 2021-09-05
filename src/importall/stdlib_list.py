@@ -54,48 +54,52 @@ STDLIB_MODULES |= {"msilib.schema", "msilib.sequence", "msilib.text"}
 STDLIB_MODULES -= {"__main__", "__phello__.foo", "antigravity", "this"}
 
 
-UNIX_ONLY_STDLIB_MODULES = frozenset({
-    "crypt",
-    "curses",
-    "curses.ascii",
-    "curses.panel",
-    "curses.textpad",
-    "dbm.ndbm",
-    "dbm.gnu",
-    "fcntl",
-    "grp",
-    "readline",
-    "multiprocessing.popen_fork",
-    "multiprocessing.popen_forkserver",
-    "multiprocessing.popen_spawn_posix",
-    "nis",
-    "ossaudiodev",
-    "posix",
-    "pty",
-    "pwd",
-    "resource",
-    "spwd",
-    "syslog",
-    "termios",
-    "tty",
-})
+UNIX_ONLY_STDLIB_MODULES = frozenset(
+    {
+        "crypt",
+        "curses",
+        "curses.ascii",
+        "curses.panel",
+        "curses.textpad",
+        "dbm.ndbm",
+        "dbm.gnu",
+        "fcntl",
+        "grp",
+        "readline",
+        "multiprocessing.popen_fork",
+        "multiprocessing.popen_forkserver",
+        "multiprocessing.popen_spawn_posix",
+        "nis",
+        "ossaudiodev",
+        "posix",
+        "pty",
+        "pwd",
+        "resource",
+        "spwd",
+        "syslog",
+        "termios",
+        "tty",
+    }
+)
 
 
-TK_REQUIRED_STDLIB_MODULES = frozenset({
-    "tkinter",
-    "tkinter.colorchooser",
-    "tkinter.commondialog",
-    "tkinter.dnd",
-    "tkinter.filedialog",
-    "tkinter.font",
-    "tkinter.messagebox",
-    "tkinter.scrolledtext",
-    "tkinter.simpledialog",
-    "tkinter.tix",
-    "tkinter.ttk",
-    "turtle",
-    "turtledemo",
-})
+TK_REQUIRED_STDLIB_MODULES = frozenset(
+    {
+        "tkinter",
+        "tkinter.colorchooser",
+        "tkinter.commondialog",
+        "tkinter.dnd",
+        "tkinter.filedialog",
+        "tkinter.font",
+        "tkinter.messagebox",
+        "tkinter.scrolledtext",
+        "tkinter.simpledialog",
+        "tkinter.tix",
+        "tkinter.ttk",
+        "turtle",
+        "turtledemo",
+    }
+)
 
 
 IMPORTABLE_STDLIB_MODULES = STDLIB_MODULES.copy()
@@ -105,7 +109,9 @@ IMPORTABLE_STDLIB_MODULES = STDLIB_MODULES.copy()
 IMPORTABLE_STDLIB_MODULES -= {"distutils.command.bdist_packager"}
 
 # lib2to3 package contains Python 2 code, which is unrunnable under Python 3.
-IMPORTABLE_STDLIB_MODULES -= {mod for mod in IMPORTABLE_STDLIB_MODULES if mod.startswith("lib2to3")}
+IMPORTABLE_STDLIB_MODULES -= {
+    mod for mod in IMPORTABLE_STDLIB_MODULES if mod.startswith("lib2to3")
+}
 
 # On Windows OS or JVM, UNIX-specific modules are ignored.
 if os.name != "posix":

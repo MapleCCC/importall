@@ -4,6 +4,7 @@ A collection of utilities related to standard libraries.
 
 
 import __future__
+
 import importlib
 import inspect
 import json
@@ -183,7 +184,9 @@ class StdlibChecker:
 
             self._stdlib_symbols.add(module)
 
-            symbol_table = import_stdlib_public_names(module_name, include_deprecated=True)
+            symbol_table = import_stdlib_public_names(
+                module_name, include_deprecated=True
+            )
 
             for symbol in symbol_table.values():
                 try:

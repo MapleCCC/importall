@@ -1,6 +1,6 @@
 import sys
 
-from .importall import importall, deimportall, get_all_symbols
+from .importall import deimportall, get_all_symbols, importall
 
 
 if sys.version_info < (3, 9):
