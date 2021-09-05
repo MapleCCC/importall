@@ -20,14 +20,15 @@ from .typing import SymbolTable
 from .utils import deprecated_names, singleton_class, stdlib_public_names
 
 
-__all__ = ["import_public_names", "deduce_public_interface", "from_stdlib"]
+__all__ = ["import_stdlib_public_names", "deduce_public_interface", "from_stdlib"]
 
 
-def import_public_names(
+def import_stdlib_public_names(
     module_name: str, *, lazy: bool = False, include_deprecated: bool = False
 ) -> SymbolTable:
     """
-    Return a symbol table containing all public names defined in the module.
+    Return a symbol table containing all public names defined in the standard library
+    module.
 
     By default, names are eagerly imported. One can reduce the overhead by setting the
     `lazy` parameter to `True` to enable lazy import mode.
@@ -169,7 +170,7 @@ class StdlibChecker:
 
             self._stdlib_symbols.add(module)
 
-            symbol_table = import_public_names(module_name, include_deprecated=True)
+            symbol_table = import_stdlib_public_names(module_name, include_deprecated=True)
 
             for symbol in symbol_table.values():
                 try:

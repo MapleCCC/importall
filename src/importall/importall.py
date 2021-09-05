@@ -90,7 +90,7 @@ from typing import Union
 
 from .importlib import clean_up_import_cache
 from .stdlib_list import BUILTINS_NAMES, IMPORTABLE_STDLIB_MODULES
-from .stdlib_utils import from_stdlib, import_public_names
+from .stdlib_utils import from_stdlib, import_stdlib_public_names
 from .typing import SymbolTable
 from .utils import (
     deprecated_modules,
@@ -232,7 +232,7 @@ def get_all_symbols(
     symtab: SymbolTable = {}
 
     for module_name in module_names:
-        symtab |= import_public_names(
+        symtab |= import_stdlib_public_names(
             module_name, lazy=lazy, include_deprecated=include_deprecated
         )
 
