@@ -186,7 +186,7 @@ def stdlib_public_names(module: str, *, version: str = None) -> set[str]:
 
 def getcallerframe() -> FrameType:
     """Return the frame object of the stack frame of the caller of the current function"""
-    return inspect().stack()[2]
+    return inspect.stack()[2].frame
 
 
 def is_called_at_module_level() -> bool:
