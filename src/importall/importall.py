@@ -89,15 +89,11 @@ from collections.abc import Iterable, Mapping
 from typing import Union
 
 from .importlib import clean_up_import_cache
+from .inspect import getcallerframe, is_called_at_module_level
 from .stdlib_list import BUILTINS_NAMES, IMPORTABLE_STDLIB_MODULES
-from .stdlib_utils import from_stdlib, import_stdlib_public_names
+from .stdlib_utils import deprecated_modules, from_stdlib, import_stdlib_public_names
 from .typing import SymbolTable
-from .utils import (
-    deprecated_modules,
-    getcallerframe,
-    is_called_at_module_level,
-    profile,
-)
+from .utils import profile
 
 
 __all__ = ["importall", "deimportall", "get_all_symbols"]
