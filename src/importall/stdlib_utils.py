@@ -179,7 +179,7 @@ class StdlibChecker:
 
             module = importlib.import_module(module_name)
 
-            self._stdlib_symbols.add(module)
+            self._stdlib_symbol_ids.add(id(module))
 
             symbol_table = import_stdlib_public_names(
                 module_name, include_deprecated=True
