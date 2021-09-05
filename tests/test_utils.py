@@ -66,5 +66,6 @@ def test_Proxy(x: int) -> None:
 
     assert p == x
     assert p is x
+    assert hash(p) == hash(x)
     assert repr(p) == repr(x)
     assert type(p) == type(x)

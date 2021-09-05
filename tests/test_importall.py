@@ -7,6 +7,8 @@ import sys
 
 import pytest
 
+from importall import deimportall, get_all_symbols, importall
+
 
 @pytest.fixture()
 def isolate_globals():
@@ -64,7 +66,6 @@ class TestImportallFunction:
     """
 
     def test_plain_call(self) -> None:
-        from importall import importall
 
         importall(globals())
 
@@ -96,7 +97,6 @@ class TestImportallFunction:
         assert barry_as_FLUFL.optional[:2] == (3, 1)
 
     def test_protect_builtins_parameter_is_true(self) -> None:
-        from importall import importall
 
         importall(globals(), protect_builtins=True)
 
@@ -112,7 +112,6 @@ class TestImportallFunction:
             assert eval_name(name) is getattr(builtins, name)
 
     def test_protect_builtins_parameter_is_false(self) -> None:
-        from importall import importall
 
         assert open.__module__ == "io"
 
@@ -121,7 +120,6 @@ class TestImportallFunction:
         assert open.__module__ == "webbrowser"
 
     def test_import_deprecated_parameter(self) -> None:
-        from importall import importall
 
         # This unit test makes a reasonable assumption that there are very likely always
         # some deprecations going on in Python's codebase.
@@ -130,7 +128,6 @@ class TestImportallFunction:
             importall(globals(), include_deprecated=True)
 
     def test_prioritized_parameter_iterable_argument(self) -> None:
-        from importall import importall
 
         importall(globals())
 
@@ -141,7 +138,6 @@ class TestImportallFunction:
         assert compress.__module__ == "lzma"
 
     def test_prioritized_parameter_mapping_argument(self) -> None:
-        from importall import importall
 
         importall(globals())
 
@@ -152,7 +148,6 @@ class TestImportallFunction:
         assert compress.__module__ == "lzma"
 
     def test_ignore_parameter(self) -> None:
-        from importall import importall
 
         importall(globals())
 
@@ -164,7 +159,6 @@ class TestImportallFunction:
 
 
 def test_get_all_symbols() -> None:
-    from importall import get_all_symbols
 
     symtab = get_all_symbols()
 
@@ -201,7 +195,6 @@ def test_get_all_symbols() -> None:
 
 
 def test_deimportall() -> None:
-    from importall import deimportall, importall
 
     importall(globals())
 
