@@ -25,7 +25,7 @@ from .utils import Proxy, jsonc_loads, singleton_class
 
 __all__ = [
     "import_stdlib_public_names",
-    "deduce_public_interface",
+    "deduce_stdlib_public_interface",
     "from_stdlib",
     "deprecated_modules",
     "deprecated_names",
@@ -72,8 +72,8 @@ def import_stdlib_public_names(
         return {name: Proxy(partial(eager_import, name)) for name in public_names}
 
 
-def deduce_public_interface(module_name: str) -> set[str]:
-    """Try best effort to heuristically determine public names exported by a module"""
+def deduce_stdlib_public_interface(module_name: str) -> set[str]:
+    """Try best effort to heuristically determine public names exported by a stdlib module"""
 
     # The __future__ module is a special case
     # Wildcard importing the __future__ module yields SyntaxError
@@ -85,7 +85,7 @@ def deduce_public_interface(module_name: str) -> set[str]:
     # This is to workaround the problem that a preceding importing of submodules could
     # lead to inadvertent and surprising injection of such submodules into the namespace
     # of the parent module. Such problem would have led to nondeterministic result from
-    # the `deduce_public_interface()` function if not taken good care of.
+    # the `deduce_stdlib_public_interface()` function if not taken good care of.
 
     # TODO create a subinterpreter within the same process to reduce performance overhead
 

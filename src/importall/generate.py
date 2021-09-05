@@ -10,7 +10,7 @@ from pathlib import Path
 from tqdm import tqdm
 
 from .stdlib_list import IMPORTABLE_STDLIB_MODULES
-from .stdlib_utils import deduce_public_interface
+from .stdlib_utils import deduce_stdlib_public_interface
 
 
 MODULES_WITH_ZERO_TOP_LEVEL_PUBLIC_NAMES = frozenset(
@@ -34,7 +34,7 @@ def main() -> None:
     ):
 
         try:
-            public_names = deduce_public_interface(module_name)
+            public_names = deduce_stdlib_public_interface(module_name)
         except (ImportError, ModuleNotFoundError):
             print(
                 f"Failed to generate public interface of library {module_name}",

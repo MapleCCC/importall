@@ -6,7 +6,7 @@ import pytest
 
 from importall.stdlib_utils import (
     from_stdlib,
-    deduce_public_interface,
+    deduce_stdlib_public_interface,
     import_stdlib_public_names,
     deprecated_names,
     deprecated_modules,
@@ -24,8 +24,8 @@ def test_import_stdlib_public_names():
     assert import_stdlib_public_names("functools") == symtab
 
 
-def test_deduce_public_interface():
-    public_names = deduce_public_interface("functools")
+def test_deduce_stdlib_public_interface():
+    public_names = deduce_stdlib_public_interface("functools")
     assert public_names == set(functools.__all__)
 
 
