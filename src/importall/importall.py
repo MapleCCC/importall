@@ -88,8 +88,9 @@ log2(2)
 from collections.abc import Iterable, Mapping
 from typing import Union
 
-from .importlib import clean_up_import_cache, from_stdlib, import_public_names
+from .importlib import clean_up_import_cache
 from .stdlib_list import BUILTINS_NAMES, IMPORTABLE_STDLIB_MODULES
+from .stdlib_utils import from_stdlib, import_public_names
 from .typing import SymbolTable
 from .utils import (
     deprecated_modules,

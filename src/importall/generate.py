@@ -9,8 +9,8 @@ from pathlib import Path
 
 from tqdm import tqdm
 
-from .importlib import deduce_public_interface
 from .stdlib_list import IMPORTABLE_STDLIB_MODULES
+from .stdlib_utils import deduce_public_interface
 
 
 MODULES_WITH_ZERO_TOP_LEVEL_PUBLIC_NAMES = frozenset(
