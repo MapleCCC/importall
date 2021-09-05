@@ -21,7 +21,7 @@ from lazy_object_proxy import Proxy
 from .importlib import import_name_from_module, wildcard_import_module
 from .stdlib_list import IMPORTABLE_STDLIB_MODULES, STDLIB_MODULES
 from .typing import SymbolTable
-from .utils import jsonc_loads, singleton_class
+from .utils import hashable, jsonc_loads, singleton_class
 
 
 __all__ = [
@@ -189,16 +189,15 @@ class StdlibChecker:
             )
 
             for symbol in symbol_table.values():
-                try:
+                if hashable(symbol):
                     self._stdlib_symbols.add(symbol)
-
-                except TypeError:
+                else:
                     self._stdlib_symbol_ids.add(id(symbol))
 
     def check(self, obj: object) -> bool:
-        try:
+        if hashable(obj):
             return obj in self._stdlib_symbols
-        except TypeError:
+        else:
             return id(obj) in self._stdlib_symbol_ids
 
 

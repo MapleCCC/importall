@@ -7,7 +7,7 @@ from .functools import nulldecorator
 from .typing import JSONLoadsReturnType
 
 
-__all__ = ["singleton_class", "profile", "jsonc_loads"]
+__all__ = ["singleton_class", "profile", "jsonc_loads", "hashable"]
 
 
 # A decorator to transform a class into a singleton
@@ -31,3 +31,14 @@ def jsonc_loads(text: str) -> JSONLoadsReturnType:
     lines = text.splitlines(keepends=True)
     cleaned = "".join(line for line in lines if not line.lstrip().startswith("//"))
     return json.loads(cleaned)
+
+
+def hashable(obj: object) -> bool:
+    """Check if an object is hashable"""
+
+    try:
+        hash(obj)
+    except TypeError:
+        return False
+    else:
+        return True
