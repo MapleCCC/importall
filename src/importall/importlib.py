@@ -193,6 +193,10 @@ class StdlibChecker:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
 
+            module = importlib.import_module(module_name)
+
+            self._stdlib_symbols.add(module)
+
             symbol_table = import_public_names(module_name, include_deprecated=True)
 
             for symbol in symbol_table.values():
