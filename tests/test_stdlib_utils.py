@@ -44,12 +44,12 @@ def test_from_stdlib():
 
 def test_deprecated_modules():
     assert "distutils.command.bdist_msi" in deprecated_modules()
-    assert "distutils.command.bdist_msi" not in deprecated_modules(version="3.8")
+    assert "distutils.command.bdist_msi" not in deprecated_modules("3.8")
 
 
 def test_deprecated_names():
-    assert "List" in deprecated_names(module="typing")
-    assert "List" not in deprecated_names(version="3.8", module="typing")
+    assert "List" in deprecated_names("typing")
+    assert "List" not in deprecated_names("typing", version="3.8")
 
 
 def test_stdlib_public_names():

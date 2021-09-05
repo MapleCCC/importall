@@ -56,7 +56,7 @@ def import_stdlib_public_names(
     public_names = stdlib_public_names(module_name)
 
     if not include_deprecated:
-        public_names -= deprecated_names(module=module_name)
+        public_names -= deprecated_names(module_name)
 
     eager = not lazy
 
@@ -248,7 +248,7 @@ DEPRECATED_MODULES = Proxy(load_deprecated_modules)
 DEPRECATED_NAMES = Proxy(load_deprecated_names)
 
 
-def deprecated_modules(*, version: str = None) -> set[str]:
+def deprecated_modules(version: str = None) -> set[str]:
     """
     Return a set of modules who are deprecated after the given version.
 
@@ -271,9 +271,9 @@ def deprecated_modules(*, version: str = None) -> set[str]:
     return modules
 
 
-def deprecated_names(*, version: str = None, module: str = None) -> set[str]:
+def deprecated_names(module: str, *, version: str = None) -> set[str]:
     """
-    Return a set of names who are deprecated after the given version.
+    Return a set of names from a stdlib module who are deprecated after the given version.
 
     If no version is given, default to the current version.
 
