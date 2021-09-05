@@ -16,12 +16,11 @@ from pathlib import Path
 from typing import Optional, cast
 
 import regex
-from lazy_object_proxy import Proxy
 
 from .importlib import import_name_from_module, wildcard_import_module
 from .stdlib_list import IMPORTABLE_STDLIB_MODULES, STDLIB_MODULES
 from .typing import SymbolTable
-from .utils import jsonc_loads, singleton_class
+from .utils import Proxy, jsonc_loads, singleton_class
 
 
 __all__ = [

@@ -1,13 +1,19 @@
 import builtins
 import functools
 import json
-from typing import TYPE_CHECKING
+from collections.abc import Callable
+from typing import TYPE_CHECKING, TypeVar, cast
+
+from lazy_object_proxy import Proxy as _Proxy
 
 from .functools import nulldecorator
 from .typing import JSONLoadsReturnType
 
 
-__all__ = ["singleton_class", "profile", "jsonc_loads", "hashable"]
+__all__ = ["singleton_class", "profile", "jsonc_loads", "hashable", "Proxy"]
+
+
+R = TypeVar("R")
 
 
 # A decorator to transform a class into a singleton
@@ -42,3 +48,39 @@ def hashable(obj: object) -> bool:
         return False
     else:
         return True
+
+
+builtins_patched = False
+
+
+def Proxy(func: Callable[[], R]) -> R:
+    """
+    Patch `lazy-object-proxy.Proxy`, so that `repr()`, `id()`, and `type()` also are
+    blind to proxy-ness.
+    """
+
+    global builtins_patched
+    if not builtins_patched:
+        _id, _repr, _type = id, repr, type
+        builtins.id = (
+            lambda x: _id(x) if not isinstance(x, _Proxy) else _id(x.__wrapped__)
+        )
+        builtins.repr = (
+            lambda x: _repr(x) if not isinstance(x, _Proxy) else _repr(x.__wrapped__)
+        )
+
+        # FIXME
+        #
+        # class patched_type(_type):
+        #     def __new__(cls, *args, **kwargs):
+        #         if len(args) == 1 and not kwargs:
+        #             x = args[0]
+        #             x = x if not isinstance(x, _Proxy) else x.__wrapped__
+        #             args = (x,)
+        #         return _type(*args, **kwargs)
+        #
+        # builtins.type = patched_type
+
+        builtins_patched = True
+
+    return cast(R, _Proxy(func))
