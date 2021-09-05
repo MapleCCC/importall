@@ -243,9 +243,9 @@ def load_deprecated_names() -> dict[VersionTuple, dict[str, frozenset[str]]]:
     return res
 
 
-DEPRECATED_MODULES = load_deprecated_modules()
+DEPRECATED_MODULES = Proxy(load_deprecated_modules)
 
-DEPRECATED_NAMES = load_deprecated_names()
+DEPRECATED_NAMES = Proxy(load_deprecated_names)
 
 
 def deprecated_modules(*, version: str = None) -> set[str]:
