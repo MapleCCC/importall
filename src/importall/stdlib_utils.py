@@ -21,7 +21,7 @@ from lazy_object_proxy import Proxy
 from .importlib import import_name_from_module, wildcard_import_module
 from .stdlib_list import IMPORTABLE_STDLIB_MODULES, STDLIB_MODULES
 from .typing import SymbolTable
-from .utils import hashable, jsonc_loads, singleton_class
+from .utils import jsonc_loads, singleton_class
 
 
 __all__ = [
@@ -159,8 +159,6 @@ class StdlibChecker:
     # The id() approach could fail if importlib.reload() has been called or sys.modules
     # has been manipulated.
     #
-    # The hash() approach could fail if the symbol is unhashable.
-    #
     # So it's a try-best-effort thing.
 
     def __init__(self) -> None:
@@ -189,16 +187,10 @@ class StdlibChecker:
             )
 
             for symbol in symbol_table.values():
-                if hashable(symbol):
-                    self._stdlib_symbols.add(symbol)
-                else:
-                    self._stdlib_symbol_ids.add(id(symbol))
+                self._stdlib_symbol_ids.add(id(symbol))
 
     def check(self, obj: object) -> bool:
-        if hashable(obj):
-            return obj in self._stdlib_symbols
-        else:
-            return id(obj) in self._stdlib_symbol_ids
+        return id(obj) in self._stdlib_symbol_ids
 
 
 # Convenient function for handy invocation of `StdlibChecker().check()`
