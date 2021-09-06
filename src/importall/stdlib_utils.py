@@ -260,7 +260,7 @@ def deprecated_modules(version: str = None) -> set[str]:
 
     If no version is given, default to the current version.
 
-    The `version` parameter takes argument of the form `3.6`, `2.7`, etc.
+    The `version` parameter takes argument of the form `3.9`, `4.7`, etc.
     """
 
     if version is None:
@@ -283,7 +283,7 @@ def deprecated_names(module: str, *, version: str = None) -> set[str]:
 
     If no version is given, default to the current version.
 
-    The `version` parameter takes argument of the form `3.6`, `2.7`, etc.
+    The `version` parameter takes argument of the form `3.9`, `4.7`, etc.
     """
 
     if version is None:
@@ -321,7 +321,7 @@ def stdlib_public_names(module: str, *, version: str = None) -> set[str]:
 
     If no version is given, default to the current version.
 
-    The `version` parameter takes argument of the form `3.6`, `2.7`, etc.
+    The `version` parameter takes argument of the form `3.9`, `4.7`, etc.
     """
 
     version = version or ".".join(str(c) for c in sys.version_info[:2])
