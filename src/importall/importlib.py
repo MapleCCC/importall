@@ -1,6 +1,5 @@
 import __future__
 
-import importlib
 import sys
 
 from .typing import SymbolTable
@@ -18,15 +17,8 @@ def import_name_from_module(name: str, module: str) -> object:
     submodule of that module.
     """
 
-    try:
-        return getattr(importlib.import_module(module), name)
-
-    except AttributeError:
-        try:
-            return importlib.import_module(module + "." + name)
-
-        except ModuleNotFoundError:
-            raise ImportError(f"cannot import name '{name}' from '{module}'") from None
+    exec(f"from {module} import {name}")
+    return eval(name)
 
 
 @profile
