@@ -100,7 +100,7 @@ __all__ = ["importall", "deimportall", "get_all_symbols"]
 
 
 def importall(
-    globals: SymbolTable = None,
+    namespace: SymbolTable = None,
     *,
     lazy: bool = True,
     protect_builtins: bool = True,
@@ -120,8 +120,8 @@ def importall(
     Attempting to invoke `importall()` in class or function definitions will raise a
     RuntimeError.
 
-    The `globals` parameter accepts a symbol table to populate. Usually the caller passes
-    in `globals()`.
+    The `namespace` parameter accepts a symbol table to populate. Usually the caller
+    passes in `globals()`.
 
     By default, names are lazily imported, to avoid the overhead of eager import.
     Set the `lazy` parameter to `False` to switch to eager import mode.
@@ -155,7 +155,7 @@ def importall(
             "importall() function is only allowed to be invoked at the module level"
         )
 
-    globals = globals or getcallerframe().f_globals
+    namespace = namespace or getcallerframe().f_globals
 
     symtab = get_all_symbols(
         lazy=lazy,
@@ -168,7 +168,7 @@ def importall(
         for name in BUILTINS_NAMES:
             symtab.pop(name, None)
 
-    globals.update(symtab)
+    namespace.update(symtab)
 
 
 @profile
@@ -237,9 +237,9 @@ def get_all_symbols(
     return symtab
 
 
-def deimportall(globals: SymbolTable = None, *, purge_cache: bool = False) -> None:
+def deimportall(namespace: SymbolTable = None, *, purge_cache: bool = False) -> None:
     """
-    De-import all imported names. Recover/restore the globals.
+    De-import all imported names. Recover/restore the namespace.
 
     Set the `purge_cache` parameter to `True` if a cleaner and more thorough revert is preferred.
     Useful when module-level behaviors is desired to re-happen, such as the emission of
@@ -256,11 +256,11 @@ def deimportall(globals: SymbolTable = None, *, purge_cache: bool = False) -> No
             "deimportall() function is only allowed to be invoked at the module level"
         )
 
-    globals = globals or getcallerframe().f_globals
+    namespace = namespace or getcallerframe().f_globals
 
-    for name, symbol in dict(globals).items():
+    for name, symbol in dict(namespace).items():
         if from_stdlib(symbol):
-            del globals[name]
+            del namespace[name]
 
     if purge_cache:
         for module_name in IMPORTABLE_STDLIB_MODULES:
