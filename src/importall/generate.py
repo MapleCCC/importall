@@ -1,6 +1,8 @@
-""" Utility script to generate static data of stdlib public names """
+"""
+Utility script to generate static data of stdlib public names
 
 # Usage: `python -m importall.generate`
+"""
 
 import json
 import subprocess

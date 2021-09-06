@@ -1,9 +1,11 @@
 """
 Script to launch an importall REPL, within which every available names from standard
 libraries are already imported.
+
+Usage: `python -m importall`
 """
 
-initial_globals = dict(globals())
+initial_globals = globals().copy()
 
 import code
 import sys

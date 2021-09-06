@@ -70,11 +70,17 @@ def Proxy(func: Callable[[], R]) -> R:
     """
 
     global builtins_patched
+
     if not builtins_patched:
+
         _id, _repr, _type = id, repr, type
+
+        # FIXME Patching id() is not enough to ensure that `Proxy(x) is x` evaluates to
+        # True.
         builtins.id = (
             lambda x: _id(x) if not isinstance(x, _Proxy) else _id(x.__wrapped__)
         )
+
         builtins.repr = (
             lambda x: _repr(x) if not isinstance(x, _Proxy) else _repr(x.__wrapped__)
         )

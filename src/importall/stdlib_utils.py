@@ -2,7 +2,6 @@
 A collection of utilities related to standard libraries.
 """
 
-
 import __future__
 
 import importlib
@@ -84,6 +83,10 @@ def deduce_stdlib_public_interface(module_name: str) -> set[str]:
     # lead to inadvertent and surprising injection of such submodules into the namespace
     # of the parent module. Such problem would have led to nondeterministic result from
     # the `deduce_stdlib_public_interface()` function if not taken good care of.
+    #
+    # An example is the `distutils` module. Whether `msvccompiler` appears in the
+    # result of `from distutils import *` depends on whether `distutils.msvccompiler`
+    # has been imported before.
 
     # TODO create a subinterpreter within the same process to reduce performance overhead
 

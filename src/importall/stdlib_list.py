@@ -14,6 +14,7 @@ __all__ = [
 
 
 BUILTINS_NAMES = frozenset(dir(builtins)) - {
+    "__build_class__",
     "__doc__",
     "__loader__",
     "__name__",
@@ -44,9 +45,9 @@ STDLIB_MODULES |= {"msilib.schema", "msilib.sequence", "msilib.text"}
 # Patch stdlib-list: some modules should not be considered public standard libraries
 # TODO open an issue in https://github.com/jackmaney/python-stdlib-list/
 #
-# The `__main__` module is meta.
 # Names from the `__main__` module should not be considered standard library utilities.
 #
+# TODO what's `__phello__.foo` module for anyway ??
 # Importing `__phello__.foo` module will cause "Hello world!" to be printed
 # on the console, and we don't yet know why.
 #
