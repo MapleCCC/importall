@@ -17,7 +17,7 @@ from typing import Optional, cast
 import regex
 
 from .importlib import import_name_from_module, wildcard_import_module
-from .stdlib_list import IMPORTABLE_STDLIB_MODULES, STDLIB_MODULES
+from .stdlib_list import BUILTINS_NAMES, IMPORTABLE_STDLIB_MODULES, STDLIB_MODULES
 from .typing import SymbolTable
 from .utils import Proxy, jsonc_loads, singleton_class
 
@@ -76,6 +76,13 @@ def deduce_stdlib_public_interface(module_name: str) -> set[str]:
     # Wildcard importing the __future__ module yields SyntaxError
     if module_name == "__future__":
         return set(__future__.__all__)
+
+    # The builtins module is a special case
+    # Some exported public names from builtins module are prefixed with underscore,
+    # hence ignored by the standard wildcard import mechanism. Examples are `__import__`
+    # and `__debug__`.
+    if module_name == "builtins":
+        return set(BUILTINS_NAMES)
 
     # Use a separate clean interpreter to retrieve public names.
     #
