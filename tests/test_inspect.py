@@ -1,3 +1,6 @@
+import subprocess
+
+import pytest
 from hypothesis import given
 from hypothesis.strategies import integers
 
@@ -13,11 +16,31 @@ def test_getcallerframe(x: int) -> None:
     f()
 
 
+def test_getcallerframe_called_from_non_function() -> None:
+
+    source = "from importall.inspect import getcallerframe\n" "getcallerframe()"
+    command = ["python", "-c", source]
+
+    with pytest.raises(subprocess.CalledProcessError) as exc_info:
+        subprocess.check_output(command, stderr=subprocess.STDOUT, text=True)
+
+    error_message = "RuntimeError: getcallerframe() expects to be called in a function"
+    assert error_message in exc_info.value.output
+
+
 def test_is_called_at_module_level() -> None:
     def f():
         assert not is_called_at_module_level()
 
     f()
+
+    class A:
+        assert not is_called_at_module_level()
+
+        def method(self):
+            assert not is_called_at_module_level()
+
+    A().method()
 
     source = """
 def g():
