@@ -121,6 +121,8 @@ def provide_lazy_version(func: Callable[P, R]) -> Callable[..., R]:
 
     Inject an optional keyword argument named `lazy` to the signature of the decorated
     function. Setting the `lazy` parameter to `True` enables lazy evaluation mode.
+
+    Access `__wrapped__` to retrieve the original function.
     """
 
     @wraps(func)
@@ -132,5 +134,7 @@ def provide_lazy_version(func: Callable[P, R]) -> Callable[..., R]:
             return func(*args, **kwargs)
         else:
             return cast(R, Proxy(partial(func, *args, **kwargs)))
+
+    wrapper.__wrapped__ = func
 
     return wrapper

@@ -3,7 +3,14 @@ from typing import cast
 from hypothesis import given
 from hypothesis.strategies import integers
 
-from importall.utils import Proxy, hashable, jsonc_loads, profile, singleton_class
+from importall.utils import (
+    Proxy,
+    hashable,
+    jsonc_loads,
+    profile,
+    provide_lazy_version,
+    singleton_class,
+)
 
 
 def test_singleton_class() -> None:
@@ -69,3 +76,13 @@ def test_Proxy(x: int) -> None:
     assert hash(p) == hash(x)
     assert repr(p) == repr(x)
     assert type(p) == type(x)
+
+
+@given(integers())
+def test_provide_lazy_version(x) -> None:
+    @provide_lazy_version
+    def inc(x: int) -> int:
+        return x + 1
+
+    assert inc(x) == x + 1
+    assert inc.__wrapped__(x) == x + 1
