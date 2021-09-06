@@ -64,8 +64,9 @@ def import_stdlib_public_names(
     eager = not lazy
 
     if eager:
-        module = importlib.import_module(module_name)
-        return {name: getattr(module, name) for name in public_names}
+        return {
+            name: import_name_from_module(name, module_name) for name in public_names
+        }
 
     else:
 
