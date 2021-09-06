@@ -53,6 +53,9 @@ def import_stdlib_public_names(
     behavior by setting the `include_deprecated` parameter to `True` (**NOT RECOMMENDED!**).
     """
 
+    if module_name not in IMPORTABLE_STDLIB_MODULES:
+        raise ValueError(f"{module_name} is not importable stdlib module")
+
     public_names = stdlib_public_names(module_name)
 
     if not include_deprecated:
@@ -74,6 +77,9 @@ def import_stdlib_public_names(
 
 def deduce_stdlib_public_interface(module_name: str) -> set[str]:
     """Try best effort to heuristically determine public names exported by a stdlib module"""
+
+    if module_name not in IMPORTABLE_STDLIB_MODULES:
+        raise ValueError(f"{module_name} is not importable stdlib module")
 
     # The __future__ module is a special case
     # Wildcard importing the __future__ module yields SyntaxError
