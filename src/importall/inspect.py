@@ -7,7 +7,11 @@ __all__ = ["getcallerframe", "is_called_at_module_level"]
 
 def getcallerframe() -> FrameType:
     """Return the frame object of the stack frame of the caller of the current function"""
-    return inspect.stack()[2].frame
+
+    try:
+        return inspect.stack()[2].frame
+    except IndexError:
+        raise RuntimeError("getcallerframe() expects to be called in a function")
 
 
 def is_called_at_module_level() -> bool:
