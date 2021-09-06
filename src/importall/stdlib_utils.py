@@ -316,11 +316,19 @@ def deprecated_names(module: str, *, version: str = None) -> set[str]:
 def load_stdlib_public_names(version: str) -> dict[str, frozenset[str]]:
     """Load stdlib public names data from JSON file"""
 
-    json_file = Path(__file__).with_name("stdlib_public_names") / (version + ".json")
-    json_text = json_file.read_text(encoding="utf-8")
-    json_obj = json.loads(json_text)
+    try:
+        json_file = Path(__file__).with_name("stdlib_public_names") / (
+            version + ".json"
+        )
+        json_text = json_file.read_text(encoding="utf-8")
+        json_obj = json.loads(json_text)
 
-    return {module: frozenset(names) for module, names in json_obj.items()}
+        return {module: frozenset(names) for module, names in json_obj.items()}
+
+    except FileNotFoundError:
+        raise ValueError(
+            f"there is no data of stdlib public names for Python version {version}"
+        )
 
 
 def stdlib_public_names(module: str, *, version: str = None) -> set[str]:
