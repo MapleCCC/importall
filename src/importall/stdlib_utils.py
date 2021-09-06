@@ -204,6 +204,9 @@ def convert_version_to_tuple(version: str) -> VersionTuple:
 
     m = regex.fullmatch(r"(?P<major>\d+)\.(?P<minor>\d+)", version)
 
+    if not m:
+        raise ValueError(f"{version} is not a valid version")
+
     major, minor = m.group("major", "minor")
     version_tuple = (int(major), int(minor))
 
@@ -278,6 +281,9 @@ def deprecated_names(module: str, *, version: str = None) -> set[str]:
     The `version` parameter takes argument of the form `3.9`, `4.7`, etc.
     """
 
+    if module not in IMPORTABLE_STDLIB_MODULES:
+        raise ValueError(f"{module} is not importable stdlib module")
+
     if version is None:
         version_tuple = sys.version_info[:2]
     else:
@@ -315,6 +321,9 @@ def stdlib_public_names(module: str, *, version: str = None) -> set[str]:
 
     The `version` parameter takes argument of the form `3.9`, `4.7`, etc.
     """
+
+    if module not in IMPORTABLE_STDLIB_MODULES:
+        raise ValueError(f"{module} is not importable stdlib module")
 
     version = version or ".".join(str(c) for c in sys.version_info[:2])
 
