@@ -11,7 +11,7 @@ import json
 import subprocess
 import sys
 import warnings
-from functools import cache, partial
+from functools import cache
 from pathlib import Path
 from typing import Optional, cast
 
@@ -61,19 +61,10 @@ def import_stdlib_public_names(
     if not include_deprecated:
         public_names -= deprecated_names(module_name)
 
-    eager = not lazy
-
-    if eager:
-        return {
-            name: import_name_from_module(name, module_name) for name in public_names
-        }
-
-    else:
-
-        def eager_import(name: str) -> object:
-            return import_name_from_module(name, module_name)
-
-        return {name: Proxy(partial(eager_import, name)) for name in public_names}
+    return {
+        name: import_name_from_module(name, module_name, lazy=lazy)
+        for name in public_names
+    }
 
 
 def deduce_stdlib_public_interface(module_name: str) -> set[str]:

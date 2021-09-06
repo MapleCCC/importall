@@ -3,18 +3,24 @@ import __future__
 import sys
 
 from .typing import SymbolTable
-from .utils import profile
+from .utils import profile, provide_lazy_version
 
 
 __all__ = ["import_name_from_module", "wildcard_import_module", "clean_up_import_cache"]
 
 
+@provide_lazy_version
 def import_name_from_module(name: str, module: str) -> object:
     """
     Programmatically import a name from a module.
 
     Such a name could be of a top level symbol defined or imported by that module, or a
     submodule of that module.
+
+    Setting the keyword argument `lazy` to `True` to enable lazy import mode. The return
+    result looks like the normal result, but it's only when the result is used by
+    external code that the actual import happens. Useful when importing a module is
+    considered expensive.
     """
 
     exec(f"from {module} import {name}")
