@@ -11,12 +11,22 @@ __all__ = ["import_name_from_module", "wildcard_import_module", "clean_up_import
 
 
 def import_name_from_module(name: str, module: str) -> object:
-    """Programmatically import a name from a module"""
+    """
+    Programmatically import a name from a module.
+
+    Such a name could be of a top level symbol defined or imported by that module, or a
+    submodule of that module.
+    """
 
     try:
         return getattr(importlib.import_module(module), name)
+
     except AttributeError:
-        raise ImportError(f"cannot import name '{name}' from '{module}'") from None
+        try:
+            return importlib.import_module(module + "." + name)
+
+        except ModuleNotFoundError:
+            raise ImportError(f"cannot import name '{name}' from '{module}'") from None
 
 
 @profile
