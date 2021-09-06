@@ -150,9 +150,9 @@ def importall(
     """
 
     # Check against invocation at non-module level
-    if not is_called_at_module_level():
+    if not namespace and not is_called_at_module_level():
         raise RuntimeError(
-            "importall() function is only allowed to be invoked at the module level"
+            "importall() function with default namespace argument is only allowed to be invoked at the module level"
         )
 
     namespace = namespace or getcallerframe().f_globals
@@ -251,9 +251,9 @@ def deimportall(namespace: SymbolTable = None, *, purge_cache: bool = False) -> 
     """
 
     # Check against invocation at non-module level
-    if not is_called_at_module_level():
+    if not namespace and not is_called_at_module_level():
         raise RuntimeError(
-            "deimportall() function is only allowed to be invoked at the module level"
+            "deimportall() function with default namespace argument is only allowed to be invoked at the module level"
         )
 
     namespace = namespace or getcallerframe().f_globals
