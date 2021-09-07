@@ -1,3 +1,8 @@
 [tool.pytest.ini_options]
 # When running tests, we want all warnings to be explicitly visible and aggressively loud.
 filterwarnings = "always"
+
+[tool.isort]
+profile = "black"
+skip_gitignore = true
+lines_after_imports = 3
