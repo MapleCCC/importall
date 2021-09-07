@@ -23,6 +23,20 @@ def import_name_from_module(name: str, module: str) -> object:
     considered expensive.
     """
 
+    # The __future__ module is a special case.
+    # `from __future__ import xxx` is a special syntax, called future statement. And the
+    # precedence of future statement is higher than that of import statement.
+    # See the production rule for the nonterminal `future_stmt` in https://docs.python.org/3/reference/simple_stmts.html#future-statements.
+    if module == "__future__":
+        return getattr(__future__, name)
+
+    # The builtins module is a special case.
+    # Some names from builtins module are reserve keywords in Python syntax, such as
+    # `True`, `False`, and `None`.
+    # Also, some special names are unassignable, such as `__debug__`.
+    if module == "builtins" and name in {"True", "False", "None", "__debug__"}:
+        return eval(name)
+
     exec(f"from {module} import {name}")
     return eval(name)
 
