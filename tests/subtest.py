@@ -7,7 +7,6 @@ from typing import Any, cast
 __all__ = ["_test_stdlib_symbols_in_namespace"]
 
 
-# TODO if we remove the underscore prefix, will pytest fail ?
 def _test_stdlib_symbols_in_namespace(namespace: Mapping[str, object]) -> None:
 
     ns = cast(Mapping[str, Any], namespace)

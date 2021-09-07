@@ -1,9 +1,14 @@
 import warnings
-from collections.abc import Iterator
+from collections.abc import Iterator, Mapping
 from contextlib import contextmanager
+from typing import TypeVar
 
 
-__all__ = ["eval_name", "pytest_not_deprecated_call"]
+__all__ = ["eval_name", "pytest_not_deprecated_call", "issubmapping"]
+
+
+KT = TypeVar("KT")
+VT = TypeVar("VT")
 
 
 def eval_name(name: str) -> object:
@@ -35,3 +40,7 @@ def pytest_not_deprecated_call() -> Iterator[None]:
 
     for warning_message in record:
         assert not issubclass(warning_message.category, DeprecationWarning)
+
+
+def issubmapping(m1: Mapping[KT, VT], m2: Mapping[KT, VT]) -> bool:
+    return all(value == m2[key] for key, value in m1.items())

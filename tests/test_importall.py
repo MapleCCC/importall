@@ -1,4 +1,5 @@
 import builtins
+import re
 
 import pytest
 
@@ -7,7 +8,7 @@ from importall.stdlib_list import BUILTINS_NAMES
 
 from .fixtures import isolate_environement  # type: ignore # autouse fixture
 from .subtest import _test_stdlib_symbols_in_namespace
-from .utils import eval_name, pytest_not_deprecated_call
+from .utils import eval_name, issubmapping, pytest_not_deprecated_call
 
 
 class TestImportallFunction:
@@ -22,14 +23,15 @@ class TestImportallFunction:
 
     def test_default_globals_argument(self) -> None:
 
-        source = "from importall import importall; importall()"
-        symtab = {}
-        exec(source, {}, symtab)
-        _test_stdlib_symbols_in_namespace(symtab)
+        _globals = {"importall": importall}
+        exec("importall()", _globals)
+        _test_stdlib_symbols_in_namespace(_globals)
 
         with pytest.raises(
             RuntimeError,
-            match="importall() function with default namespace argument is only allowed to be invoked at the module level",
+            match=re.escape(
+                "importall() function with default namespace argument is only allowed to be invoked at the module level"
+            ),
         ):
             importall()
 
@@ -56,7 +58,7 @@ class TestImportallFunction:
     def test_include_deprecated_parameter_is_false(self) -> None:
 
         with pytest_not_deprecated_call():
-            importall(globals(), include_deprecated=False)
+            importall(globals(), lazy=False, include_deprecated=False)
 
     def test_include_deprecated_parameter_is_true(self) -> None:
 
@@ -64,7 +66,7 @@ class TestImportallFunction:
         # some deprecations going on in Python's codebase.
 
         with pytest.deprecated_call():
-            importall(globals(), include_deprecated=True)
+            importall(globals(), lazy=False, include_deprecated=True)
 
     def test_prioritized_parameter_iterable_argument(self) -> None:
 
@@ -110,10 +112,12 @@ def test_deimportall() -> None:
 
     deimportall(globals())
 
-    assert globals() == origin_globals
+    assert issubmapping(globals(), origin_globals)
 
     with pytest.raises(
         RuntimeError,
-        match="deimportall() function with default namespace argument is only allowed to be invoked at the module level",
+        match=re.escape(
+            "deimportall() function with default namespace argument is only allowed to be invoked at the module level"
+        ),
     ):
         deimportall()
