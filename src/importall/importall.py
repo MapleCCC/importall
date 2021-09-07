@@ -237,13 +237,9 @@ def get_all_symbols(
     return symtab
 
 
-def deimportall(namespace: SymbolTable = None, *, purge_cache: bool = False) -> None:
+def deimportall(namespace: SymbolTable = None) -> None:
     """
     De-import all imported names. Recover/restore the namespace.
-
-    Set the `purge_cache` parameter to `True` if a cleaner and more thorough revert is preferred.
-    Useful when module-level behaviors is desired to re-happen, such as the emission of
-    the `DeprecationWarning` on import.
 
     The `deimportall()` function is only allowed to be called at the module level.
     Attempting to invoke `deimportall()` in class or function definitions will raise a
@@ -261,7 +257,3 @@ def deimportall(namespace: SymbolTable = None, *, purge_cache: bool = False) -> 
     for name, symbol in dict(namespace).items():
         if from_stdlib(symbol):
             del namespace[name]
-
-    if purge_cache:
-        for module_name in IMPORTABLE_STDLIB_MODULES:
-            clean_up_import_cache(module_name)
