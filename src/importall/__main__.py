@@ -3,11 +3,12 @@ A script to either launch an importall REPL, within which every available names 
 standard libraries are already imported, or run a Python script, with every available
 names from standard libraries injected into the script's namespace.
 
-Usage: `python -m importall [script]`
+Usage: `python -m importall [-h] [script]`
 """
 
 initial_globals = globals().copy()
 
+import argparse
 import builtins
 import code
 import sys
@@ -66,12 +67,21 @@ def run_repl() -> None:
 
 def main() -> None:
 
-    assert len(sys.argv[1:]) <= 1, "at most one argument is accepted"
+    parser = argparse.ArgumentParser(
+        prog="python -m importall",
+        usage="python -m importall [-h] [script]",
+        description="A script to either launch an importall REPL, "
+        "within which every available names from standard libraries are already imported, "
+        "or run a Python script, "
+        "with every available names from standard libraries injected into the script's namespace.",
+    )
+    parser.add_argument("script", nargs="?", help="A Python script file to run.")
+    args = parser.parse_args()
 
     # If there is a script file as command line argument, run it, otherwise launch an
     # interactive shell.
-    if sys.argv[1:]:
-        run_script(sys.argv[1])
+    if args.script:
+        run_script(args.script)
     else:
         run_repl()
 
