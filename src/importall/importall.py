@@ -2,7 +2,6 @@ from collections.abc import Iterable, Mapping
 from typing import Union, cast
 from uuid import uuid4
 
-from .importlib import clean_up_import_cache
 from .inspect import getcallerframe, is_called_at_module_level
 from .stdlib_list import BUILTINS_NAMES, IMPORTABLE_STDLIB_MODULES
 from .stdlib_utils import deprecated_modules, import_stdlib_public_names
@@ -90,6 +89,32 @@ def importall(
     namespace[KEY_TRACKING_INJECTED_SYMBOLS] = symtab
 
 
+def deimportall(namespace: SymbolTable = None) -> None:
+    """
+    De-import all imported names. Recover/restore the namespace.
+
+    The `deimportall()` function is only allowed to be called at the module level.
+    Attempting to invoke `deimportall()` in class or function definitions will raise a
+    RuntimeError.
+    """
+
+    # Check against invocation at non-module level
+    if not namespace and not is_called_at_module_level():
+        raise RuntimeError(
+            "deimportall() function with default namespace argument is only allowed to be invoked at the module level"
+        )
+
+    namespace = namespace or getcallerframe().f_globals
+
+    injected_symbols = cast(SymbolTable, namespace[KEY_TRACKING_INJECTED_SYMBOLS])
+
+    del namespace[KEY_TRACKING_INJECTED_SYMBOLS]
+
+    for name, symbol in injected_symbols.items():
+        if namespace[name] is symbol:
+            del namespace[name]
+
+
 @profile
 def get_all_symbols(
     *,
@@ -154,29 +179,3 @@ def get_all_symbols(
         )
 
     return symtab
-
-
-def deimportall(namespace: SymbolTable = None) -> None:
-    """
-    De-import all imported names. Recover/restore the namespace.
-
-    The `deimportall()` function is only allowed to be called at the module level.
-    Attempting to invoke `deimportall()` in class or function definitions will raise a
-    RuntimeError.
-    """
-
-    # Check against invocation at non-module level
-    if not namespace and not is_called_at_module_level():
-        raise RuntimeError(
-            "deimportall() function with default namespace argument is only allowed to be invoked at the module level"
-        )
-
-    namespace = namespace or getcallerframe().f_globals
-
-    injected_symbols = cast(SymbolTable, namespace[KEY_TRACKING_INJECTED_SYMBOLS])
-
-    del namespace[KEY_TRACKING_INJECTED_SYMBOLS]
-
-    for name, symbol in injected_symbols.items():
-        if namespace[name] is symbol:
-            del namespace[name]
