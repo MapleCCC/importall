@@ -4,20 +4,19 @@ import sys
 import pytest
 
 
-__all__ = ["isolate_environement"]
+__all__ = ["isolate_environment"]
 
 
-@pytest.fixture()
-def isolate_globals():
-    # Copy a reference, because the name `globals` can't be accessed after the `.clear()` call.
-    globals_dict = globals()
+@pytest.fixture
+def isolate_globals(request):
+    globals_dict = request.function.__globals__
     original_globals = dict(globals_dict)
     yield
     globals_dict.clear()
     globals_dict |= original_globals
 
 
-@pytest.fixture()
+@pytest.fixture
 def isolate_sys_modules():
     original_sys_modules = dict(sys.modules)
     yield
@@ -25,7 +24,7 @@ def isolate_sys_modules():
     sys.modules |= original_sys_modules
 
 
-@pytest.fixture()
+@pytest.fixture
 def isolate_os_environ():
     original_os_environ = dict(os.environ)
     yield
@@ -33,8 +32,8 @@ def isolate_os_environ():
     os.environ |= original_os_environ
 
 
-@pytest.fixture(autouse=True)
-def isolate_environement(isolate_globals, isolate_sys_modules, isolate_os_environ):
+@pytest.fixture
+def isolate_environment(isolate_globals, isolate_sys_modules, isolate_os_environ):
     """
     Before the test runs, backup the environment.
     After the test runs, restore the environment.
