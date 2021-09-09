@@ -86,17 +86,21 @@ log2(2)
 
 
 from collections.abc import Iterable, Mapping
-from typing import Union
+from typing import Union, cast
+from uuid import uuid4
 
 from .importlib import clean_up_import_cache
 from .inspect import getcallerframe, is_called_at_module_level
 from .stdlib_list import BUILTINS_NAMES, IMPORTABLE_STDLIB_MODULES
-from .stdlib_utils import deprecated_modules, from_stdlib, import_stdlib_public_names
+from .stdlib_utils import deprecated_modules, import_stdlib_public_names
 from .typing import SymbolTable
 from .utils import profile
 
 
 __all__ = ["importall", "deimportall", "get_all_symbols"]
+
+
+KEY_TRACKING_INJECTED_SYMBOLS = uuid4().hex
 
 
 def importall(
@@ -169,6 +173,8 @@ def importall(
             symtab.pop(name, None)
 
     namespace.update(symtab)
+
+    namespace[KEY_TRACKING_INJECTED_SYMBOLS] = symtab
 
 
 @profile
@@ -254,6 +260,10 @@ def deimportall(namespace: SymbolTable = None) -> None:
 
     namespace = namespace or getcallerframe().f_globals
 
-    for name, symbol in dict(namespace).items():
-        if from_stdlib(symbol):
+    injected_symbols = cast(SymbolTable, namespace[KEY_TRACKING_INJECTED_SYMBOLS])
+
+    del namespace[KEY_TRACKING_INJECTED_SYMBOLS]
+
+    for name, symbol in injected_symbols.items():
+        if namespace[name] is symbol:
             del namespace[name]
