@@ -38,7 +38,7 @@ if TYPE_CHECKING:
 
 
 def jsonc_loads(text: str) -> JSONLoadsReturnType:
-    """Similar to json.loads(), except also accepts JSON with comments"""
+    """Similar to json.loads(), except also accepts JSON with comments of various styles"""
 
     # TODO use more robust way to clean comments, use syntax parsing
     # TODO recognize more comment formats, Python-style comment, C-style comment, ...

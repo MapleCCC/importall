@@ -60,6 +60,7 @@ def import_stdlib_public_names(
     if not include_deprecated:
         public_names -= deprecated_names(module_name)
 
+    # TODO check to see if the laziness persists until actual use
     return {
         name: import_name_from_module(name, module_name, lazy=lazy)
         for name in public_names
@@ -150,7 +151,7 @@ def deduce_stdlib_public_interface(module_name: str) -> set[str]:
 
     symtab = wildcard_import_module(module_name)
 
-    for name, symbol in dict(symtab).items():
+    for name, symbol in symtab.items():
         if is_another_stdlib(symbol) or from_another_stdlib(symbol):
             public_names.remove(name)
 
@@ -169,11 +170,13 @@ class StdlibChecker:
     # So it's a try-best-effort thing.
 
     def __init__(self) -> None:
-        self._stdlib_symbols = set()
+
         self._stdlib_symbol_ids: set[int] = set()
 
         for module_name in IMPORTABLE_STDLIB_MODULES:
             self._gather_info(module_name)
+
+    __slots__ = ["_stdlib_symbol_ids"]
 
     def _gather_info(self, module_name: str) -> None:
 
