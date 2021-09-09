@@ -8,6 +8,7 @@ Usage: `python -m importall [script]`
 
 initial_globals = globals().copy()
 
+import builtins
 import code
 import sys
 from pathlib import Path
@@ -29,17 +30,16 @@ def bright_green(s: str) -> str:
     return Style.BRIGHT + Fore.GREEN + s + Style.RESET_ALL
 
 
-def get_inject_globals() -> dict[str, object]:
-    return initial_globals | get_all_symbols()
-
-
 def run_script(script_path: str) -> None:
 
     script = Path(script_path)
 
     text = script.read_text(encoding="utf-8")
 
-    exec(compile(text, script, "exec"), get_inject_globals())
+    inject_builtins = builtins.__dict__ | get_all_symbols()
+    inject_globals = initial_globals | {"__builtins__": inject_builtins}
+
+    exec(compile(text, script, "exec"), inject_globals)
 
 
 def run_repl() -> None:
@@ -59,7 +59,9 @@ def run_repl() -> None:
 
     exitmsg = "exiting importall REPL..."
 
-    code.interact(banner=banner, local=get_inject_globals(), exitmsg=exitmsg)
+    inject_globals = initial_globals | get_all_symbols()
+
+    code.interact(banner=banner, local=inject_globals, exitmsg=exitmsg)
 
 
 def main() -> None:
