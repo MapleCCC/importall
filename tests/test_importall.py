@@ -10,7 +10,7 @@ from .subtest import _test_stdlib_symbols_in_namespace
 from .utils import eval_name, issubmapping, pytest_not_deprecated_call
 
 
-@pytest.mark.usefixtures("isolate_environment")
+@pytest.mark.usefixtures("mock_environment")
 class TestImportallFunction:
     """
     Unit tests for testing the `importall()` function
@@ -99,13 +99,13 @@ class TestImportallFunction:
         assert compress.__module__ == "lzma"  # type: ignore
 
 
-@pytest.mark.usefixtures("isolate_environment")
+@pytest.mark.usefixtures("mock_environment")
 def test_get_all_symbols() -> None:
 
     _test_stdlib_symbols_in_namespace(get_all_symbols())
 
 
-@pytest.mark.usefixtures("isolate_environment")
+@pytest.mark.usefixtures("mock_environment")
 def test_deimportall() -> None:
 
     origin_globals = globals().copy()
