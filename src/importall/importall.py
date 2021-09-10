@@ -110,8 +110,10 @@ def deimportall(namespace: SymbolTable = None) -> None:
 
     del namespace[KEY_TRACKING_INJECTED_SYMBOLS]
 
+    sentinel = object()
+
     for name, symbol in injected_symbols.items():
-        if namespace[name] is symbol:
+        if getattr(namespace, name, sentinel) is symbol:
             del namespace[name]
 
 
