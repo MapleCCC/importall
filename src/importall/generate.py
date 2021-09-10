@@ -5,6 +5,7 @@ Utility script to generate static data of stdlib public names
 """
 
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -52,10 +53,9 @@ def main() -> None:
 
     file.write_text(json.dumps(data, indent=2, sort_keys=True), encoding="utf-8")
 
-    # FIXME without `shell=True` this call fails, why?
-    # The use of `shell=True` is discouraged, so we should find solution ASAP.
+    prettier_executable = "prettier.cmd" if os.name == "nt" else "prettier"
     subprocess.check_call(
-        ["prettier", "--end-of-line", "auto", "--write", str(file)], shell=True
+        [prettier_executable, "--end-of-line", "auto", "--write", str(file)]
     )
 
 
