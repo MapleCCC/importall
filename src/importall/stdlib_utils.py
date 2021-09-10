@@ -19,7 +19,7 @@ import regex
 from .importlib import import_name_from_module, wildcard_import_module
 from .stdlib_list import BUILTINS_NAMES, IMPORTABLE_STDLIB_MODULES, STDLIB_MODULES
 from .typing import SymbolTable
-from .utils import Proxy, jsonc_loads, singleton_class
+from .utils import Proxy, jsonc_loads
 
 
 __all__ = [
@@ -158,27 +158,11 @@ def deduce_stdlib_public_interface(module_name: str) -> set[str]:
     return public_names
 
 
-@singleton_class
-class StdlibChecker:
-    """
-    Check if a symbol comes from standard libraries. Try best effort.
-    """
+def gather_stdlib_symbol_ids() -> set[int]:
 
-    # The id() approach could fail if importlib.reload() has been called or sys.modules
-    # has been manipulated.
-    #
-    # So it's a try-best-effort thing.
+    stdlib_symbol_ids: set[int] = set()
 
-    def __init__(self) -> None:
-
-        self._stdlib_symbol_ids: set[int] = set()
-
-        for module_name in IMPORTABLE_STDLIB_MODULES:
-            self._gather_info(module_name)
-
-    __slots__ = ["_stdlib_symbol_ids"]
-
-    def _gather_info(self, module_name: str) -> None:
+    for module_name in IMPORTABLE_STDLIB_MODULES:
 
         # Suppress DeprecationWarning, because we know for sure that we are not intended
         # to use the deprecated names here.
@@ -190,23 +174,29 @@ class StdlibChecker:
 
             module = importlib.import_module(module_name)
 
-            self._stdlib_symbol_ids.add(id(module))
+            stdlib_symbol_ids.add(id(module))
 
-            symbol_table = import_stdlib_public_names(
-                module_name, include_deprecated=True
-            )
+            symbol_table = import_stdlib_public_names(module_name, include_deprecated=True)
 
             for symbol in symbol_table.values():
-                self._stdlib_symbol_ids.add(id(symbol))
+                stdlib_symbol_ids.add(id(symbol))
 
-    def check(self, obj: object) -> bool:
-        return id(obj) in self._stdlib_symbol_ids
+    return stdlib_symbol_ids
+
+
+STDLIB_SYMBOLS_IDS = Proxy(gather_stdlib_symbol_ids)
 
 
 # Convenient function for handy invocation of `StdlibChecker().check()`
 def from_stdlib(symbol: object) -> bool:
     """Check if a symbol comes from standard libraries. Try best effort."""
-    return StdlibChecker().check(symbol)
+
+    # The id() approach could fail if importlib.reload() has been called or sys.modules
+    # has been manipulated.
+    #
+    # So it's a try-best-effort thing.
+
+    return id(symbol) in STDLIB_SYMBOLS_IDS
 
 
 def convert_version_to_tuple(version: str) -> VersionTuple:
