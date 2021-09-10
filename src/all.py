@@ -1,7 +1,16 @@
+"""
+This module implements the magic import feature. Import this module will cause every
+avaiable names from standard libraries to be imported to the importer's namespace.
+
+Usage: `import everything`
+"""
+
+
 import builtins
 import inspect
 import sys
-from types import FrameType
+from types import FrameType, ModuleType
+from typing import cast
 
 from importall import importall
 
@@ -39,4 +48,4 @@ except GetImporterFrameError:
 importall(frame.f_globals)
 
 # Make sure the name "all" is not shadowed by the imported `all` module
-sys.modules["all"] = builtins.all  # type: ignore
+sys.modules["all"] = cast(ModuleType, builtins.all)
