@@ -184,7 +184,7 @@ def gather_stdlib_symbol_ids() -> set[int]:
     return stdlib_symbol_ids
 
 
-STDLIB_SYMBOLS_IDS = Proxy(gather_stdlib_symbol_ids)
+STDLIB_SYMBOLS_IDS: set[int] = Proxy(gather_stdlib_symbol_ids)
 
 
 # Convenient function for handy invocation of `StdlibChecker().check()`
@@ -247,9 +247,11 @@ def load_deprecated_names() -> dict[VersionTuple, dict[str, frozenset[str]]]:
     return res
 
 
-DEPRECATED_MODULES = Proxy(load_deprecated_modules)
+DEPRECATED_MODULES: dict[VersionTuple, frozenset[str]] = Proxy(load_deprecated_modules)
 
-DEPRECATED_NAMES = Proxy(load_deprecated_names)
+DEPRECATED_NAMES: dict[VersionTuple, dict[str, frozenset[str]]] = Proxy(
+    load_deprecated_names
+)
 
 
 def deprecated_modules(version: str = None) -> set[str]:
