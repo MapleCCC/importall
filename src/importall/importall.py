@@ -106,9 +106,9 @@ def deimportall(namespace: SymbolTable = None) -> None:
 
     namespace = namespace or getcallerframe().f_globals
 
-    injected_symbols = cast(SymbolTable, namespace[KEY_TRACKING_INJECTED_SYMBOLS])
-
-    del namespace[KEY_TRACKING_INJECTED_SYMBOLS]
+    injected_symbols = cast(
+        SymbolTable, namespace.pop(KEY_TRACKING_INJECTED_SYMBOLS, {})
+    )
 
     sentinel = object()
 
