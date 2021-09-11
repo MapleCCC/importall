@@ -1,10 +1,10 @@
 import warnings
-from collections.abc import Iterator, Mapping
+from collections.abc import Iterator, Mapping, MutableMapping
 from contextlib import contextmanager
 from typing import TypeVar
 
 
-__all__ = ["eval_name", "pytest_not_deprecated_call", "issubmapping"]
+__all__ = ["eval_name", "pytest_not_deprecated_call", "issubmapping", "mock_dict"]
 
 
 KT = TypeVar("KT")
@@ -44,3 +44,13 @@ def pytest_not_deprecated_call() -> Iterator[None]:
 
 def issubmapping(m1: Mapping[KT, VT], m2: Mapping[KT, VT]) -> bool:
     return all(value == m2[key] for key, value in m1.items())
+
+
+@contextmanager
+def mock_dict(dic: MutableMapping) -> Iterator[None]:
+    origin_dict = dict(dic)
+    try:
+        yield
+    finally:
+        dic.clear()
+        dic |= origin_dict
