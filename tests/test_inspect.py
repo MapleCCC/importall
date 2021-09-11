@@ -29,6 +29,9 @@ def test_getcallerframe_called_from_non_function() -> None:
 
 
 def test_is_called_at_module_level() -> None:
+
+    assert not is_called_at_module_level()
+
     def f():
         assert not is_called_at_module_level()
 
@@ -49,4 +52,4 @@ def g():
 g()
     """
 
-    exec(source, globals(), locals())
+    exec(source, {"is_called_at_module_level": is_called_at_module_level})
