@@ -10,7 +10,6 @@ __all__ = [
     "BUILTINS_NAMES",
     "STDLIB_MODULES",
     "UNIX_ONLY_STDLIB_MODULES",
-    "TK_REQUIRED_STDLIB_MODULES",
     "IMPORTABLE_STDLIB_MODULES",
 ]
 
@@ -86,25 +85,6 @@ UNIX_ONLY_STDLIB_MODULES = frozenset(
 )
 
 
-TK_REQUIRED_STDLIB_MODULES = frozenset(
-    {
-        "tkinter",
-        "tkinter.colorchooser",
-        "tkinter.commondialog",
-        "tkinter.dnd",
-        "tkinter.filedialog",
-        "tkinter.font",
-        "tkinter.messagebox",
-        "tkinter.scrolledtext",
-        "tkinter.simpledialog",
-        "tkinter.tix",
-        "tkinter.ttk",
-        "turtle",
-        "turtledemo",
-    }
-)
-
-
 IMPORTABLE_STDLIB_MODULES = STDLIB_MODULES.copy()
 
 # Despite its show-up in docs, `distutils.command.bdist_packager` is actually
@@ -120,6 +100,10 @@ IMPORTABLE_STDLIB_MODULES -= {
 if os.name != "posix":
     IMPORTABLE_STDLIB_MODULES -= UNIX_ONLY_STDLIB_MODULES
 
+# Some modules depend on availability of Tk
 if not tk_is_available():
-    # Some modules depend on availability of Tk
-    IMPORTABLE_STDLIB_MODULES -= TK_REQUIRED_STDLIB_MODULES
+    IMPORTABLE_STDLIB_MODULES -= {
+        mod
+        for mod in IMPORTABLE_STDLIB_MODULES
+        if mod.split(".")[0] in {"tkinter", "turtle", "turtledemo"}
+    }
