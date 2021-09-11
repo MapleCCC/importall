@@ -96,7 +96,7 @@ def raises(etype: type[Exception], error_message: str) -> IdentityDecorator:
         @wraps(func)
         def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
             try:
-                return func()
+                return func(*args, **kwargs)
 
             # Catch Exception instead of BaseException, because we don't want to hinder
             # system-exiting exceptions from propagating up.
