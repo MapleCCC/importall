@@ -107,7 +107,7 @@ def raises(etype: type[Exception], error_message: str) -> IdentityDecorator:
 
                 formatted_message = error_message.format_map(bound_argument.arguments)
 
-                raise etype(formatted_message) from None
+                raise etype(formatted_message)
 
         return wrapper
 
