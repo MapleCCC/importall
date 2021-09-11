@@ -1,6 +1,5 @@
 import builtins
 import functools
-import json
 from collections.abc import Callable
 from functools import partial, wraps
 from typing import TYPE_CHECKING, TypeVar, cast
@@ -9,13 +8,11 @@ from lazy_object_proxy import Proxy as _Proxy
 from typing_extensions import ParamSpec
 
 from .functools import nulldecorator
-from .typing import JSONLoadsReturnType
 
 
 __all__ = [
     "singleton_class",
     "profile",
-    "jsonc_loads",
     "hashable",
     "Proxy",
     "provide_lazy_version",
@@ -36,18 +33,6 @@ profile = getattr(builtins, "profile", None) or nulldecorator
 
 if TYPE_CHECKING:
     profile = nulldecorator
-
-
-def jsonc_loads(text: str) -> JSONLoadsReturnType:
-    """Similar to json.loads(), except also accepts JSON with comments of various styles"""
-
-    # TODO use more robust way to clean comments, use syntax parsing
-    # TODO recognize more comment formats, Python-style comment, C-style comment, ...
-    # TODO recognize multi-line comment
-
-    lines = text.splitlines(keepends=True)
-    cleaned = "".join(line for line in lines if not line.lstrip().startswith("//"))
-    return json.loads(cleaned)
 
 
 def hashable(obj: object) -> bool:

@@ -15,12 +15,13 @@ from functools import cache
 from pathlib import Path
 from typing import Optional, cast
 
+import commentjson
 import regex
 
 from .importlib import import_name_from_module, wildcard_import_module
 from .stdlib_list import BUILTINS_NAMES, IMPORTABLE_STDLIB_MODULES, STDLIB_MODULES
 from .typing import SymbolTable
-from .utils import Proxy, jsonc_loads
+from .utils import Proxy
 
 
 __all__ = [
@@ -225,7 +226,7 @@ def load_deprecated_modules() -> dict[VersionTuple, frozenset[str]]:
 
     json_file = Path(__file__).with_name("deprecated_modules.json")
     json_text = json_file.read_text(encoding="utf-8")
-    json_obj = cast(dict[str, list[str]], jsonc_loads(json_text))
+    json_obj = cast(dict[str, list[str]], commentjson.loads(json_text))
 
     return {
         convert_version_to_tuple(version): frozenset(modules)
@@ -238,7 +239,7 @@ def load_deprecated_names() -> dict[VersionTuple, dict[str, frozenset[str]]]:
 
     json_file = Path(__file__).with_name("deprecated_names.json")
     json_text = json_file.read_text(encoding="utf-8")
-    json_obj = cast(dict[str, dict[str, list[str]]], jsonc_loads(json_text))
+    json_obj = cast(dict[str, dict[str, list[str]]], commentjson.loads(json_text))
 
     res: dict[VersionTuple, dict[str, frozenset[str]]] = {}
 

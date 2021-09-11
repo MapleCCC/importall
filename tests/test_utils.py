@@ -1,6 +1,3 @@
-from json import JSONDecodeError
-from typing import cast
-
 import pytest
 from hypothesis import given
 from hypothesis.strategies import integers
@@ -8,7 +5,6 @@ from hypothesis.strategies import integers
 from importall.utils import (
     Proxy,
     hashable,
-    jsonc_loads,
     profile,
     provide_lazy_version,
     singleton_class,
@@ -30,44 +26,6 @@ def test_profile(x: int) -> None:
         return x + 1
 
     assert inc(x) == x + 1
-
-
-@pytest.mark.xfail
-def test_jsonc_loads() -> None:
-
-    text = """
-// This is a C-style single-line comment
-
-/*
- * This is a C-style multi-line comment
-/*
-
-{ "1": 1 }  // This is also a C-style single-line comment
-
-# This is a Python-style comment
-    """
-
-    jsonobj = cast(dict, jsonc_loads(text))
-    assert jsonobj["1"] == 1
-
-
-@pytest.mark.xfail
-def test_jsonc_loads_invalid_input() -> None:
-
-    text = """
-// This is a C-style single-line comment
-
-/*
- * This is a C-style multi-line comment
-/*
-
-{ "1" 1 }  // This is also a C-style single-line comment
-
-# This is a Python-style comment
-    """
-
-    with pytest.raises(JSONDecodeError, match="Expecting ':' delimiter"):
-        jsonc_loads(text)
 
 
 def test_hashable() -> None:
