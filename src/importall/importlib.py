@@ -46,7 +46,7 @@ def wildcard_import_module(module_name: str) -> SymbolTable:
     """
     Programmatically wildcard import a module.
 
-    Could raise `ModuleNotFoundError` or `ImportError`.
+    Raise `ModuleNotFoundError` if the module with given name can't be found.
     """
 
     # The __future__ module is a special case.
