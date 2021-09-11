@@ -55,6 +55,10 @@ STDLIB_MODULES |= {"msilib.schema", "msilib.sequence", "msilib.text"}
 # The `antigravity` and `this` modules are easter eggs.
 STDLIB_MODULES -= {"__main__", "__phello__.foo", "antigravity", "this"}
 
+# The `test` package is for Python dev internal use, and should not be considered public
+# standard library.
+STDLIB_MODULES -= {mod for mod in STDLIB_MODULES if mod.split(".")[0] == "test"}
+
 
 UNIX_ONLY_STDLIB_MODULES = frozenset(
     {
