@@ -1,5 +1,4 @@
 import builtins
-import functools
 import inspect
 from collections.abc import Callable
 from functools import partial, wraps
@@ -12,22 +11,11 @@ from .functools import nulldecorator
 from .typing import IdentityDecorator
 
 
-__all__ = [
-    "singleton_class",
-    "profile",
-    "hashable",
-    "provide_lazy_version",
-    "tk_is_available",
-    "raises",
-]
+__all__ = ["profile", "provide_lazy_version", "tk_is_available", "raises"]
 
 
 P = ParamSpec("P")
 R = TypeVar("R")
-
-
-# A decorator to transform a class into a singleton
-singleton_class = functools.cache
 
 
 # The name `profile` will be injected into builtins in runtime by line-profiler.
@@ -35,17 +23,6 @@ profile = getattr(builtins, "profile", None) or nulldecorator
 
 if TYPE_CHECKING:
     profile = nulldecorator
-
-
-def hashable(obj: object) -> bool:
-    """Check if an object is hashable"""
-
-    try:
-        hash(obj)
-    except TypeError:
-        return False
-    else:
-        return True
 
 
 # FIXME we want to add type annotation to `provide_lazy_version()` to indicate to type
