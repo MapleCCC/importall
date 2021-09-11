@@ -75,17 +75,17 @@ def deduce_stdlib_public_interface(module_name: str) -> set[str]:
     if module_name not in IMPORTABLE_STDLIB_MODULES:
         raise ValueError(f"{module_name} is not importable stdlib module")
 
-    # The __future__ module is a special case
-    # Wildcard importing the __future__ module yields SyntaxError
-    if module_name == "__future__":
-        return set(__future__.__all__)
-
     # The builtins module is a special case
     # Some exported public names from builtins module are prefixed with underscore,
     # hence ignored by the standard wildcard import mechanism. Examples are `__import__`
     # and `__debug__`.
     if module_name == "builtins":
         return set(BUILTINS_NAMES)
+
+    if (
+        __all__ := getattr(importlib.import_module(module_name), "__all__", None)
+    ) is not None:
+        return __all__
 
     # Use a separate clean interpreter to retrieve public names.
     #
