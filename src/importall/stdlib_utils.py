@@ -22,10 +22,12 @@ from lazy_object_proxy import Proxy
 from .importlib import import_name_from_module, wildcard_import_module
 from .stdlib_list import BUILTINS_NAMES, IMPORTABLE_STDLIB_MODULES, STDLIB_MODULES
 from .typing import SymbolTable
+from .utils import raises
 
 
 __all__ = [
     "import_stdlib_public_names",
+    "DeducePublicInterfaceError",
     "deduce_stdlib_public_interface",
     "from_stdlib",
     "deprecated_modules",
@@ -69,8 +71,20 @@ def import_stdlib_public_names(
     }
 
 
+class DeducePublicInterfaceError(Exception):
+    """
+    Raised when `deduce_stdlib_public_interface()` fails to deduce the public interface
+    of a given module.
+    """
+
+
+@raises(RuntimeError, "Fail to deduce public interface of module '{module_name}'")
 def deduce_stdlib_public_interface(module_name: str) -> set[str]:
-    """Try best effort to heuristically determine public names exported by a stdlib module"""
+    """
+    Try best effort to heuristically determine public names exported by a stdlib module.
+
+    Raise `DeducePublicInterfaceError` on failure.
+    """
 
     if module_name not in IMPORTABLE_STDLIB_MODULES:
         raise ValueError(f"{module_name} is not importable stdlib module")

@@ -1,5 +1,6 @@
 import builtins
 import functools
+import inspect
 from collections.abc import Callable
 from functools import partial, wraps
 from typing import TYPE_CHECKING, TypeVar, cast
@@ -8,6 +9,7 @@ from lazy_object_proxy import Proxy
 from typing_extensions import ParamSpec
 
 from .functools import nulldecorator
+from .typing import IdentityDecorator
 
 
 __all__ = [
@@ -16,6 +18,7 @@ __all__ = [
     "hashable",
     "provide_lazy_version",
     "tk_is_available",
+    "raises",
 ]
 
 
@@ -98,3 +101,37 @@ def tk_is_available() -> bool:
         return False
     else:
         return True
+
+
+def raises(etype: type[Exception], error_message: str) -> IdentityDecorator:
+    """
+    A decorator to make decorated function raise given exception with given error
+    message whenever failure happens.
+
+    The `error_message` parameter accepts a format string whose replacement fields are
+    substituted for arguments to the decorated function.
+    """
+
+    def decorator(func: Callable[P, R]) -> Callable[P, R]:
+
+        signature = inspect.signature(func)
+
+        @wraps(func)
+        def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
+            try:
+                return func()
+
+            # Catch Exception instead of BaseException, because we don't want to hinder
+            # system-exiting exceptions from propagating up.
+            except Exception:
+
+                bound_argument = signature.bind(*args, **kwargs)
+                bound_argument.apply_defaults()
+
+                formatted_message = error_message.format_map(bound_argument.arguments)
+
+                raise etype(formatted_message) from None
+
+        return wrapper
+
+    return decorator
