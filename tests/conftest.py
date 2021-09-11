@@ -5,9 +5,6 @@ from tests.utils import mock_dict
 import pytest
 
 
-__all__ = ["mock_environment"]
-
-
 @pytest.fixture
 def mock_environment(request):
     """
