@@ -93,7 +93,7 @@ IMPORTABLE_STDLIB_MODULES -= {"distutils.command.bdist_packager"}
 
 # lib2to3 package contains Python 2 code, which is unrunnable under Python 3.
 IMPORTABLE_STDLIB_MODULES -= {
-    mod for mod in IMPORTABLE_STDLIB_MODULES if mod.startswith("lib2to3")
+    mod for mod in IMPORTABLE_STDLIB_MODULES if mod.split(".")[0] == "lib2to3"
 }
 
 # On Windows OS or JVM, UNIX-specific modules are ignored.
