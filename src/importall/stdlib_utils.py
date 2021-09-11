@@ -17,11 +17,11 @@ from typing import Optional, cast
 
 import commentjson
 import regex
+from lazy_object_proxy import Proxy
 
 from .importlib import import_name_from_module, wildcard_import_module
 from .stdlib_list import BUILTINS_NAMES, IMPORTABLE_STDLIB_MODULES, STDLIB_MODULES
 from .typing import SymbolTable
-from .utils import Proxy
 
 
 __all__ = [
@@ -189,7 +189,7 @@ def gather_stdlib_symbol_ids() -> set[int]:
     return stdlib_symbol_ids
 
 
-STDLIB_SYMBOLS_IDS: set[int] = Proxy(gather_stdlib_symbol_ids)
+STDLIB_SYMBOLS_IDS = cast(set[int], Proxy(gather_stdlib_symbol_ids))
 
 
 # Convenient function for handy invocation of `StdlibChecker().check()`
@@ -252,10 +252,12 @@ def load_deprecated_names() -> dict[VersionTuple, dict[str, frozenset[str]]]:
     return res
 
 
-DEPRECATED_MODULES: dict[VersionTuple, frozenset[str]] = Proxy(load_deprecated_modules)
+DEPRECATED_MODULES = cast(
+    dict[VersionTuple, frozenset[str]], Proxy(load_deprecated_modules)
+)
 
-DEPRECATED_NAMES: dict[VersionTuple, dict[str, frozenset[str]]] = Proxy(
-    load_deprecated_names
+DEPRECATED_NAMES = cast(
+    dict[VersionTuple, dict[str, frozenset[str]]], Proxy(load_deprecated_names)
 )
 
 

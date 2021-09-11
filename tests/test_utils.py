@@ -2,13 +2,7 @@ import pytest
 from hypothesis import given
 from hypothesis.strategies import integers
 
-from importall.utils import (
-    Proxy,
-    hashable,
-    profile,
-    provide_lazy_version,
-    singleton_class,
-)
+from importall.utils import hashable, profile, provide_lazy_version, singleton_class
 
 
 def test_singleton_class() -> None:
@@ -59,21 +53,6 @@ def test_hashable() -> None:
     assert hashable(hashable)
 
     assert hashable(pytest)
-
-
-@pytest.mark.xfail
-@given(integers())
-def test_Proxy(x: int) -> None:
-    def func():
-        return x
-
-    p = Proxy(func)
-
-    assert p == x
-    assert p is x
-    assert hash(p) == hash(x)
-    assert repr(p) == repr(x)
-    assert type(p) == type(x)
 
 
 @given(integers())

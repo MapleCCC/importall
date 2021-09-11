@@ -4,7 +4,7 @@ from collections.abc import Callable
 from functools import partial, wraps
 from typing import TYPE_CHECKING, TypeVar, cast
 
-from lazy_object_proxy import Proxy as _Proxy
+from lazy_object_proxy import Proxy
 from typing_extensions import ParamSpec
 
 from .functools import nulldecorator
@@ -14,7 +14,6 @@ __all__ = [
     "singleton_class",
     "profile",
     "hashable",
-    "Proxy",
     "provide_lazy_version",
     "tk_is_available",
 ]
@@ -44,50 +43,6 @@ def hashable(obj: object) -> bool:
         return False
     else:
         return True
-
-
-builtins_patched = False
-
-
-# TODO remove this function because there is no need for patching anymore.
-# Use test to ensure no regression before and after removal of this function.
-def Proxy(func: Callable[[], R]) -> R:
-    """
-    Patch `lazy-object-proxy.Proxy`, so that `repr()`, `id()`, and `type()` also are
-    blind to proxy-ness.
-    """
-
-    global builtins_patched
-
-    if not builtins_patched:
-
-        _id, _repr, _type = id, repr, type
-
-        # FIXME Patching id() is not enough to ensure that `Proxy(x) is x` evaluates to
-        # True.
-        builtins.id = (
-            lambda x: _id(x) if not isinstance(x, _Proxy) else _id(x.__wrapped__)
-        )
-
-        builtins.repr = (
-            lambda x: _repr(x) if not isinstance(x, _Proxy) else _repr(x.__wrapped__)
-        )
-
-        # FIXME
-        #
-        # class patched_type(_type):
-        #     def __new__(cls, *args, **kwargs):
-        #         if len(args) == 1 and not kwargs:
-        #             x = args[0]
-        #             x = x if not isinstance(x, _Proxy) else x.__wrapped__
-        #             args = (x,)
-        #         return _type(*args, **kwargs)
-        #
-        # builtins.type = patched_type
-
-        builtins_patched = True
-
-    return cast(R, _Proxy(func))
 
 
 # FIXME we want to add type annotation to `provide_lazy_version()` to indicate to type
