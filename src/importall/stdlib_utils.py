@@ -7,6 +7,7 @@ import __future__
 import importlib
 import inspect
 import json
+import re
 import subprocess
 import sys
 import warnings
@@ -310,6 +311,9 @@ def deprecated_names(module: str, *, version: str = None) -> set[str]:
 @cache
 def load_stdlib_public_names(version: str) -> dict[str, frozenset[str]]:
     """Load stdlib public names data from JSON file"""
+
+    if not re.fullmatch(r"\d+\.\d+", version):
+        raise ValueError(f"{version} is not a valid version")
 
     try:
         json_file = Path(__file__).with_name("stdlib_public_names") / (
