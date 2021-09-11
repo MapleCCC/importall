@@ -27,6 +27,8 @@ class TestImportallFunction:
         exec("importall()", _globals)
         _test_stdlib_symbols_in_namespace(_globals)
 
+    def test_called_at_non_module_level(self) -> None:
+
         with pytest.raises(
             RuntimeError,
             match=re.escape(

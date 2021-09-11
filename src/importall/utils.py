@@ -64,6 +64,8 @@ def hashable(obj: object) -> bool:
 builtins_patched = False
 
 
+# TODO remove this function because there is no need for patching anymore.
+# Use test to ensure no regression before and after removal of this function.
 def Proxy(func: Callable[[], R]) -> R:
     """
     Patch `lazy-object-proxy.Proxy`, so that `repr()`, `id()`, and `type()` also are

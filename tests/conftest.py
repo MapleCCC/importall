@@ -1,5 +1,6 @@
 import os
 import sys
+from typing import cast
 
 import pytest
 
@@ -9,7 +10,7 @@ __all__ = ["mock_environment"]
 
 @pytest.fixture
 def mock_globals(request):
-    globals_dict = request.function.__globals__
+    globals_dict = cast(dict[str, object], request.function.__globals__)
     original_globals = dict(globals_dict)
     yield
     globals_dict.clear()

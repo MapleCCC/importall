@@ -20,7 +20,11 @@ class GetImporterFrameError(Exception):
 
 
 def get_importer_frame() -> FrameType:
-    """Get the frame of the importer who imports the current module"""
+    """
+    Get the frame of the importer who imports the current module.
+
+    Raise GetImporterFrameError if such frame can't be found.
+    """
 
     stack = inspect.stack()
     index = 0

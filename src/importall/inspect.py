@@ -21,8 +21,7 @@ def is_called_at_module_level() -> bool:
     Raise `RuntimeError` if `is_called_at_module_level()` is not called in a function.
     """
 
-    frame = getcallerframe().f_back
-    if not frame:
+    if not (frame := getcallerframe().f_back):
         raise RuntimeError(
             "is_called_at_module_level() expects to be called in a function"
         )

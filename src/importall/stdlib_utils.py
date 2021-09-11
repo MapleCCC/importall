@@ -98,6 +98,7 @@ def deduce_stdlib_public_interface(module_name: str) -> set[str]:
     # has been imported before.
 
     # TODO create a subinterpreter within the same process to reduce performance overhead
+    # TODO Capture output. Don't let the subprocess print to current console.
 
     executable = sys.executable or "python"
     source = (
@@ -177,7 +178,9 @@ def gather_stdlib_symbol_ids() -> set[int]:
 
             stdlib_symbol_ids.add(id(module))
 
-            symbol_table = import_stdlib_public_names(module_name, include_deprecated=True)
+            symbol_table = import_stdlib_public_names(
+                module_name, include_deprecated=True
+            )
 
             for symbol in symbol_table.values():
                 stdlib_symbol_ids.add(id(symbol))
@@ -327,7 +330,7 @@ def load_stdlib_public_names(version: str) -> dict[str, frozenset[str]]:
     except FileNotFoundError:
         raise ValueError(
             f"there is no data of stdlib public names for Python version {version}"
-        )
+        ) from None
 
 
 def stdlib_public_names(module: str, *, version: str = None) -> set[str]:

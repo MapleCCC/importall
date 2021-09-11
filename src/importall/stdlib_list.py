@@ -88,7 +88,7 @@ UNIX_ONLY_STDLIB_MODULES = frozenset(
 IMPORTABLE_STDLIB_MODULES = STDLIB_MODULES.copy()
 
 # Despite its show-up in docs, `distutils.command.bdist_packager` is actually
-# unimportable in runtime.
+# unimportable at runtime.
 IMPORTABLE_STDLIB_MODULES -= {"distutils.command.bdist_packager"}
 
 # lib2to3 package contains Python 2 code, which is unrunnable under Python 3.
