@@ -87,7 +87,7 @@ def clean_up_import_cache(module_name: str) -> None:
         submodules = []
 
         for mod in sys.modules:
-            if mod.startswith(module_name + "."):
+            if mod.split(".")[0] == module_name:
                 submodules.append(mod)
 
         for mod in submodules:

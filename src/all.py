@@ -2,7 +2,7 @@
 This module implements the magic import feature. Import this module will cause every
 avaiable names from standard libraries to be imported to the importer's namespace.
 
-Usage: `import everything`
+Usage: `import all`
 """
 
 
