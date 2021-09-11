@@ -99,7 +99,6 @@ def deduce_stdlib_public_interface(module_name: str) -> set[str]:
     # has been imported before.
 
     # TODO create a subinterpreter within the same process to reduce performance overhead
-    # TODO Capture output. Don't let the subprocess print to current console.
 
     executable = sys.executable or "python"
     source = (
@@ -108,7 +107,9 @@ def deduce_stdlib_public_interface(module_name: str) -> set[str]:
         "for symbol in symtab: print(symbol)\n"
     )
     public_names = set(
-        subprocess.check_output([executable, "-c", source], text=True).splitlines()
+        subprocess.check_output(
+            [executable, "-c", source], stderr=subprocess.STDOUT, text=True
+        ).splitlines()
     )
 
     # Try best effort to filter out only public names
