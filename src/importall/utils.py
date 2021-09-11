@@ -19,6 +19,7 @@ __all__ = [
     "hashable",
     "Proxy",
     "provide_lazy_version",
+    "tk_is_available",
 ]
 
 
@@ -144,3 +145,14 @@ def provide_lazy_version(func: Callable[P, R]) -> Callable[..., R]:
     wrapper.__wrapped__ = func
 
     return wrapper
+
+
+def tk_is_available() -> bool:
+    """Check if Tk is available"""
+
+    try:
+        import tkinter  # type: ignore
+    except ModuleNotFoundError:
+        return False
+    else:
+        return True

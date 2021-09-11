@@ -3,6 +3,8 @@ import os
 
 from stdlib_list import stdlib_list
 
+from .utils import tk_is_available
+
 
 __all__ = [
     "BUILTINS_NAMES",
@@ -118,8 +120,6 @@ IMPORTABLE_STDLIB_MODULES -= {
 if os.name != "posix":
     IMPORTABLE_STDLIB_MODULES -= UNIX_ONLY_STDLIB_MODULES
 
-try:
-    import tkinter  # type: ignore
-except ModuleNotFoundError:
+if not tk_is_available():
     # Some modules depend on availability of Tk
     IMPORTABLE_STDLIB_MODULES -= TK_REQUIRED_STDLIB_MODULES
