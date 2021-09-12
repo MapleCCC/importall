@@ -21,11 +21,17 @@ class TestImportallFunction:
         importall(globals())
         _test_stdlib_symbols_in_namespace(globals())
 
-    def test_default_globals_argument(self) -> None:
+    def test_default_namespace_argument(self) -> None:
 
         _globals = {"importall": importall}
         exec("importall()", _globals)
         _test_stdlib_symbols_in_namespace(_globals)
+
+    def test_custom_namespace_argument(self) -> None:
+
+        namespace = {}
+        importall(namespace)
+        _test_stdlib_symbols_in_namespace(namespace)
 
     def test_called_at_non_module_level(self) -> None:
 
@@ -108,20 +114,33 @@ def test_get_all_symbols() -> None:
 
 
 @pytest.mark.usefixtures("mock_environment")
-def test_deimportall() -> None:
+class TestDeimportall:
+    """
+    Unit tests for testing the `deimportall()` function
+    """
 
-    origin_globals = globals().copy()
+    def test_restore_globals(self) -> None:
 
-    importall(globals())
+        origin_globals = globals().copy()
 
-    deimportall(globals())
+        importall(globals())
 
-    assert issubmapping(globals(), origin_globals)
+        deimportall(globals())
 
-    with pytest.raises(
-        RuntimeError,
-        match=re.escape(
-            "deimportall() function with default namespace argument is only allowed to be invoked at the module level"
-        ),
-    ):
-        deimportall()
+        assert issubmapping(globals(), origin_globals)
+
+    def test_called_at_non_module_level(self) -> None:
+
+        with pytest.raises(
+            RuntimeError,
+            match=re.escape(
+                "deimportall() function with default namespace argument is only allowed to be invoked at the module level"
+            ),
+        ):
+            deimportall()
+
+    def test_non_importalled_namespace_argument(self) -> None:
+
+        namespace = {}
+        deimportall(namespace)
+        assert namespace == {}
