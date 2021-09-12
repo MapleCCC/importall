@@ -1,10 +1,16 @@
 import warnings
 from collections.abc import Iterator, Mapping, MutableMapping
-from contextlib import contextmanager
+from contextlib import ExitStack, contextmanager
 from typing import TypeVar
 
 
-__all__ = ["eval_name", "pytest_not_deprecated_call", "issubmapping", "mock_dict"]
+__all__ = [
+    "eval_name",
+    "pytest_not_deprecated_call",
+    "issubmapping",
+    "mock_dict",
+    "mock_dicts",
+]
 
 
 KT = TypeVar("KT")
@@ -48,9 +54,23 @@ def issubmapping(m1: Mapping[KT, VT], m2: Mapping[KT, VT]) -> bool:
 
 @contextmanager
 def mock_dict(dic: MutableMapping) -> Iterator[None]:
+    """A context manager to mock a dictionary"""
+
     origin_dict = dict(dic)
     try:
         yield
     finally:
         dic.clear()
         dic |= origin_dict
+
+
+@contextmanager
+def mock_dicts(*dicts: MutableMapping) -> Iterator[None]:
+    """A context manager to mock multiple dictionaries"""
+
+    with ExitStack() as stack:
+
+        for dic in dicts:
+            stack.enter_context(mock_dict(dic))
+
+        yield
