@@ -1,4 +1,5 @@
 import importlib
+import sys
 import warnings
 from collections.abc import Iterator, Mapping, MutableMapping
 from contextlib import ExitStack, contextmanager
@@ -77,21 +78,18 @@ def mock_dict(*dicts: MutableMapping) -> Iterator[None]:
         yield
 
 
-@contextmanager
-def assert_raises(exc: type[Exception]) -> Iterator[None]:
-    try:
-        yield
-    except exc:
-        pass
-    except Exception:
-        raise AssertionError(f"expect raise of {exc}")
-    else:
-        raise AssertionError(f"expect raise of {exc}")
+def importable(module: str) -> bool:
+    with mock_dict(sys.modules):
+        try:
+            importlib.import_module(module)
+        except ModuleNotFoundError:
+            return False
+        else:
+            return True
 
 
 # A module that guarantees to be inexistent. Useful for testing behavior that involves
 # fiddling with modules.
 INEXISTENT_MODULE = "gugugugugugugugugugugu"
 
-with assert_raises(ModuleNotFoundError):
-    importlib.import_module(INEXISTENT_MODULE)
+assert importable(INEXISTENT_MODULE)
