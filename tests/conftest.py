@@ -3,7 +3,7 @@ import sys
 
 import pytest
 
-from .utils import mock_dicts
+from .utils import mock_dict
 
 
 @pytest.fixture
@@ -18,5 +18,5 @@ def mock_environment(request):
 
     f_globals = request.function.__globals__
 
-    with mock_dicts(f_globals, sys.modules, os.environ):
+    with mock_dict(f_globals, sys.modules, os.environ):
         yield

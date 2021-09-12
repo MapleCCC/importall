@@ -10,7 +10,6 @@ __all__ = [
     "pytest_not_deprecated_call",
     "issubmapping",
     "mock_dict",
-    "mock_dicts",
     "INEXISTENT_MODULE",
 ]
 
@@ -55,7 +54,7 @@ def issubmapping(m1: Mapping[KT, VT], m2: Mapping[KT, VT]) -> bool:
 
 
 @contextmanager
-def mock_dict(dic: MutableMapping) -> Iterator[None]:
+def _mock_dict(dic: MutableMapping) -> Iterator[None]:
     """A context manager to mock a dictionary"""
 
     origin_dict = dict(dic)
@@ -67,13 +66,13 @@ def mock_dict(dic: MutableMapping) -> Iterator[None]:
 
 
 @contextmanager
-def mock_dicts(*dicts: MutableMapping) -> Iterator[None]:
+def mock_dict(*dicts: MutableMapping) -> Iterator[None]:
     """A context manager to mock multiple dictionaries"""
 
     with ExitStack() as stack:
 
         for dic in dicts:
-            stack.enter_context(mock_dict(dic))
+            stack.enter_context(_mock_dict(dic))
 
         yield
 
