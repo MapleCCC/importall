@@ -1,3 +1,4 @@
+import importlib
 import warnings
 from collections.abc import Iterator, Mapping, MutableMapping
 from contextlib import ExitStack, contextmanager
@@ -10,6 +11,7 @@ __all__ = [
     "issubmapping",
     "mock_dict",
     "mock_dicts",
+    "INEXISTENT_MODULE",
 ]
 
 
@@ -74,3 +76,23 @@ def mock_dicts(*dicts: MutableMapping) -> Iterator[None]:
             stack.enter_context(mock_dict(dic))
 
         yield
+
+
+@contextmanager
+def assert_raises(exc: type[Exception]) -> Iterator[None]:
+    try:
+        yield
+    except exc:
+        pass
+    except Exception:
+        raise AssertionError(f"expect raise of {exc}")
+    else:
+        raise AssertionError(f"expect raise of {exc}")
+
+
+# A module that guarantees to be inexistent. Useful for testing behavior that involves
+# fiddling with modules.
+INEXISTENT_MODULE = "gugugugugugugugugugugu"
+
+with assert_raises(ModuleNotFoundError):
+    importlib.import_module(INEXISTENT_MODULE)
