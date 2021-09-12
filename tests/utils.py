@@ -7,7 +7,6 @@ from typing import TypeVar
 
 
 __all__ = [
-    "eval_name",
     "pytest_not_deprecated_call",
     "issubmapping",
     "mock_dict",
@@ -17,19 +16,6 @@ __all__ = [
 
 KT = TypeVar("KT")
 VT = TypeVar("VT")
-
-
-def eval_name(name: str) -> object:
-    """
-    The use of `eval()` on arbitrary string has been considered dangerous practice.
-    `eval_name()` is a safer and specialized alternative to `eval()`.
-    It only evaluates expression consisting of a single name.
-    """
-
-    if not name.isidentifier():
-        raise ValueError(f"Invalid name: {name}")
-
-    return eval(name)
 
 
 @contextmanager

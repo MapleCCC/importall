@@ -7,7 +7,7 @@ from importall import deimportall, get_all_symbols, importall
 from importall.stdlib_list import BUILTINS_NAMES
 
 from .subtest import _test_stdlib_symbols_in_namespace
-from .utils import eval_name, issubmapping, pytest_not_deprecated_call
+from .utils import issubmapping, pytest_not_deprecated_call
 
 
 @pytest.mark.usefixtures("mock_environment")
@@ -47,7 +47,7 @@ class TestImportallFunction:
         importall(globals(), protect_builtins=True)
 
         for name in BUILTINS_NAMES:
-            assert eval_name(name) is getattr(builtins, name)
+            assert eval(name) is getattr(builtins, name)
 
     def test_protect_builtins_parameter_is_false(self) -> None:
 
