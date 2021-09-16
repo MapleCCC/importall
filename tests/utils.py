@@ -17,6 +17,8 @@ KT = TypeVar("KT")
 VT = TypeVar("VT")
 
 
+# FIXME is the impl correct ?
+# FIXME pytest assert introspection mechanism doesn't extend here
 @contextmanager
 def pytest_not_deprecated_call() -> Iterator[None]:
     """
@@ -53,7 +55,7 @@ def _mock_dict(dic: MutableMapping) -> Iterator[None]:
 
 @contextmanager
 def mock_dict(*dicts: MutableMapping) -> Iterator[None]:
-    """A context manager to mock multiple dictionaries"""
+    """A context manager to mock dictionaries"""
 
     with ExitStack() as stack:
 
@@ -64,7 +66,10 @@ def mock_dict(*dicts: MutableMapping) -> Iterator[None]:
 
 
 def importable(module: str) -> bool:
+    """Check if a module is importable."""
+
     # Reference: https://docs.python.org/3/library/importlib.html#checking-if-a-module-can-be-imported
+
     return importlib.util.find_spec(module) is not None
 
 

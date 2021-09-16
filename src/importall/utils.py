@@ -18,7 +18,7 @@ P = ParamSpec("P")
 R = TypeVar("R")
 
 
-# The name `profile` will be injected into builtins in runtime by line-profiler.
+# The name `profile` will be injected into builtins at runtime by line-profiler.
 profile = getattr(builtins, "profile", None) or nulldecorator
 
 if TYPE_CHECKING:
@@ -31,17 +31,17 @@ if TYPE_CHECKING:
 #
 # Yet there is currently no officially-supported way to properly type annotate a
 # decorator that add a keyword argument to the wrapped function. The `Concatenating
-# Keyword Parameters` section of PEP-612 summaries the status quo:
+# Keyword Parameters` section of PEP-612 summarizes the status quo:
 # https://www.python.org/dev/peps/pep-0612/#concatenating-keyword-parameters
 #
 # For now, we fallback to the `no type check` option, until the Python dev team, in the
 # future, roll out more sophisticated type system constructs, so that expressing more
-# powerful type concepts is possible.
+# powerful type concepts is made possible.
 
 
 def provide_lazy_version(func: Callable[P, R]) -> Callable[..., R]:
     """
-    A decorator to let the decorated function provide an option to return a
+    A decorator to make the decorated function provide an option to return a
     lazily-evaluated result.
 
     The return result, if lazy evaluation mode is on, looks like normal result, except
@@ -51,7 +51,10 @@ def provide_lazy_version(func: Callable[P, R]) -> Callable[..., R]:
     Inject an optional keyword argument named `lazy` to the signature of the decorated
     function. Setting the `lazy` parameter to `True` enables lazy evaluation mode.
 
-    Access `__wrapped__` to retrieve the original function.
+    The decorated function is instrumented with a `__wrapped__` attribute to access the
+    original vanilla function.
+
+    It's recommended to decorate pure functions only.
     """
 
     @wraps(func)

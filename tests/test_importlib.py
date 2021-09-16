@@ -15,6 +15,8 @@ from .utils import INEXISTENT_MODULE
 
 def test_import_name_from_module() -> None:
 
+    # FIXME should use `is` instead of `==`
+
     # import top level symbol
     assert import_name_from_module("partial", "functools") == functools.partial
     assert (

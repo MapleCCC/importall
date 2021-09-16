@@ -207,7 +207,6 @@ def gather_stdlib_symbol_ids() -> set[int]:
 STDLIB_SYMBOLS_IDS = cast(set[int], Proxy(gather_stdlib_symbol_ids))
 
 
-# Convenient function for handy invocation of `StdlibChecker().check()`
 def from_stdlib(symbol: object) -> bool:
     """Check if a symbol comes from standard libraries. Try best effort."""
 
