@@ -1,12 +1,34 @@
 import __future__
 
 import sys
+from collections.abc import Sequence
+from typing import Literal, overload
 
 from .typing import SymbolTable
 from .utils import profile, provide_lazy_version
 
 
 __all__ = ["import_name_from_module", "wildcard_import_module", "clean_up_import_cache"]
+
+
+MODULE_STR_VALUED_ATTRIBUTES = Literal[
+    "__cached__", "__doc__", "__file__", "__name__", "__package__"
+]
+
+
+@overload
+def import_name_from_module(name: Literal["__all__"], module: str) -> Sequence[str]:
+    ...
+
+
+@overload
+def import_name_from_module(name: MODULE_STR_VALUED_ATTRIBUTES, module: str) -> str:
+    ...
+
+
+@overload
+def import_name_from_module(name: str, module: str) -> object:
+    ...
 
 
 @provide_lazy_version
