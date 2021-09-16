@@ -4,6 +4,8 @@ from collections.abc import Iterator, Mapping, MutableMapping
 from contextlib import ExitStack, contextmanager
 from typing import TypeVar
 
+import pytest
+
 
 __all__ = [
     "pytest_not_deprecated_call",
@@ -18,7 +20,6 @@ VT = TypeVar("VT")
 
 
 # FIXME is the impl correct ?
-# FIXME pytest assert introspection mechanism doesn't extend here
 @contextmanager
 def pytest_not_deprecated_call() -> Iterator[None]:
     """
@@ -34,7 +35,10 @@ def pytest_not_deprecated_call() -> Iterator[None]:
         yield
 
     for warning_message in record:
-        assert not issubclass(warning_message.category, (DeprecationWarning, PendingDeprecationWarning))
+        if issubclass(
+            warning_message.category, (DeprecationWarning, PendingDeprecationWarning)
+        ):
+            pytest.fail("expect no DeprecationWarning or PendingDeprecationWarning")
 
 
 def issubmapping(m1: Mapping[KT, VT], m2: Mapping[KT, VT]) -> bool:
