@@ -20,8 +20,7 @@ VT = TypeVar("VT")
 
 
 # FIXME is the impl correct ?
-@contextmanager
-def pytest_not_deprecated_call() -> Iterator[None]:
+class pytest_not_deprecated_call(warnings.catch_warnings):
     """
     Return a context manager to assert that the code within context doesn't trigger any
     `DeprecationWarning` or `PendingDeprecationWarning`.
@@ -30,15 +29,31 @@ def pytest_not_deprecated_call() -> Iterator[None]:
     shoud not be used otherwise.
     """
 
-    with warnings.catch_warnings(record=True) as record:
-        warnings.simplefilter("always", DeprecationWarning)
-        yield
+    def __init__(self) -> None:
+        super().__init__(record=True)
 
-    for warning_message in record:
-        if issubclass(
-            warning_message.category, (DeprecationWarning, PendingDeprecationWarning)
-        ):
-            pytest.fail("expect no DeprecationWarning or PendingDeprecationWarning")
+    def __enter__(self) -> None:
+        self._record = super().__enter__()
+        warnings.simplefilter("always", DeprecationWarning)
+
+    def __exit__(
+        self,
+        exc_type: Optional[type[BaseException]],
+        exc_value: Optional[BaseException],
+        traceback: TracebackType,
+    ) -> None:
+
+        __tracebackhide__ = True
+
+        if exc_type is not None:
+            return
+
+        for warning_message in self._record:
+            if issubclass(
+                warning_message.category,
+                (DeprecationWarning, PendingDeprecationWarning),
+            ):
+                pytest.fail("expect no DeprecationWarning or PendingDeprecationWarning")
 
 
 def issubmapping(m1: Mapping[KT, VT], m2: Mapping[KT, VT]) -> bool:
