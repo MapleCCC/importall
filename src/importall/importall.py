@@ -71,7 +71,8 @@ def importall(
             "importall() function with default namespace argument is only allowed to be invoked at the module level"
         )
 
-    namespace = namespace or getcallerframe().f_globals
+    if namespace is None:
+        namespace = getcallerframe().f_globals
 
     symtab = get_all_symbols(
         lazy=lazy,
@@ -104,7 +105,8 @@ def deimportall(namespace: SymbolTable = None) -> None:
             "deimportall() function with default namespace argument is only allowed to be invoked at the module level"
         )
 
-    namespace = namespace or getcallerframe().f_globals
+    if namespace is None:
+        namespace = getcallerframe().f_globals
 
     injected_symbols = cast(
         SymbolTable, namespace.pop(KEY_TRACKING_INJECTED_SYMBOLS, {})
