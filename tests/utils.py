@@ -1,5 +1,4 @@
-import importlib
-import sys
+import importlib.util
 import warnings
 from collections.abc import Iterator, Mapping, MutableMapping
 from contextlib import ExitStack, contextmanager
@@ -65,13 +64,8 @@ def mock_dict(*dicts: MutableMapping) -> Iterator[None]:
 
 
 def importable(module: str) -> bool:
-    with mock_dict(sys.modules):
-        try:
-            importlib.import_module(module)
-        except ModuleNotFoundError:
-            return False
-        else:
-            return True
+    # Reference: https://docs.python.org/3/library/importlib.html#checking-if-a-module-can-be-imported
+    return importlib.util.find_spec(module) is not None
 
 
 # A module that guarantees to be inexistent. Useful for testing behavior that involves
