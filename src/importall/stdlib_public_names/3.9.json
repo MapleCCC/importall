@@ -19,7 +19,6 @@
     "allocate",
     "allocate_lock",
     "exit",
-    "exit_thread",
     "get_ident",
     "get_native_id",
     "interrupt_main",

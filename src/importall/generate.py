@@ -20,6 +20,8 @@ MODULES_WITH_ZERO_TOP_LEVEL_PUBLIC_NAMES = frozenset(
     {"distutils", "email.mime", "test", "urllib", "wsgiref"}
 )
 
+KNOWN_FALSE_POSITIVES = {"_thread": {"exit_thread"}}
+
 
 def generate_stdlib_public_names() -> dict[str, list[str]]:
 
@@ -41,6 +43,9 @@ def generate_stdlib_public_names() -> dict[str, list[str]]:
                 file=sys.stderr,
             )
             raise
+
+        # Remove false positives
+        public_names -= KNOWN_FALSE_POSITIVES.get(module_name, set())
 
         # Sanity check: a stdlib is unlikely to have no public names
         if module_name not in MODULES_WITH_ZERO_TOP_LEVEL_PUBLIC_NAMES:
