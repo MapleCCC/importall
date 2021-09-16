@@ -17,17 +17,21 @@ MODULE_STR_VALUED_ATTRIBUTES = Literal[
 
 
 @overload
-def import_name_from_module(name: Literal["__all__"], module: str) -> Sequence[str]:
+def import_name_from_module(
+    name: Literal["__all__"], module: str, lazy: bool = ...
+) -> Sequence[str]:
     ...
 
 
 @overload
-def import_name_from_module(name: MODULE_STR_VALUED_ATTRIBUTES, module: str) -> str:
+def import_name_from_module(
+    name: MODULE_STR_VALUED_ATTRIBUTES, module: str, lazy: bool = ...
+) -> str:
     ...
 
 
 @overload
-def import_name_from_module(name: str, module: str) -> object:
+def import_name_from_module(name: str, module: str, lazy: bool = ...) -> object:
     ...
 
 
