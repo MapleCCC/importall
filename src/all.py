@@ -7,7 +7,6 @@ Usage: `import all`
 
 
 import builtins
-import inspect
 import sys
 from types import FrameType, ModuleType
 from typing import cast
@@ -26,20 +25,18 @@ def get_importer_frame() -> FrameType:
     Raise GetImporterFrameError if such frame can't be found.
     """
 
-    stack = inspect.stack()
-    index = 0
+    frame = sys._getframe()
 
-    try:
-        while stack[index].frame.f_globals["__package__"] != "importlib":
-            index += 1
+    while frame and frame.f_globals["__package__"] != "importlib":
+        frame = frame.f_back
 
-        while stack[index].frame.f_globals["__package__"] == "importlib":
-            index += 1
+    while frame and frame.f_globals["__package__"] == "importlib":
+        frame = frame.f_back
 
-        return stack[index].frame
+    if not frame:
+        raise GetImporterFrameError
 
-    except IndexError:
-        raise GetImporterFrameError from None
+    return frame
 
 
 try:

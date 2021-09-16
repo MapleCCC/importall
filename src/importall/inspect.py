@@ -1,4 +1,4 @@
-import inspect
+import sys
 from types import FrameType
 
 
@@ -8,9 +8,12 @@ __all__ = ["getcallerframe", "is_called_at_module_level"]
 def getcallerframe() -> FrameType:
     """Return the frame object of the stack frame of the caller of the current function"""
 
+    # Use `sys._getframe()` instead of `inspect.stack().frame`. Profiling shows that
+    # `inspect.stack()` is super expensive, due to internal I/O calls.
+
     try:
-        return inspect.stack()[2].frame
-    except IndexError:
+        return sys._getframe(2)
+    except ValueError:
         raise RuntimeError("getcallerframe() expects to be called in a function")
 
 
