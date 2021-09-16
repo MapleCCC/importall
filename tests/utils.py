@@ -23,7 +23,7 @@ VT = TypeVar("VT")
 def pytest_not_deprecated_call() -> Iterator[None]:
     """
     Return a context manager to assert that the code within context doesn't trigger any
-    `DeprecationWarning`.
+    `DeprecationWarning` or `PendingDeprecationWarning`.
 
     This utility is intended for use in test code employing pytest framework. It
     shoud not be used otherwise.
@@ -34,7 +34,7 @@ def pytest_not_deprecated_call() -> Iterator[None]:
         yield
 
     for warning_message in record:
-        assert not issubclass(warning_message.category, DeprecationWarning)
+        assert not issubclass(warning_message.category, (DeprecationWarning, PendingDeprecationWarning))
 
 
 def issubmapping(m1: Mapping[KT, VT], m2: Mapping[KT, VT]) -> bool:
