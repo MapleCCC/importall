@@ -3,7 +3,7 @@ import sys
 import warnings
 from collections.abc import Iterator, Mapping, MutableMapping
 from contextlib import ExitStack, contextmanager
-from typing import TypeVar, Union
+from typing import Any, NoReturn, TypeVar, Union
 
 import pytest
 
@@ -19,6 +19,48 @@ __all__ = [
 
 KT = TypeVar("KT")
 VT = TypeVar("VT")
+
+
+# A sentinel object to represent no argument to a parameter of a callable.
+NO_ARGUMENT: Any = object()
+
+
+class Unreachable(RuntimeError):
+    """Raised when supposedly unreachable code is reached"""
+
+
+def pytest_fail_from(
+    msg: str = "",
+    pytrace: bool = True,
+    *,
+    cause: Union[BaseException, type[BaseException], None] = NO_ARGUMENT,
+) -> NoReturn:
+
+    """
+    Enhance `pytest.fail()` with exception chaining.
+
+    The `cause` parameter accepts either an exception class or instance, or None.
+    The semantic of the value is similar to that of the `raise-from` statement.
+    Refer to the official document of `raise-from` statement for details:
+    https://docs.python.org/3/reference/simple_stmts.html#raise
+    """
+
+    __tracebackhide__ = True
+
+    try:
+        pytest.fail(msg, pytrace)
+
+    # FIXME pytest doesn't expose `_pytest.outcomes.Failed` as public API, and it would be
+    # fragile to rely on private API, hence discouraged. Current naive workaround is to
+    # blindly and greedily catch any exceptions.
+    except BaseException as exc:
+
+        if cause is NO_ARGUMENT:
+            raise exc
+        else:
+            raise exc from cause
+
+    raise Unreachable
 
 
 @contextmanager
@@ -39,13 +81,13 @@ def pytest_not_raises(
 
     try:
         yield
-    except etype:
+    except etype as exc:
 
         # A workaround to hide traceback of `contextlib._GeneratorContextManager.__exit__`.
         # It's an internal detail of the `contextlib` library.
         sys._getframe(1).f_locals["__tracebackhide__"] = True
 
-        pytest.fail(f"expect no exception of type {etype}")
+        pytest_fail_from(f"expect no exception of type {etype}", cause=exc)
 
 
 @contextmanager
