@@ -158,4 +158,4 @@ def importable(module: str) -> bool:
 # fiddling with modules.
 INEXISTENT_MODULE = "gugugugugugugugugugugu"
 
-assert importable(INEXISTENT_MODULE)
+assert not importable(INEXISTENT_MODULE)
