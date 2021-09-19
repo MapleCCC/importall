@@ -1,4 +1,5 @@
 import importlib.util
+import sys
 import warnings
 from collections.abc import Iterator, Mapping, MutableMapping
 from contextlib import ExitStack, contextmanager
@@ -19,7 +20,8 @@ KT = TypeVar("KT")
 VT = TypeVar("VT")
 
 
-class pytest_not_deprecated_call(warnings.catch_warnings):
+@contextmanager
+def pytest_not_deprecated_call() -> Iterator[None]:
     """
     Return a context manager to assert that the code within context doesn't trigger any
     `DeprecationWarning` or `PendingDeprecationWarning`.
@@ -28,34 +30,22 @@ class pytest_not_deprecated_call(warnings.catch_warnings):
     shoud not be used otherwise.
     """
 
-    def __init__(self) -> None:
-        super().__init__(record=True)
+    __tracebackhide__ = True
 
-    def __enter__(self) -> Optional[list[warnings.WarningMessage]]:
-        self._record = super().__enter__()
-
+    with warnings.catch_warnings(record=True) as record:
         warnings.simplefilter("always", DeprecationWarning)
         warnings.simplefilter("always", PendingDeprecationWarning)
+        yield
 
-        return self._record
+    # A workaround to hide traceback of `contextlib._GeneratorContextManager.__exit__`.
+    # It's an internal detail of the `contextlib` library.
+    sys._getframe(1).f_locals["__tracebackhide__"] = True
 
-    def __exit__(
-        self,
-        exc_type: Optional[type[BaseException]],
-        exc_value: Optional[BaseException],
-        traceback: TracebackType,
-    ) -> None:
-
-        __tracebackhide__ = True
-
-        for warning in self._record:
-            if issubclass(
-                warning.category,
-                (DeprecationWarning, PendingDeprecationWarning),
-            ):
-                pytest.fail("expect no DeprecationWarning or PendingDeprecationWarning")
-
-        super().__exit__(exc_type, exc_value, traceback)
+    for warning in record:
+        if issubclass(
+            warning.category, (DeprecationWarning, PendingDeprecationWarning)
+        ):
+            pytest.fail("expect no DeprecationWarning or PendingDeprecationWarning")
 
 
 def issubmapping(m1: Mapping[KT, VT], m2: Mapping[KT, VT]) -> bool:
