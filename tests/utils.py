@@ -19,7 +19,6 @@ KT = TypeVar("KT")
 VT = TypeVar("VT")
 
 
-# FIXME is the impl correct ?
 class pytest_not_deprecated_call(warnings.catch_warnings):
     """
     Return a context manager to assert that the code within context doesn't trigger any
@@ -32,9 +31,13 @@ class pytest_not_deprecated_call(warnings.catch_warnings):
     def __init__(self) -> None:
         super().__init__(record=True)
 
-    def __enter__(self) -> None:
+    def __enter__(self) -> Optional[list[warnings.WarningMessage]]:
         self._record = super().__enter__()
+
         warnings.simplefilter("always", DeprecationWarning)
+        warnings.simplefilter("always", PendingDeprecationWarning)
+
+        return self._record
 
     def __exit__(
         self,
@@ -45,15 +48,14 @@ class pytest_not_deprecated_call(warnings.catch_warnings):
 
         __tracebackhide__ = True
 
-        if exc_type is not None:
-            return
-
-        for warning_message in self._record:
+        for warning in self._record:
             if issubclass(
-                warning_message.category,
+                warning.category,
                 (DeprecationWarning, PendingDeprecationWarning),
             ):
                 pytest.fail("expect no DeprecationWarning or PendingDeprecationWarning")
+
+        super().__exit__(exc_type, exc_value, traceback)
 
 
 def issubmapping(m1: Mapping[KT, VT], m2: Mapping[KT, VT]) -> bool:
