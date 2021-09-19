@@ -3,12 +3,13 @@ import sys
 import warnings
 from collections.abc import Iterator, Mapping, MutableMapping
 from contextlib import ExitStack, contextmanager
-from typing import TypeVar
+from typing import TypeVar, Union
 
 import pytest
 
 
 __all__ = [
+    "pytest_not_raises",
     "pytest_not_deprecated_call",
     "issubmapping",
     "mock_dict",
@@ -18,6 +19,33 @@ __all__ = [
 
 KT = TypeVar("KT")
 VT = TypeVar("VT")
+
+
+@contextmanager
+def pytest_not_raises(
+    etype: Union[type[BaseException], tuple[type[BaseException], ...]] = BaseException
+) -> Iterator[None]:
+    """
+    Return a context manager to assert that code within context doesn't raise specified
+    exceptions.
+
+    `etype` parameter accepts either an exception type, or a tuple of exception types.
+
+    This utility is intended for use in test code employing pytest framework. It
+    shoud not be used otherwise.
+    """
+
+    __tracebackhide__ = True
+
+    try:
+        yield
+    except etype:
+
+        # A workaround to hide traceback of `contextlib._GeneratorContextManager.__exit__`.
+        # It's an internal detail of the `contextlib` library.
+        sys._getframe(1).f_locals["__tracebackhide__"] = True
+
+        pytest.fail(f"expect no exception of type {etype}")
 
 
 @contextmanager
