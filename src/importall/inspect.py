@@ -14,7 +14,9 @@ def getcallerframe() -> FrameType:
     try:
         return sys._getframe(2)
     except ValueError:
-        raise RuntimeError("getcallerframe() expects to be called in a function")
+        raise RuntimeError(
+            "getcallerframe() expects to be called in a function"
+        ) from None
 
 
 def is_called_at_module_level() -> bool:
