@@ -114,17 +114,22 @@ def deduce_stdlib_public_interface(module_name: str) -> set[str]:
 
     # TODO create a subinterpreter within the same process to reduce performance overhead
 
-    executable = sys.executable or "python"
+    # TODO maybe we can just use test.support.CleanImport instead of the heavy solution
+    # - subprocess to launch another interpreter instance ?
+
+    # TODO rewrite in functional programming style
+
+    python_executable = sys.executable or "python"
     source = (
         "symtab = {}\n"
         f"exec('from {module_name} import *', dict(), symtab)\n"
         "for symbol in symtab: print(symbol)\n"
     )
-    public_names = set(
-        subprocess.check_output(
-            [executable, "-c", source], stderr=subprocess.STDOUT, text=True
-        ).splitlines()
-    )
+    command = [python_executable, "-c", source]
+    # Spawn subprocess with stderr captured, so as to avoid cluttering console output
+    cmd_output = subprocess.check_output(command, stderr=subprocess.STDOUT, text=True)
+
+    public_names = set(cmd_output.splitlines())
 
     # Try best effort to filter out only public names
 
