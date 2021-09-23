@@ -19,4 +19,4 @@ def test_provide_lazy_version(x) -> None:
     def inc(x: int) -> int:
         return x + 1
 
-    assert inc(x) == inc.__wrapped__(x) == x + 1
+    assert inc(x, lazy=True) == inc(x, lazy=False) == inc.__wrapped__(x) == x + 1
