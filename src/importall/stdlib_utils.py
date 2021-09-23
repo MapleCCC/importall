@@ -96,10 +96,10 @@ def deduce_stdlib_public_interface(module_name: str) -> set[str]:
     if module_name == "builtins":
         return set(BUILTINS_NAMES)
 
-    if (
-        __all__ := getattr(importlib.import_module(module_name), "__all__", None)
-    ) is not None:
-        return __all__
+    try:
+        return set(import_name_from_module("__all__", module_name))
+    except ImportError:
+        pass
 
     # Use a separate clean interpreter to retrieve public names.
     #
