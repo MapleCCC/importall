@@ -109,8 +109,8 @@ def deduce_stdlib_public_interface(module_name: str) -> set[str]:
     # the `deduce_stdlib_public_interface()` function if not taken good care of.
     #
     # An example is the `distutils` module. Whether `msvccompiler` appears in the
-    # result of `from distutils import *` depends on whether `distutils.msvccompiler`
-    # has been imported before.
+    # result of `from distutils import *` is affected by whether
+    # `distutils.msvccompiler` has been imported before.
 
     # TODO create a subinterpreter within the same process to reduce performance overhead
 
