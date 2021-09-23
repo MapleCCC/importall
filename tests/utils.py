@@ -33,7 +33,7 @@ def pytest_fail_from(
     msg: str = "",
     pytrace: bool = True,
     *,
-    cause: Union[BaseException, type[BaseException], None] = NO_ARGUMENT,
+    cause: Union[BaseException, type[BaseException], None],
 ) -> NoReturn:
 
     """
