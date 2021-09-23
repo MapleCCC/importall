@@ -1,4 +1,5 @@
 import subprocess
+import sys
 
 import pytest
 from hypothesis import given
@@ -19,7 +20,7 @@ def test_getcallerframe(x: int) -> None:
 def test_getcallerframe_called_from_non_function() -> None:
 
     source = "from importall.inspect import getcallerframe\n" "getcallerframe()"
-    command = ["python", "-c", source]
+    command = [sys.executable or "python", "-c", source]
 
     with pytest.raises(subprocess.CalledProcessError) as exc_info:
         subprocess.check_output(command, stderr=subprocess.STDOUT, text=True)
