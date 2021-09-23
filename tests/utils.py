@@ -118,7 +118,7 @@ def pytest_not_deprecated_call() -> Iterator[None]:
             pytest.fail("expect no DeprecationWarning or PendingDeprecationWarning")
 
 
-def issubmapping(m1: Mapping[KT, VT], m2: Mapping[KT, VT]) -> bool:
+def issubmapping(m1: Mapping[KT, VT], m2: Mapping[KT, VT], /) -> bool:
     return all(value == m2[key] for key, value in m1.items())
 
 
