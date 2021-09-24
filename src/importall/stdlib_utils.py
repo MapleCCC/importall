@@ -82,7 +82,7 @@ def get_names_from_wildcard_import_module(module_name: str) -> set[str]:
 
 
 @raises(RuntimeError, "Fail to deduce public interface of module '{module_name}'")
-def deduce_stdlib_public_interface(module_name: str) -> set[str]:
+async def deduce_stdlib_public_interface(module_name: str) -> set[str]:
     """
     Try best effort to heuristically determine public names exported by a stdlib module.
 
@@ -118,7 +118,7 @@ def deduce_stdlib_public_interface(module_name: str) -> set[str]:
     # TODO maybe we can just use test.support.CleanImport instead of the heavy solution
     # - subprocess to launch another interpreter instance ?
 
-    public_names = run_in_new_interpreter(
+    public_names = await run_in_new_interpreter(
         get_names_from_wildcard_import_module, module_name
     )
 
