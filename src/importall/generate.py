@@ -57,6 +57,8 @@ def generate_stdlib_public_names() -> dict[str, list[str]]:
 
 
 def reformat_json_file(file: Path) -> None:
+    """Reformat JSON file"""
+
     prettier_executable = "prettier.cmd" if os.name == "nt" else "prettier"
     options = ["--end-of-line", "auto", "--write"]
     subprocess.check_call([prettier_executable, *options, str(file)])

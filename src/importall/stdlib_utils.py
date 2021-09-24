@@ -119,13 +119,12 @@ def deduce_stdlib_public_interface(module_name: str) -> set[str]:
 
     # TODO rewrite in functional programming style
 
-    python_executable = sys.executable or "python"
     source = (
         "from importall.importlib import wildcard_import_module\n"
         f"symtab = wildcard_import_module({module_name})\n"
         "for symbol in symtab: print(symbol)\n"
     )
-    command = [python_executable, "-c", source]
+    command = [sys.executable or "python", "-c", source]
     # Spawn subprocess with stderr captured, so as to avoid cluttering console output
     cmd_output = subprocess.check_output(command, stderr=subprocess.STDOUT, text=True)
 

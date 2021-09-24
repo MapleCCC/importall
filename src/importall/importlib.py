@@ -45,7 +45,7 @@ def import_name_from_module(name: str, module: str) -> object:
 
     Setting the keyword argument `lazy` to `True` to enable lazy import mode. The return
     result looks like the normal result, but it's only when the result is used by
-    external code that the actual import happens. Useful when importing a module is
+    external code that the actual import happens. Useful when importing some modules are
     considered expensive.
     """
 

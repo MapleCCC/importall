@@ -1,5 +1,6 @@
 import subprocess
 import sys
+from subprocess import CalledProcessError
 
 import pytest
 from hypothesis import given
@@ -19,10 +20,10 @@ def test_getcallerframe(x: int) -> None:
 
 def test_getcallerframe_called_from_non_function() -> None:
 
-    source = "from importall.inspect import getcallerframe\n" "getcallerframe()"
+    source = "from importall.inspect import getcallerframe\n" "getcallerframe()\n"
     command = [sys.executable or "python", "-c", source]
 
-    with pytest.raises(subprocess.CalledProcessError) as exc_info:
+    with pytest.raises(CalledProcessError) as exc_info:
         subprocess.check_output(command, stderr=subprocess.STDOUT, text=True)
 
     error_message = "RuntimeError: getcallerframe() expects to be called in a function"

@@ -14,6 +14,10 @@ def _test_stdlib_symbols_in_namespace(namespace: Mapping[str, object]) -> None:
 
     assert ns["log2"](2) == 1
 
+    # FIXME lazy-object-proxy doesn't handle some deep-level calls like type(), id(),
+    # repr(), isinstance(), etc.
+    # assert ns["isinstance"](ns["list"](), ns["MutableSequence"])
+
     assert list(ns["combinations"]("ABCD", 2)) == [
         ("A", "B"),
         ("A", "C"),
