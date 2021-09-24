@@ -6,6 +6,7 @@ import subprocess
 import sys
 from collections.abc import Callable, Mapping
 from functools import partial, wraps
+from subprocess import CalledProcessError
 from typing import TYPE_CHECKING, TypeVar, cast
 
 from lazy_object_proxy import Proxy
@@ -143,7 +144,14 @@ async def asyncio_subprocess_check_output(
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.STDOUT if redirect_stderr_to_stdout else None,
     )
-    stdout, _ = await proc.communicate()
+    stdout, stderr = await proc.communicate()
+
+    retcode = proc.returncode
+    assert retcode is not None
+
+    if retcode != 0:
+        raise CalledProcessError(retcode, args, stdout, stderr)
+
     return stdout
 
 
