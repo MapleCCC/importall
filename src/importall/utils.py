@@ -151,12 +151,11 @@ class RunInNewProcessError(RuntimeError):
     """An exception to represent that `run_in_new_interpreter()` fails"""
 
 
-# TODO async, twisted, tornado
 # TODO design some creative approaches to add color highlighting to literal source
 # TODO better error report
 # TODO create a subinterpreter within the same process to reduce performance overhead
 @raises(RunInNewProcessError, "fail to run {func} in new process")
-def run_in_new_interpreter(
+async def run_in_new_interpreter(
     func: Callable[P, R], /, *args: P.args, **kwargs: P.kwargs
 ) -> R:
     """
@@ -187,4 +186,8 @@ def run_in_new_interpreter(
     command = [sys.executable or "python", "-c", source]
 
     # Spawn subprocess with stderr captured, so as to avoid cluttering console output
-    return pickle.loads(subprocess.check_output(command, stderr=subprocess.STDOUT))
+    pickled_result = await asyncio_subprocess_check_output(
+        command, redirect_stderr_to_stdout=True
+    )
+
+    return pickle.loads(pickled_result)
