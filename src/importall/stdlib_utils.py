@@ -7,6 +7,7 @@ import __future__
 import importlib
 import inspect
 import json
+import pickle
 import re
 import sys
 import warnings
@@ -21,7 +22,7 @@ from lazy_object_proxy import Proxy
 from .importlib import import_name_from_module, wildcard_import_module
 from .stdlib_list import BUILTINS_NAMES, IMPORTABLE_STDLIB_MODULES, STDLIB_MODULES
 from .typing import SymbolTable
-from .utils import raises, run_in_new_interpreter
+from .utils import asyncio_subprocess_check_output, raises, unindent_source
 
 
 __all__ = [
@@ -77,10 +78,6 @@ class DeducePublicInterfaceError(Exception):
     """
 
 
-def get_names_from_wildcard_import_module(module_name: str) -> set[str]:
-    return set(wildcard_import_module(module_name))
-
-
 @raises(RuntimeError, "Fail to deduce public interface of module '{module_name}'")
 async def deduce_stdlib_public_interface(module_name: str) -> set[str]:
     """
@@ -118,9 +115,28 @@ async def deduce_stdlib_public_interface(module_name: str) -> set[str]:
     # TODO maybe we can just use test.support.CleanImport instead of the heavy solution
     # - subprocess to launch another interpreter instance ?
 
-    public_names = await run_in_new_interpreter(
-        get_names_from_wildcard_import_module, module_name
+    source = unindent_source(
+        f"""
+        import pickle, sys, os
+        from contextlib import redirect_stdout, redirect_stderr
+
+        symtab = dict()
+
+        # NOTE it's more robust to use the `locals` argument instead of the `globals`
+        # argument to collect symbols, because the `globals` argument could have been
+        # implicitly and surprisingly altered, such as being inserted a `__builtins__` key.
+
+        with open(os.devnull, "w") as f:
+            with redirect_stdout(f), redirect_stderr(f):
+                exec("from {module_name} import *", dict(), symtab)
+
+        sys.stdout.buffer.write(pickle.dumps(set(symtab)))
+    """
     )
+
+    command = [sys.executable or "python", "-c", source]
+    out = await asyncio_subprocess_check_output(command, redirect_stderr_to_stdout=True)
+    public_names = pickle.loads(out)
 
     # Try best effort to filter out only public names
 
