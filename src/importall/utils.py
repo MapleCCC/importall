@@ -141,14 +141,20 @@ class RunInNewProcessError(RuntimeError):
 # TODO better error report
 # TODO create a subinterpreter within the same process to reduce performance overhead
 @raises(RunInNewProcessError, "fail to run {func} in new process")
-def run_in_new_interpreter(func: Callable[[], R]) -> R:
+def run_in_new_interpreter(
+    func: Callable[P, R], /, *args: P.args, **kwargs: P.kwargs
+) -> R:
     """
-    Run the callable in a new interpreter instance.
+    Run the callable in a new interpreter instance. Return the result of the callable.
+
+    Picklability of the callable and its arguments and its return value are required.
 
     Raise RunInNewInterpreterError on failure.
     """
 
     pickled_func = pickle.dumps(func).hex()
+    pickled_args = pickle.dumps(args).hex()
+    pickled_kwargs = pickle.dumps(kwargs).hex()
 
     source = unindent_source(
         f"""
@@ -158,10 +164,12 @@ def run_in_new_interpreter(func: Callable[[], R]) -> R:
         from contextlib import redirect_stdout
 
         func = pickle.loads(bytes.fromhex('{pickled_func}'))
+        args = pickle.loads(bytes.fromhex('{pickled_args}'))
+        kwargs = pickle.loads(bytes.fromhex('{pickled_kwargs}'))
 
         with open(os.devnull, "w") as f:
             with redirect_stdout(f):
-                result = func()
+                result = func(*args, **kwargs)
 
         sys.stdout.buffer.write(pickle.dumps(result))
     """

@@ -10,7 +10,7 @@ import json
 import re
 import sys
 import warnings
-from functools import cache, partial
+from functools import cache
 from pathlib import Path
 from typing import Optional, cast
 
@@ -119,7 +119,7 @@ def deduce_stdlib_public_interface(module_name: str) -> set[str]:
     # - subprocess to launch another interpreter instance ?
 
     public_names = run_in_new_interpreter(
-        partial(get_names_from_wildcard_import_module, module_name)
+        get_names_from_wildcard_import_module, module_name
     )
 
     # Try best effort to filter out only public names
