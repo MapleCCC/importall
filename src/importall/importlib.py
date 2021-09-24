@@ -47,6 +47,9 @@ def import_name_from_module(name: str, module: str) -> object:
     result looks like the normal result, but it's only when the result is used by
     external code that the actual import happens. Useful when importing some modules are
     considered expensive.
+
+    Raise `ModuleNotFoundError` if the module can't be located, and `ImportError` if the
+    loading process fail or the name can't be found from the module.
     """
 
     # The __future__ module is a special case.
