@@ -14,6 +14,7 @@ from lazy_object_proxy import Proxy
 from typing_extensions import ParamSpec
 
 from .functools import nulldecorator
+from .inspect import getcallerframe
 from .typing import IdentityDecorator
 
 
@@ -24,6 +25,7 @@ __all__ = [
     "raises",
     "unindent_source",
     "run_in_new_interpreter",
+    "eval_name",
 ]
 
 
@@ -207,3 +209,29 @@ async def run_in_new_interpreter(
         )
 
     return pickle.loads(pickled_result)
+
+
+def eval_name(
+    name: str, globals: dict[str, object] = None, locals: Mapping[str, object] = None, /
+) -> object:
+    """
+    The use of `eval()` on arbitrary string has been discouraged as a dangerous
+    practice. `eval_name()` is a safer and specialized alternative to `eval()`. It only
+    evaluates expression consisting of a single name.
+    """
+
+    if not name.isidentifier():
+        raise ValueError(f"Invalid name: {name}")
+
+    # Constraint implemented by the position-only syntax, so as to imitate the
+    # built-in `eval()`'s behavior.
+    assert not (globals is None and locals is not None)
+
+    if globals is None:
+        globals = getcallerframe().f_globals
+        locals = getcallerframe().f_locals
+
+    if locals is None:
+        locals = globals
+
+    return eval(name, globals, locals)
