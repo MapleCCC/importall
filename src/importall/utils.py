@@ -1,6 +1,9 @@
 import builtins
 import inspect
-from collections.abc import Callable
+import pickle
+import subprocess
+import sys
+from collections.abc import Callable, Mapping
 from functools import partial, wraps
 from typing import TYPE_CHECKING, TypeVar, cast
 
@@ -11,7 +14,13 @@ from .functools import nulldecorator
 from .typing import IdentityDecorator
 
 
-__all__ = ["profile", "provide_lazy_version", "tk_is_available", "raises"]
+__all__ = [
+    "profile",
+    "provide_lazy_version",
+    "tk_is_available",
+    "raises",
+    "run_in_new_interpreter",
+]
 
 
 P = ParamSpec("P")
@@ -115,3 +124,59 @@ def raises(etype: type[Exception], error_message: str) -> IdentityDecorator:
         return wrapper
 
     return decorator
+
+
+def unindent_source(text: str) -> str:
+    lines = text.splitlines()
+    margin = min(len(line) - len(line.lstrip()) for line in lines if line.strip())
+    return "\n".join(line[margin:] for line in lines)
+
+
+class RunInNewProcessError(RuntimeError):
+    """An exception to represent that `run_in_new_interpreter()` fails"""
+
+
+# TODO use positional only keyword argument syntax to handle the conflict between the
+# globals argument and other keyword arguments intended to pass to func.
+# TODO do we need to have the `globals` argument ?
+# TODO async, twisted, tornado
+# TODO design some creative approaches to add color highlighting to literal source
+# TODO better error report
+# TODO create a subinterpreter within the same process to reduce performance overhead
+@raises(RunInNewProcessError, "fail to run {func} in new process")
+def run_in_new_interpreter(
+    func: Callable[[], R], globals: Mapping[str, object] = None
+) -> R:
+    """
+    Run the callable in a new interpreter instance.
+
+    Raise RunInNewInterpreterError on failure.
+    """
+
+    pickled_globals = pickle.dumps(globals or {}).hex()
+    pickled_func = pickle.dumps(func).hex()
+
+    source = unindent_source(
+        f"""
+        import os
+        import pickle
+        import sys
+        from contextlib import redirect_stdout
+
+        globals_dict = globals()
+        globals_dict |= pickle.loads(bytes.fromhex('{pickled_globals}'))
+
+        func = pickle.loads(bytes.fromhex('{pickled_func}'))
+
+        with open(os.devnull, "w") as f:
+            with redirect_stdout(f):
+                result = func()
+
+        sys.stdout.buffer.write(pickle.dumps(result))
+    """
+    )
+
+    command = [sys.executable or "python", "-c", source]
+
+    # Spawn subprocess with stderr captured, so as to avoid cluttering console output
+    return pickle.loads(subprocess.check_output(command, stderr=subprocess.STDOUT))

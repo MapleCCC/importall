@@ -8,10 +8,9 @@ import importlib
 import inspect
 import json
 import re
-import subprocess
 import sys
 import warnings
-from functools import cache
+from functools import cache, partial
 from pathlib import Path
 from typing import Optional, cast
 
@@ -22,7 +21,7 @@ from lazy_object_proxy import Proxy
 from .importlib import import_name_from_module, wildcard_import_module
 from .stdlib_list import BUILTINS_NAMES, IMPORTABLE_STDLIB_MODULES, STDLIB_MODULES
 from .typing import SymbolTable
-from .utils import raises
+from .utils import raises, run_in_new_interpreter
 
 
 __all__ = [
@@ -78,6 +77,10 @@ class DeducePublicInterfaceError(Exception):
     """
 
 
+def get_names_from_wildcard_import_module(module_name: str) -> set[str]:
+    return set(wildcard_import_module(module_name))
+
+
 @raises(RuntimeError, "Fail to deduce public interface of module '{module_name}'")
 def deduce_stdlib_public_interface(module_name: str) -> set[str]:
     """
@@ -112,23 +115,12 @@ def deduce_stdlib_public_interface(module_name: str) -> set[str]:
     # result of `from distutils import *` is affected by whether
     # `distutils.msvccompiler` has been imported before.
 
-    # TODO create a subinterpreter within the same process to reduce performance overhead
-
     # TODO maybe we can just use test.support.CleanImport instead of the heavy solution
     # - subprocess to launch another interpreter instance ?
 
-    # TODO rewrite in functional programming style
-
-    source = (
-        "from importall.importlib import wildcard_import_module\n"
-        f"symtab = wildcard_import_module({module_name})\n"
-        "for symbol in symtab: print(symbol)\n"
+    public_names = run_in_new_interpreter(
+        partial(get_names_from_wildcard_import_module, module_name)
     )
-    command = [sys.executable or "python", "-c", source]
-    # Spawn subprocess with stderr captured, so as to avoid cluttering console output
-    cmd_output = subprocess.check_output(command, stderr=subprocess.STDOUT, text=True)
-
-    public_names = set(cmd_output.splitlines())
 
     # Try best effort to filter out only public names
 
