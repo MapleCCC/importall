@@ -81,6 +81,9 @@ def wildcard_import_module(module_name: str) -> SymbolTable:
         return {name: getattr(__future__, name) for name in __future__.__all__}
 
     symtab: SymbolTable = {}
+    # NOTE it's more robust to use the `locals` argument instead of the `globals`
+    # argument to collect symbols, because the `globals` argument could have been
+    # implicitly and surprisingly altered, such as being inserted a `__builtins__` key.
     exec(f"from {module_name} import *", {}, symtab)
     return symtab
 
