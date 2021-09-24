@@ -136,24 +136,18 @@ class RunInNewProcessError(RuntimeError):
     """An exception to represent that `run_in_new_interpreter()` fails"""
 
 
-# TODO use positional only keyword argument syntax to handle the conflict between the
-# globals argument and other keyword arguments intended to pass to func.
-# TODO do we need to have the `globals` argument ?
 # TODO async, twisted, tornado
 # TODO design some creative approaches to add color highlighting to literal source
 # TODO better error report
 # TODO create a subinterpreter within the same process to reduce performance overhead
 @raises(RunInNewProcessError, "fail to run {func} in new process")
-def run_in_new_interpreter(
-    func: Callable[[], R], globals: Mapping[str, object] = None
-) -> R:
+def run_in_new_interpreter(func: Callable[[], R]) -> R:
     """
     Run the callable in a new interpreter instance.
 
     Raise RunInNewInterpreterError on failure.
     """
 
-    pickled_globals = pickle.dumps(globals or {}).hex()
     pickled_func = pickle.dumps(func).hex()
 
     source = unindent_source(
@@ -162,9 +156,6 @@ def run_in_new_interpreter(
         import pickle
         import sys
         from contextlib import redirect_stdout
-
-        globals_dict = globals()
-        globals_dict |= pickle.loads(bytes.fromhex('{pickled_globals}'))
 
         func = pickle.loads(bytes.fromhex('{pickled_func}'))
 
