@@ -48,6 +48,10 @@ def import_name_from_module(name: str, module: str) -> object:
     external code that the actual import happens. Useful when importing some modules are
     considered expensive.
 
+    NOTE that `exec("from xxx import yyy")` is not equivalent to the naive snippet
+    `getattr(importlib.import_module(xxx), yyy)`. They differ in some cases, such as
+    when the name to import is a submodule.
+
     Raise `ModuleNotFoundError` if the module can't be located, and `ImportError` if the
     loading process fail or the name can't be found from the module.
     """
