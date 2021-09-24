@@ -1,3 +1,9 @@
+"""
+`importall` is a lightweight, performant and robust library to import every available
+names from standard libraries to the current namespace, i.e., a Python equivalent to
+C++'s `<bits/stdc++.h>`.
+"""
+
 import sys
 
 from .importall import deimportall, get_all_symbols, importall
