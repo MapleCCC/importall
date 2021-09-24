@@ -121,8 +121,8 @@ def deduce_stdlib_public_interface(module_name: str) -> set[str]:
 
     python_executable = sys.executable or "python"
     source = (
-        "symtab = {}\n"
-        f"exec('from {module_name} import *', dict(), symtab)\n"
+        "from importall.importlib import wildcard_import_module\n"
+        f"symtab = wildcard_import_module({module_name})\n"
         "for symbol in symtab: print(symbol)\n"
     )
     command = [python_executable, "-c", source]
