@@ -6,6 +6,7 @@ import subprocess
 import sys
 from collections.abc import Callable, Mapping
 from functools import partial, wraps
+from pickle import PicklingError
 from subprocess import CalledProcessError
 from typing import TYPE_CHECKING, TypeVar, cast
 
@@ -155,14 +156,8 @@ async def asyncio_subprocess_check_output(
     return stdout
 
 
-class RunInNewProcessError(RuntimeError):
-    """An exception to represent that `run_in_new_interpreter()` fails"""
-
-
 # TODO design some creative approaches to add color highlighting to literal source
-# TODO better error report
 # TODO create a subinterpreter within the same process to reduce performance overhead
-@raises(RunInNewProcessError, "fail to run {func} in new process")
 async def run_in_new_interpreter(
     func: Callable[P, R], /, *args: P.args, **kwargs: P.kwargs
 ) -> R:
@@ -174,7 +169,12 @@ async def run_in_new_interpreter(
     Raise `RunInNewInterpreterError` on failure.
     """
 
-    pickled = pickle.dumps((func, args, kwargs))
+    try:
+        pickled = pickle.dumps((func, args, kwargs))
+    except PicklingError:
+        raise ValueError(
+            "Picklability of the callable and its arguments and its return value are required."
+        )
 
     source = unindent_source(
         f"""
@@ -193,9 +193,16 @@ async def run_in_new_interpreter(
 
     command = [sys.executable or "python", "-c", source]
 
-    # Spawn subprocess with stderr captured, so as to avoid cluttering console output
-    pickled_result = await asyncio_subprocess_check_output(
-        command, redirect_stderr_to_stdout=True
-    )
+    try:
+        # Spawn subprocess with stderr captured, so as to avoid cluttering console output
+        pickled_result = await asyncio_subprocess_check_output(
+            command, redirect_stderr_to_stdout=True
+        )
+
+    except CalledProcessError as exc:
+        raise RuntimeError(
+            f"Fail to run {func} in new interpreter due to:\n"
+            + "\n".join(" " * 4 + line for line in exc.stdout.decode().splitlines())
+        )
 
     return pickle.loads(pickled_result)
