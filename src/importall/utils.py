@@ -22,6 +22,7 @@ __all__ = [
     "provide_lazy_version",
     "tk_is_available",
     "raises",
+    "unindent_source",
     "run_in_new_interpreter",
 ]
 
