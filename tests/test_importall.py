@@ -127,6 +127,11 @@ class TestDeimportall:
 
         deimportall(globals())
 
+        # Test for submapping relationship instead of equality, because it's possible
+        # that importall() introduces a symbol that overrides the old symbol with the
+        # same name, and we make a design choice that deimportall() should not pay
+        # effort to restore the old symbol. Refer to document of `deimportall()` for
+        # more details.
         assert issubmapping(globals(), origin_globals)
 
     def test_called_at_non_module_level(self) -> None:
