@@ -1,7 +1,7 @@
 """
 A script to either launch an importall REPL, within which every available names from
 standard libraries are already imported, or run a Python script, with every available
-names from standard libraries injected into the script's namespace.
+names from standard libraries injected into the script's builtins namespace.
 
 Usage: `python -m importall [-h] [script]`
 """
@@ -11,13 +11,13 @@ initial_globals = globals().copy()
 import argparse
 import builtins
 import code
+import runpy
 import sys
-from pathlib import Path
 
 import colorama
 from colorama import Fore, Style
 
-from .importall import get_all_symbols
+from .importall import get_all_symbols, importall
 
 
 colorama.init()
@@ -31,16 +31,10 @@ def bright_green(s: str) -> str:
     return Style.BRIGHT + Fore.GREEN + s + Style.RESET_ALL
 
 
-def run_script(script_path: str) -> None:
+def run_script(script: str) -> None:
 
-    script = Path(script_path)
-
-    text = script.read_text(encoding="utf-8")
-
-    inject_builtins = builtins.__dict__ | get_all_symbols()
-    inject_globals = initial_globals | {"__builtins__": inject_builtins}
-
-    exec(compile(text, script, "exec"), inject_globals)
+    importall(builtins.__dict__)
+    runpy.run_path(script)
 
 
 def run_repl() -> None:
@@ -73,7 +67,7 @@ def main() -> None:
         description="A script to either launch an importall REPL, "
         "within which every available names from standard libraries are already imported, "
         "or run a Python script, "
-        "with every available names from standard libraries injected into the script's namespace.",
+        "with every available names from standard libraries injected into the script's builtins namespace.",
     )
     parser.add_argument("script", nargs="?", help="A Python script file to run.")
     args = parser.parse_args()
