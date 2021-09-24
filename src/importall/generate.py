@@ -14,7 +14,7 @@ from pathlib import Path
 from tqdm.asyncio import tqdm_asyncio
 
 from .stdlib_list import IMPORTABLE_STDLIB_MODULES
-from .stdlib_utils import DeducePublicInterfaceError, deduce_stdlib_public_interface
+from .stdlib_utils import deduce_stdlib_public_interface
 
 
 MODULES_WITH_ZERO_TOP_LEVEL_PUBLIC_NAMES = frozenset(
@@ -28,14 +28,7 @@ async def generate_stdlib_public_names() -> dict[str, list[str]]:
 
     async def helper(module_name: str) -> list[str]:
 
-        try:
-            public_names = await deduce_stdlib_public_interface(module_name)
-        except DeducePublicInterfaceError:
-            print(
-                f"Failed to generate public interface of library {module_name}",
-                file=sys.stderr,
-            )
-            raise
+        public_names = await deduce_stdlib_public_interface(module_name)
 
         # Remove false positives
         public_names -= KNOWN_FALSE_POSITIVES.get(module_name, set())

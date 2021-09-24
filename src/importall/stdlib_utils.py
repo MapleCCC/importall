@@ -13,6 +13,7 @@ import sys
 import warnings
 from functools import cache
 from pathlib import Path
+from subprocess import CalledProcessError
 from typing import Optional, cast
 
 import commentjson
@@ -22,12 +23,11 @@ from lazy_object_proxy import Proxy
 from .importlib import import_name_from_module, wildcard_import_module
 from .stdlib_list import BUILTINS_NAMES, IMPORTABLE_STDLIB_MODULES, STDLIB_MODULES
 from .typing import SymbolTable
-from .utils import asyncio_subprocess_check_output, raises, unindent_source
+from .utils import asyncio_subprocess_check_output, unindent_source
 
 
 __all__ = [
     "import_stdlib_public_names",
-    "DeducePublicInterfaceError",
     "deduce_stdlib_public_interface",
     "from_stdlib",
     "deprecated_modules",
@@ -71,14 +71,6 @@ def import_stdlib_public_names(
     }
 
 
-class DeducePublicInterfaceError(Exception):
-    """
-    Raised when `deduce_stdlib_public_interface()` fails to deduce the public interface
-    of a given module.
-    """
-
-
-@raises(RuntimeError, "Fail to deduce public interface of module '{module_name}'")
 async def deduce_stdlib_public_interface(module_name: str) -> set[str]:
     """
     Try best effort to heuristically determine public names exported by a stdlib module.
@@ -135,8 +127,19 @@ async def deduce_stdlib_public_interface(module_name: str) -> set[str]:
     )
 
     command = [sys.executable or "python", "-c", source]
-    out = await asyncio_subprocess_check_output(command, redirect_stderr_to_stdout=True)
-    public_names = pickle.loads(out)
+
+    try:
+        pickled_public_names = await asyncio_subprocess_check_output(
+            command, redirect_stderr_to_stdout=True
+        )
+
+    except CalledProcessError as exc:
+        raise RuntimeError(
+            f"Fail to deduce public interface of module '{module_name}' due to:\n"
+            + "\n".join(" " * 4 + line for line in exc.stdout.decode().splitlines())
+        )
+
+    public_names = pickle.loads(pickled_public_names)
 
     # Try best effort to filter out only public names
 
