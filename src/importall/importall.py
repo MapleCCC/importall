@@ -39,6 +39,10 @@ def importall(
     The `namespace` parameter accepts a symbol table to populate. Usually the caller
     passes in `globals()`.
 
+    It's also possible to pass in `builtins.__dict__` to the `namespace` argument so
+    that the imported symbols are available literally everywhere, especially useful when
+    quickly writing one-off script.
+
     By default, names are lazily imported, to avoid the overhead of eager import.
     Set the `lazy` parameter to `False` to switch to eager import mode.
 
