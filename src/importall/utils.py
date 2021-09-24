@@ -1,3 +1,4 @@
+import asyncio
 import builtins
 import inspect
 import pickle
@@ -130,6 +131,20 @@ def unindent_source(text: str) -> str:
     lines = text.splitlines()
     margin = min(len(line) - len(line.lstrip()) for line in lines if line.strip())
     return "\n".join(line[margin:] for line in lines)
+
+
+async def asyncio_subprocess_check_output(
+    args, redirect_stderr_to_stdout: bool = False
+) -> bytes:
+    """Augment `subprocess.check_output()` with async support"""
+
+    proc = await asyncio.create_subprocess_exec(
+        *args,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.STDOUT if redirect_stderr_to_stdout else None,
+    )
+    stdout, _ = await proc.communicate()
+    return stdout
 
 
 class RunInNewProcessError(RuntimeError):
