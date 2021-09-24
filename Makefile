@@ -18,7 +18,7 @@ test:
 	python3 -m pytest test_importall.py
 
 profile:
-	kernprof -lv profile_entry.py > profile_output.txt
+	kernprof --line-by-line --view profile_entry.py > profile_output.txt
 
 loc:
 	tokei .
