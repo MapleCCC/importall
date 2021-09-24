@@ -180,12 +180,12 @@ async def run_in_new_interpreter(
     source = unindent_source(
         f"""
         import os, pickle, sys
-        from contextlib import redirect_stdout
+        from contextlib import redirect_stderr, redirect_stdout
 
         func, args, kwargs = pickle.loads({pickled})
 
         with open(os.devnull, "w") as f:
-            with redirect_stdout(f):
+            with redirect_stdout(f), redirect_stderr(f):
                 result = func(*args, **kwargs)
 
         sys.stdout.buffer.write(pickle.dumps(result))
