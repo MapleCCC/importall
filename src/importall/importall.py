@@ -98,6 +98,15 @@ def deimportall(namespace: SymbolTable = None) -> None:
     """
     De-import all imported names. Recover/restore the namespace.
 
+    More precisely, `deimportall()` removes, from the namespace, symbols introduced by
+    the previous call to `importall()`. Sometimes it's possible that `importall()`
+    introduces a symbol that overrides the old symbol with the same name.
+    `deimportall()` is intentionally designed to not pay effort to restore the old
+    symbol, mainly to avoid adding considerable complexity to the implementation.
+
+    If the namespace has never been injected symbols by a previous call to `importall()`
+    , passing it to `deimportall()` will leave it intact.
+
     The `deimportall()` function is only allowed to be called at the module level.
     Attempting to invoke `deimportall()` in class or function definitions will raise a
     RuntimeError.
