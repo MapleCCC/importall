@@ -152,14 +152,14 @@ def run_in_new_interpreter(
     Raise `RunInNewInterpreterError` on failure.
     """
 
-    pickled = pickle.dumps((func, args, kwargs)).hex()
+    pickled = pickle.dumps((func, args, kwargs))
 
     source = unindent_source(
         f"""
         import os, pickle, sys
         from contextlib import redirect_stdout
 
-        func, args, kwargs = pickle.loads(bytes.fromhex('{pickled}'))
+        func, args, kwargs = pickle.loads({pickled})
 
         with open(os.devnull, "w") as f:
             with redirect_stdout(f):
