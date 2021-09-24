@@ -149,23 +149,17 @@ def run_in_new_interpreter(
 
     Picklability of the callable and its arguments and its return value are required.
 
-    Raise RunInNewInterpreterError on failure.
+    Raise `RunInNewInterpreterError` on failure.
     """
 
-    pickled_func = pickle.dumps(func).hex()
-    pickled_args = pickle.dumps(args).hex()
-    pickled_kwargs = pickle.dumps(kwargs).hex()
+    pickled = pickle.dumps((func, args, kwargs)).hex()
 
     source = unindent_source(
         f"""
-        import os
-        import pickle
-        import sys
+        import os, pickle, sys
         from contextlib import redirect_stdout
 
-        func = pickle.loads(bytes.fromhex('{pickled_func}'))
-        args = pickle.loads(bytes.fromhex('{pickled_args}'))
-        kwargs = pickle.loads(bytes.fromhex('{pickled_kwargs}'))
+        func, args, kwargs = pickle.loads(bytes.fromhex('{pickled}'))
 
         with open(os.devnull, "w") as f:
             with redirect_stdout(f):
