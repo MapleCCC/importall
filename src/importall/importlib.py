@@ -123,7 +123,8 @@ def clean_up_import_cache(module_name: str) -> None:
         submodules = []
 
         for mod in sys.modules:
-            if mod.split(".")[0] == module_name:
+            root, *branches = mod.split(".")
+            if root == module_name and branches:
                 submodules.append(mod)
 
         for mod in submodules:
