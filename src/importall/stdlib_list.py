@@ -1,9 +1,8 @@
 import builtins
 import os
 
+from recipes.sys import tk_is_available
 from stdlib_list import stdlib_list
-
-from .utils import tk_is_available
 
 
 __all__ = [

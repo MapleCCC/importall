@@ -21,7 +21,6 @@ from .typing import IdentityDecorator
 __all__ = [
     "profile",
     "provide_lazy_version",
-    "tk_is_available",
     "raises",
     "unindent_source",
     "run_in_new_interpreter",
@@ -85,17 +84,6 @@ def provide_lazy_version(func: Callable[P, R]) -> Callable[..., R]:
     wrapper.__wrapped__ = func
 
     return wrapper
-
-
-def tk_is_available() -> bool:
-    """Check if Tk is available"""
-
-    try:
-        import tkinter  # type: ignore
-    except ModuleNotFoundError:
-        return False
-    else:
-        return True
 
 
 def raises(etype: type[Exception], error_message: str) -> IdentityDecorator:
