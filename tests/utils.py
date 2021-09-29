@@ -2,7 +2,7 @@ import sys
 import warnings
 from collections.abc import Iterator, Mapping, MutableMapping
 from contextlib import ExitStack, contextmanager
-from typing import Any, NoReturn, TypeVar, Union
+from typing import NoReturn, TypeVar, Union
 
 import pytest
 from recipes.importlib import importable
@@ -19,10 +19,6 @@ __all__ = [
 
 KT = TypeVar("KT")
 VT = TypeVar("VT")
-
-
-# A sentinel object to represent no argument to a parameter of a callable.
-NO_ARGUMENT: Any = object()
 
 
 class Unreachable(RuntimeError):
@@ -54,11 +50,7 @@ def pytest_fail_from(
     # fragile to rely on private API, hence discouraged. Current naive workaround is to
     # blindly and greedily catch any exceptions.
     except BaseException as exc:
-
-        if cause is NO_ARGUMENT:
-            raise exc
-        else:
-            raise exc from cause
+        raise exc from cause
 
     raise Unreachable
 
