@@ -2,7 +2,6 @@ from __future__ import annotations  # for types imported from _typeshed
 
 import asyncio
 import builtins
-import inspect
 import pickle
 import subprocess
 import sys
@@ -13,6 +12,7 @@ from subprocess import CalledProcessError
 from typing import TYPE_CHECKING, TypeVar, cast
 
 from lazy_object_proxy import Proxy
+from recipes.inspect import bind_arguments
 from typing_extensions import ParamSpec
 
 from .functools import nulldecorator
@@ -103,8 +103,6 @@ def raises(etype: type[Exception], error_message: str) -> IdentityDecorator:
 
     def decorator(func: Callable[P, R]) -> Callable[P, R]:
 
-        signature = inspect.signature(func)
-
         @wraps(func)
         def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
             try:
@@ -113,12 +111,8 @@ def raises(etype: type[Exception], error_message: str) -> IdentityDecorator:
             # Catch Exception instead of BaseException, because we don't want to hinder
             # system-exiting exceptions from propagating up.
             except Exception:
-
-                bound_argument = signature.bind(*args, **kwargs)
-                bound_argument.apply_defaults()
-
-                formatted_message = error_message.format_map(bound_argument.arguments)
-
+                bound_arguments = bind_arguments(func, *args, **kwargs)
+                formatted_message = error_message.format_map(bound_arguments)
                 raise etype(formatted_message)
 
         return wrapper
