@@ -1,10 +1,12 @@
+from __future__ import annotations  # for types imported from _typeshed
+
 import asyncio
 import builtins
 import inspect
 import pickle
 import subprocess
 import sys
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Mapping, Sequence
 from functools import partial, wraps
 from pickle import PicklingError
 from subprocess import CalledProcessError
@@ -16,6 +18,10 @@ from typing_extensions import ParamSpec
 from .functools import nulldecorator
 from .inspect import getcallerframe
 from .typing import IdentityDecorator
+
+
+if TYPE_CHECKING:
+    from _typeshed import StrOrBytesPath
 
 
 __all__ = [
@@ -127,7 +133,7 @@ def unindent_source(text: str) -> str:
 
 
 async def asyncio_subprocess_check_output(
-    args, redirect_stderr_to_stdout: bool = False
+    args: Sequence[StrOrBytesPath], redirect_stderr_to_stdout: bool = False
 ) -> bytes:
     """Augment `subprocess.check_output()` with async support"""
 
