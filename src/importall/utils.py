@@ -6,12 +6,12 @@ import pickle
 import subprocess
 import sys
 from collections.abc import Callable, Mapping, Sequence
-from functools import partial, wraps
+from functools import wraps
 from pickle import PicklingError
 from subprocess import CalledProcessError
-from typing import TYPE_CHECKING, TypeVar, cast
+from typing import TYPE_CHECKING, TypeVar
 
-from lazy_object_proxy import Proxy
+from recipes.functools import lazy_call
 from recipes.inspect import bind_arguments
 from typing_extensions import ParamSpec
 
@@ -85,7 +85,7 @@ def provide_lazy_version(func: Callable[P, R]) -> Callable[..., R]:
         if eager:
             return func(*args, **kwargs)
         else:
-            return cast(R, Proxy(partial(func, *args, **kwargs)))
+            return lazy_call(func, *args, **kwargs)
 
     wrapper.__wrapped__ = func
 
