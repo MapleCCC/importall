@@ -1,16 +1,14 @@
-from __future__ import annotations  # for types imported from _typeshed
-
-import asyncio
 import builtins
 import pickle
 import subprocess
 import sys
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Callable, Mapping
 from functools import wraps
 from pickle import PicklingError
 from subprocess import CalledProcessError
 from typing import TYPE_CHECKING, TypeVar
 
+from recipes.asyncio import asyncio_subprocess_check_output
 from recipes.functools import lazy_call
 from recipes.inspect import bind_arguments
 from typing_extensions import ParamSpec
@@ -18,10 +16,6 @@ from typing_extensions import ParamSpec
 from .functools import nulldecorator
 from .inspect import getcallerframe
 from .typing import IdentityDecorator
-
-
-if TYPE_CHECKING:
-    from _typeshed import StrOrBytesPath
 
 
 __all__ = [
@@ -124,27 +118,6 @@ def unindent_source(text: str) -> str:
     lines = text.splitlines()
     margin = min(len(line) - len(line.lstrip()) for line in lines if line.strip())
     return "\n".join(line[margin:] for line in lines)
-
-
-async def asyncio_subprocess_check_output(
-    args: Sequence[StrOrBytesPath], redirect_stderr_to_stdout: bool = False
-) -> bytes:
-    """Augment `subprocess.check_output()` with async support"""
-
-    proc = await asyncio.create_subprocess_exec(
-        *args,
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.STDOUT if redirect_stderr_to_stdout else None,
-    )
-    stdout, stderr = await proc.communicate()
-
-    retcode = proc.returncode
-    assert retcode is not None
-
-    if retcode != 0:
-        raise CalledProcessError(retcode, args, stdout, stderr)
-
-    return stdout
 
 
 # TODO design some creative approaches to add color highlighting to literal source
