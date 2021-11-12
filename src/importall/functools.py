@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from typing import TypeVar
 
 
@@ -7,6 +8,9 @@ __all__ = ["nulldecorator"]
 T = TypeVar("T")
 
 
-def nulldecorator(fn: T) -> T:
+FunctionOrClassType = TypeVar("FunctionOrClassType", bound=Callable)
+
+
+def nulldecorator(fn_or_cls: FunctionOrClassType) -> FunctionOrClassType:
     """Similar to contextlib.nullcontext, except for decorator"""
-    return fn
+    return fn_or_cls
